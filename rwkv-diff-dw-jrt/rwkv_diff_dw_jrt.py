@@ -33,6 +33,26 @@ LAMBDA_LR = env_float("LAMBDA_LR", 0.02)
 DW_JRT = env_int("DW_JRT", 0) == 1
 DW_JRT_SCALE = env_float("DW_JRT_SCALE", 1.0)
 TRAIN = env_int("TRAIN", 0) == 1
+MEM_CHECK = env_int("MEM_CHECK", 0) == 1
+REVERSE_TASK = env_int("REVERSE_TASK", 0) == 1
+REVERSE_DIGIT_MAX = env_int("REVERSE_DIGIT_MAX", 60)
+REVERSE_EVAL = env_int("REVERSE_EVAL", 0) == 1
+REVERSE_MASK_REVERSE = env_int("REVERSE_MASK_REVERSE", 0) == 1
+BIDIR_TASK = env_int("BIDIR_TASK", 0) == 1
+BIDIR_LEN = env_int("BIDIR_LEN", 16)
+BIDIR_EVAL = env_int("BIDIR_EVAL", 0) == 1
+BIDIR_MASK_MIDDLE = env_int("BIDIR_MASK_MIDDLE", 1) == 1
+BIDIR_BASE = env_int("BIDIR_BASE", 10)
+STRUCT_TASK = env_int("STRUCT_TASK", 0) == 1
+STRUCT_LEN = env_int("STRUCT_LEN", 8)
+STRUCT_EVAL = env_int("STRUCT_EVAL", 0) == 1
+RETR_TASK = env_int("RETR_TASK", 0) == 1
+RETR_K = env_int("RETR_K", 4)
+RETR_VLEN = env_int("RETR_VLEN", 4)
+RETR_EVAL = env_int("RETR_EVAL", 0) == 1
+SENT_TASK = env_int("SENT_TASK", 0) == 1
+SENT_MASK_LEN = env_int("SENT_MASK_LEN", 16)
+SENT_EVAL = env_int("SENT_EVAL", 0) == 1
 WEIGHTS_PATH = os.getenv("WEIGHTS_PATH", "weights/diffusion.pt")
 DATA_PATH = os.getenv("DATA_PATH", "../tiny-diffusion/data.txt")
 DATA_BIN = os.getenv("DATA_BIN", "")
@@ -52,10 +72,168 @@ device = (
 )
 muon_dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
-use_bin = len(DATA_BIN) > 0
+use_bin = len(DATA_BIN) > 0 and not REVERSE_TASK and not BIDIR_TASK and not STRUCT_TASK and not RETR_TASK and not SENT_TASK
 
 
-if use_bin:
+if STRUCT_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["a", "b", "c", "{", "}", ":", ",", "\"", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _struct_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        c = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        b = a + c
+        s = "{\"a\":" + a + ",\"b\":" + b + ",\"c\":" + c + "}"
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _struct_sample(STRUCT_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("\"b\":")
+            p2 = s.find(",\"c\":")
+            if p1 >= 0 and p2 > p1:
+                mask[i, p1 + 4 : p2] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif RETR_TASK:
+    keys = [chr(ord("a") + i) for i in range(RETR_K)]
+    vocab_base = [str(i) for i in range(10)] + keys + ["=", ";", "|", "Q", "A", "N", "S", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _retr_sample():
+        vals = {}
+        for k in keys:
+            vals[k] = "".join([str(random.randint(0, 9)) for _ in range(RETR_VLEN)])
+        q = random.choice(keys)
+        left = ";".join([f"{k}={vals[k]}" for k in keys])
+        s = left + "|ANS=" + vals[q] + "|Q=" + q
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _retr_sample()
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|ANS=")
+            p2 = s.find("|Q=")
+            if p1 >= 0 and p2 > p1:
+                mask[i, p1 + 5 : p2] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif BIDIR_TASK:
+    vocab_base = [str(i) for i in range(BIDIR_BASE)] + ["|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _bidir_sample(n):
+        a = [str(random.randint(0, BIDIR_BASE - 1)) for _ in range(n)]
+        b = [str(random.randint(0, BIDIR_BASE - 1)) for _ in range(n)]
+        x = [str((int(a[i]) + int(b[i])) % BIDIR_BASE) for i in range(n)]
+        s = "".join(a) + "|" + "".join(x) + "|" + "".join(b)
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _bidir_sample(BIDIR_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            if BIDIR_MASK_MIDDLE:
+                p1 = s.find("|")
+                p2 = s.find("|", p1 + 1)
+                if p1 >= 0 and p2 > p1:
+                    mask[i, p1 + 1 : p2] = True
+        y = x.clone()
+        if not BIDIR_MASK_MIDDLE:
+            mask_probs = torch.rand(DEVICE_BSZ, 1)
+            mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
+            missing = ~mask.any(dim=1)
+            if missing.any():
+                idx = torch.randint(0, SEQ_LEN, (int(missing.sum()),))
+                mask[missing, idx] = True
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif REVERSE_TASK:
+    vocab_base = [str(i) for i in range(10)] + [",", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _reverse_sample(digits):
+        lo = 0 if digits == 1 else 10 ** (digits - 1)
+        raw = str(random.randint(lo, 10 ** digits - 1))
+        s = raw + "," + raw[::-1]
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _reverse_sample(random.randint(1, REVERSE_DIGIT_MAX))
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            if REVERSE_MASK_REVERSE:
+                comma = s.find(",")
+                sharp = s.find("#")
+                if comma >= 0 and sharp > comma:
+                    mask[i, comma + 1 : sharp] = True
+        y = x.clone()
+        if not REVERSE_MASK_REVERSE:
+            mask_probs = torch.rand(DEVICE_BSZ, 1)
+            mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
+            missing = ~mask.any(dim=1)
+            if missing.any():
+                idx = torch.randint(0, SEQ_LEN, (int(missing.sum()),))
+                mask[missing, idx] = True
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif use_bin:
     def _load_data_shard(filename):
         with open(filename, "rb") as f:
             _ = np.frombuffer(f.read(256 * 4), dtype=np.int32)
@@ -131,12 +309,17 @@ else:
         idx = torch.randint(len(data) - SEQ_LEN, (DEVICE_BSZ,))
         x = torch.stack([data[i : i + SEQ_LEN] for i in idx])
         y = x.clone()
-        mask_probs = torch.rand(DEVICE_BSZ, 1)
-        mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
-        missing = ~mask.any(dim=1)
-        if missing.any():
-            idx = torch.randint(0, SEQ_LEN, (int(missing.sum()),))
-            mask[missing, idx] = True
+        if SENT_TASK:
+            start = (SEQ_LEN - SENT_MASK_LEN) // 2
+            mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+            mask[:, start : start + SENT_MASK_LEN] = True
+        else:
+            mask_probs = torch.rand(DEVICE_BSZ, 1)
+            mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
+            missing = ~mask.any(dim=1)
+            if missing.any():
+                idx = torch.randint(0, SEQ_LEN, (int(missing.sum()),))
+                mask[missing, idx] = True
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
 
@@ -461,8 +644,155 @@ def estimate_loss(model):
 
 
 @torch.no_grad()
+def reverse_eval(model, trials_per_digit=10):
+    if not REVERSE_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for digits in range(1, REVERSE_DIGIT_MAX + 1):
+        for _ in range(trials_per_digit):
+            s = _reverse_sample(digits)
+            comma = s.find(",")
+            sharp = s.find("#")
+            if comma < 0 or sharp < 0:
+                continue
+            tgt = torch.tensor(encode(s), device=device)
+            x = tgt.clone().unsqueeze(0)
+            mask = torch.zeros_like(x, dtype=torch.bool)
+            mask[:, comma + 1 : sharp] = True
+            x[mask] = mask_token_id
+            logits, _ = model(x)
+            pred = logits.argmax(dim=-1)[0]
+            pred_seg = pred[comma + 1 : sharp]
+            tgt_seg = tgt[comma + 1 : sharp]
+            correct += (pred_seg == tgt_seg).sum().item()
+            total += (sharp - comma - 1)
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def bidir_eval(model, trials=200):
+    if not BIDIR_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _bidir_sample(BIDIR_LEN)
+        p1 = s.find("|")
+        p2 = s.find("|", p1 + 1)
+        if p1 < 0 or p2 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 1 : p2] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 1 : p2]
+        tgt_seg = tgt[p1 + 1 : p2]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += (p2 - p1 - 1)
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def struct_eval(model, trials=200):
+    if not STRUCT_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _struct_sample(STRUCT_LEN)
+        p1 = s.find("\"b\":")
+        p2 = s.find(",\"c\":")
+        if p1 < 0 or p2 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 4 : p2] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 4 : p2]
+        tgt_seg = tgt[p1 + 4 : p2]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += (p2 - p1 - 4)
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def retr_eval(model, trials=200):
+    if not RETR_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _retr_sample()
+        p1 = s.find("|ANS=")
+        p2 = s.find("|Q=")
+        if p1 < 0 or p2 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 5 : p2] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 5 : p2]
+        tgt_seg = tgt[p1 + 5 : p2]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += (p2 - p1 - 5)
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def sent_eval(model, trials=200):
+    if not SENT_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        x, y, m = get_batch("train")
+        logits, _ = model(x, y, m)
+        pred = logits.argmax(dim=-1)
+        correct += (pred[m] == y[m]).sum().item()
+        total += m.sum().item()
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
 def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshold=0.95, top_k=3):
-    if use_bin:
+    if STRUCT_TASK:
+        s = _struct_sample(STRUCT_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif RETR_TASK:
+        s = _retr_sample()
+        all_tokens = encode(s)[:prompt_len]
+    elif BIDIR_TASK:
+        s = _bidir_sample(BIDIR_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif REVERSE_TASK:
+        s = _reverse_sample(REVERSE_DIGIT_MAX)
+        all_tokens = encode(s)[:prompt_len]
+    elif use_bin:
         all_tokens = [0] * prompt_len
     else:
         all_tokens = data[:prompt_len].tolist()
@@ -501,6 +831,45 @@ def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshol
     print(f"Total steps: {total_steps} for {tokens_generated} tokens")
     print(f"Avg decoded per step: {tokens_generated / total_steps:.2f}")
     return decode(all_tokens)
+
+
+@torch.no_grad()
+def mem_check(model, prompt_len=16):
+    model.eval()
+    if STRUCT_TASK:
+        s = _struct_sample(STRUCT_LEN)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+    elif RETR_TASK:
+        s = _retr_sample()
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+    elif BIDIR_TASK:
+        s = _bidir_sample(BIDIR_LEN)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+    elif REVERSE_TASK:
+        s = _reverse_sample(REVERSE_DIGIT_MAX)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+    elif use_bin:
+        x, y, _ = get_batch("train")
+        x = x[:1].clone()
+        y = y[:1].clone()
+    else:
+        y = data[:SEQ_LEN].unsqueeze(0).to(device)
+        x = y.clone()
+    mask = torch.zeros_like(x, dtype=torch.bool)
+    mask[:, prompt_len:] = True
+    x[mask] = mask_token_id
+    logits, _ = model(x)
+    pred = logits.argmax(dim=-1)
+    out = torch.where(mask, pred, x)
+    acc = (out[mask] == y[mask]).float().mean().item()
+    print(f"MEM acc: {acc:.4f}")
+    print(f"GT:\n{decode(y[0].tolist())}")
+    print(f"PR:\n{decode(out[0].tolist())}")
+    model.train()
 
 
 if __name__ == "__main__":
@@ -546,6 +915,21 @@ if __name__ == "__main__":
                 print(
                     f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}, time {time.time() - start:.2f} seconds"
                 )
+                if REVERSE_EVAL:
+                    acc = reverse_eval(m)
+                    print(f"reverse acc {acc:.4f}")
+                if BIDIR_EVAL:
+                    acc = bidir_eval(m)
+                    print(f"bidir acc {acc:.4f}")
+                if STRUCT_EVAL:
+                    acc = struct_eval(m)
+                    print(f"struct acc {acc:.4f}")
+                if RETR_EVAL:
+                    acc = retr_eval(m)
+                    print(f"retr acc {acc:.4f}")
+                if SENT_EVAL:
+                    acc = sent_eval(m)
+                    print(f"sent acc {acc:.4f}")
                 if not use_bin:
                     sample = generate(m, max_new_tokens=240)
                     print(f"Sample:\n{sample}\n")
@@ -568,5 +952,7 @@ if __name__ == "__main__":
         print(f"Total training time: {time.time() - start:.2f} seconds")
         torch.save(m.state_dict(), WEIGHTS_PATH)
 
+    if MEM_CHECK:
+        mem_check(m, prompt_len=PROMPT_LEN)
     output = generate(m, max_new_tokens=GEN_TOKENS, temp=0.8, confidence_threshold=0.95, top_k=2)
     print(f"\nOutput:\n{output}")

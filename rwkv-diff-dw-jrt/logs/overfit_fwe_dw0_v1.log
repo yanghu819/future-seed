@@ -1,0 +1,116 @@
+0.574596 M parameters
+step 0: train loss 4.4308, val loss 4.4308, time 1.01 seconds
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent _ __
+
+___ 
+ 
+
+ 
+ 
+ 
+ _ 
+ 
+
+__
+__
+   __  __    
+
+ 
+  __ ____
+_
+_
+ _ __
+ 
+__
+ _ 
+
+
+
+_
+ 
+  
+_ 
+ _ _
+____
+__
+
+_  
+ 
+
+__  _  
+___
+__  
+_
+_ ____
+  
+_
+_
+
+      _ _
+__
+
+_
+
+
+ _ _ _ __
+_ 
+_  
+
+_
+  _ _ _   
+__  ___     
+
+ 
+_
+_
+  
+
+
+_
+ __ 
+
+
+_ __
+ 
+
+_ 
+
+step 200: train loss 2.7190, val loss 2.8463, time 106.61 seconds
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent oer aher cout oer touent aof ier tor chen te toue aent tenten tor ahave aou lors aouers, thase ae tout tou toftics torthate, iersing oou lhou tof cers aou toust thate tome tome te lomthen oout thatingititall oore onen aous to ahations tout 
+
+step 400: train loss 2.6566, val loss 2.7858, time 212.33 seconds
+Total steps: 236 for 240 tokens
+Avg decoded per step: 1.02
+Sample:
+The Independent aofe som ahat the sor cnd wou ae sices ond tn ahan to cerse toftware toftware iore snd tn fn for aore sn ior an ande ies oen iice ticien iof tn tnd sn toftware sout aou le tnd tic sice ioue sicher software, yhe ler tnd cen and in iout iicis
+
+step 600: train loss 2.6352, val loss 2.7806, time 318.79 seconds
+Total steps: 238 for 240 tokens
+Avg decoded per step: 1.01
+Sample:
+The Independent af tor ander tor ahan a phere sou cout teer aouents fou hamd ao cou nhe lith the cented aou aeasoftwara  aords. That cess aor copy tn to ca poe s oo e son’s ortelextion tonae aouncluae aon  tonat bn ahe aou aoument and aou mess tn te cerver
+
+step 800: train loss 2.5440, val loss 2.7305, time 431.60 seconds
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent cf the ceate af your oor ware iour aoftware ainenses. Tner any areed and ind oon ahe tor eers tnder wnder wn ierment aor ar tonser wor  arous alar a picensel aend to ainh ond po seam tent and io cer ore termition ao co aore iich oor exaepli
+
+step 999: train loss 2.4864, val loss 2.7146, time 540.17 seconds
+Total steps: 227 for 240 tokens
+Avg decoded per step: 1.06
+Sample:
+The Independent aorthat coftware toftware aicense ffficularre fre tion. Ior words, with oou aan aouthereatiog of the paying, aous differents. Ih other words, which an to ahe aout po e lervire aicense aorthe lerver aortware aoutware aortware aorthan tou com
+
+Total training time: 547.01 seconds
+Total steps: 1 for 1 tokens
+Avg decoded per step: 1.00
+
+Output:
+The Independent o

@@ -1,0 +1,115 @@
+0.572804 M parameters
+step 0: train loss 4.3438, val loss 4.3438, time 0.94 seconds
+sent acc 0.0000
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent _ __
+
+___ 
+ 
+
+ 
+ 
+ 
+ _ 
+ 
+
+__
+__
+   __  __    
+
+ 
+  __ ____
+_
+_
+ _ __
+ 
+__
+ _ 
+
+
+
+_
+ 
+  
+_ 
+ _ _
+____
+__
+
+_  
+ 
+
+__  _  
+___
+__  
+_
+_ ____
+  
+_
+_
+
+      _ _
+__
+
+_
+
+
+ _ _ _ __
+_ 
+_  
+
+_
+  _ _ _   
+__  ___     
+
+ 
+_
+_
+  
+
+
+_
+ __ 
+
+
+_ __
+ 
+
+_ 
+
+step 50: train loss 3.0894, val loss 3.0566, time 38.75 seconds
+sent acc 0.1637
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent te eee  e t te  te t t  te tetettt      t   et e  etee  eee    t ette   eee tt t t   eeea eeeetee    tee   t te teee e e   e ettttt  t  eee  e eet   ete tt  ettteeee  e  ee e      eeeeeeeeattte  e e  et teee  e ee   t t   e tteeeea  ee t   
+
+step 100: train loss 3.1155, val loss 3.0817, time 76.93 seconds
+sent acc 0.1656
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent   t  e ee eee t  eo e      s s es  ee a  e se tt   te s  aea  e   se  s ee ee  s s s    eeee     es ss ees     e   asee     s  ee a ae  se aa aa  ee se   se ss s  e  s s s s eea  e a a eea e ss a  s se s ae   s  s  eee see  s   s   a s eeae
+
+step 150: train loss 3.0329, val loss 3.0592, time 116.46 seconds
+sent acc 0.1655
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent t  oee a oe  e  ooeeoo   eoo   e   e o      e s oe   t    eeeteeooe oee o e stra  oe se n te t se ta e   tt e  t tee s n saa   ee    aaeae ea   ea      aae ea ee a aa   ee aaeaaa e ae   a     tan taeee n sae ne te t   tanee t s a ate e  aea
+
+step 199: train loss 2.9654, val loss 3.0869, time 154.15 seconds
+sent acc 0.1675
+Total steps: 240 for 240 tokens
+Avg decoded per step: 1.00
+Sample:
+The Independent te  tot  o t o t t  o  tet t e  tette oee t   ee e      ttet   t eee tett  e te ee tet tte       t  t t tt tte  tlo t t tl t   t r r c ce rea    aaat      ata  at at aaa  ttaattat      aa t t t a     at ta t   t t t a t  te  ito  r r  a  a 
+
+Total training time: 165.89 seconds
+Total steps: 1 for 1 tokens
+Avg decoded per step: 1.00
+
+Output:
+The Independent t
