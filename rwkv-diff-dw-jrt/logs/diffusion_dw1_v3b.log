@@ -1,0 +1,13 @@
+13.431172 M parameters
+step 0: train loss 10.8259, val loss 10.8259, time 11.85 seconds
+step 200: train loss 6.4915, val loss 8.5465, time 319.34 seconds
+step 400: train loss 5.1669, val loss 9.1670, time 635.83 seconds
+step 600: train loss 4.2244, val loss 9.6515, time 943.09 seconds
+step 800: train loss 3.7630, val loss 10.1012, time 1248.89 seconds
+step 999: train loss 3.3093, val loss 10.2167, time 1552.97 seconds
+Total training time: 1554.43 seconds
+Total steps: 1 for 1 tokens
+Avg decoded per step: 1.00
+
+Output:
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 314
