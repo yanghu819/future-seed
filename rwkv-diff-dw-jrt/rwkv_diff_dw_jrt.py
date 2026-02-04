@@ -33,6 +33,7 @@ LAMBDA_LR = env_float("LAMBDA_LR", 0.02)
 DW_JRT = env_int("DW_JRT", 0) == 1
 DW_JRT_SCALE = env_float("DW_JRT_SCALE", 1.0)
 DW_JRT_ALPHA_INIT = env_float("DW_JRT_ALPHA_INIT", 0.0)
+DW_JRT_LAYER_START = env_int("DW_JRT_LAYER_START", 0)
 TRAIN = env_int("TRAIN", 0) == 1
 MEM_CHECK = env_int("MEM_CHECK", 0) == 1
 REVERSE_TASK = env_int("REVERSE_TASK", 0) == 1
@@ -62,6 +63,15 @@ PARITY_BLOCK = env_int("PARITY_BLOCK", 4)
 PARITY_BLOCKS = env_int("PARITY_BLOCKS", 8)
 PARITY_MASK_POS = env_int("PARITY_MASK_POS", 1)
 PARITY_EVAL = env_int("PARITY_EVAL", 0) == 1
+RIGHTCOPY_TASK = env_int("RIGHTCOPY_TASK", 0) == 1
+RIGHTCOPY_LEN = env_int("RIGHTCOPY_LEN", 8)
+RIGHTCOPY_EVAL = env_int("RIGHTCOPY_EVAL", 0) == 1
+RIGHTREV_TASK = env_int("RIGHTREV_TASK", 0) == 1
+RIGHTREV_LEN = env_int("RIGHTREV_LEN", 8)
+RIGHTREV_EVAL = env_int("RIGHTREV_EVAL", 0) == 1
+INDEX_TASK = env_int("INDEX_TASK", 0) == 1
+INDEX_LEN = env_int("INDEX_LEN", 16)
+INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
 STRUCT_TASK = env_int("STRUCT_TASK", 0) == 1
 STRUCT_LEN = env_int("STRUCT_LEN", 8)
 STRUCT_EVAL = env_int("STRUCT_EVAL", 0) == 1
@@ -102,6 +112,9 @@ use_bin = (
     and not INTER_TASK
     and not MULTI_TASK
     and not PARITY_TASK
+    and not RIGHTCOPY_TASK
+    and not RIGHTREV_TASK
+    and not INDEX_TASK
 )
 
 
@@ -360,6 +373,109 @@ elif PARITY_TASK:
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
+elif RIGHTCOPY_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["L", "M", "R", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _rightcopy_sample(n):
+        l = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        r = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        m = r
+        s = "L=" + l + "|M=" + m + "|R=" + r
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _rightcopy_sample(RIGHTCOPY_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|M=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + RIGHTCOPY_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif RIGHTREV_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["L", "M", "R", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _rightrev_sample(n):
+        l = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        r = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        m = r[::-1]
+        s = "L=" + l + "|M=" + m + "|R=" + r
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _rightrev_sample(RIGHTREV_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|M=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + RIGHTREV_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif INDEX_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["A", "I", "Y", "=", "|", "#", ","]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _index_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        i = random.randint(0, n - 4)
+        j = i + 3
+        y = a[i : j + 1]
+        s = "A=" + a + "|I=" + str(i) + "," + str(j) + "|Y=" + y
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _index_sample(INDEX_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|Y=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + 4] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
 elif BIDIR_TASK:
     vocab_base = [str(i) for i in range(BIDIR_BASE)] + ["|", "#"]
     vocab_size = len(vocab_base) + 1
@@ -568,7 +684,7 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, jrt_alpha):
         w_t = w[:, t]
         sa = torch.einsum("bhij,bhj->bhi", s, a_t)
         s = s * w_t.unsqueeze(-2) + sa.unsqueeze(-1) * b_t.unsqueeze(-2) + v_t.unsqueeze(-1) * k_t.unsqueeze(-2)
-        s = s + inject
+        s = s + inject * (1.0 - w_t.unsqueeze(-2))
         y_t = torch.einsum("bhij,bhj->bhi", s, r_t)
         y[:, t] = y_t
     return y.view(B, T, C), s
@@ -664,7 +780,7 @@ class RWKV7(nn.Module):
             self.key.weight.data.uniform_(-0.05 / (self.n_embd**0.5), 0.05 / (self.n_embd**0.5))
             self.value.weight.data.uniform_(-0.5 / (self.n_embd**0.5), 0.5 / (self.n_embd**0.5))
             self.output.weight.data.zero_()
-            self.jrt_alpha = nn.Parameter(torch.tensor(DW_JRT_ALPHA_INIT))
+            self.jrt_alpha = nn.Parameter(torch.full((1, self.n_head, 1, 1), DW_JRT_ALPHA_INIT))
 
     def forward(self, x, v1, state):
         B, T, C = x.size()
@@ -737,6 +853,7 @@ class Block(nn.Module):
         self.lambdas = nn.Parameter(torch.tensor([1.0, 0.0]))
         self.ln1 = nn.LayerNorm(config.n_embd)
         self.ln2 = nn.LayerNorm(config.n_embd)
+        self.layer_id = layer_id
 
     def forward(self, x, v1, x0, state0):
         x = self.lambdas[0] * x + self.lambdas[1] * x0
@@ -774,7 +891,8 @@ class GPT(nn.Module):
         v1 = None
         state0 = None
         for block in self.transformer.h:
-            x, v1, state1 = block(x, v1, x0, state0 if self.dw_jrt else None)
+            use_state = state0 if (self.dw_jrt and block.layer_id >= DW_JRT_LAYER_START) else None
+            x, v1, state1 = block(x, v1, x0, use_state)
             if self.dw_jrt:
                 state0 = state1
         x = F.rms_norm(x, (x.size(-1),))
@@ -1065,6 +1183,90 @@ def parity_eval(model, trials=200):
 
 
 @torch.no_grad()
+def rightcopy_eval(model, trials=200):
+    if not RIGHTCOPY_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _rightcopy_sample(RIGHTCOPY_LEN)
+        p1 = s.find("|M=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + RIGHTCOPY_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + RIGHTCOPY_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + RIGHTCOPY_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += RIGHTCOPY_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def rightrev_eval(model, trials=200):
+    if not RIGHTREV_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _rightrev_sample(RIGHTREV_LEN)
+        p1 = s.find("|M=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + RIGHTREV_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + RIGHTREV_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + RIGHTREV_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += RIGHTREV_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def index_eval(model, trials=200):
+    if not INDEX_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _index_sample(INDEX_LEN)
+        p1 = s.find("|Y=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + 4] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + 4]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + 4]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += 4
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
 def struct_eval(model, trials=200):
     if not STRUCT_TASK:
         return None
@@ -1170,6 +1372,15 @@ def sent_eval(model, trials=200):
 def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshold=0.95, top_k=3):
     if STRUCT_TASK:
         s = _struct_sample(STRUCT_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif RIGHTCOPY_TASK:
+        s = _rightcopy_sample(RIGHTCOPY_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif RIGHTREV_TASK:
+        s = _rightrev_sample(RIGHTREV_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif INDEX_TASK:
+        s = _index_sample(INDEX_LEN)
         all_tokens = encode(s)[:prompt_len]
     elif ADD_TASK:
         s = _add_sample(ADD_LEN)
@@ -1339,6 +1550,15 @@ if __name__ == "__main__":
                 if PARITY_EVAL:
                     acc = parity_eval(m)
                     print(f"parity acc {acc:.4f}")
+                if RIGHTCOPY_EVAL:
+                    acc = rightcopy_eval(m)
+                    print(f"rightcopy acc {acc:.4f}")
+                if RIGHTREV_EVAL:
+                    acc = rightrev_eval(m)
+                    print(f"rightrev acc {acc:.4f}")
+                if INDEX_EVAL:
+                    acc = index_eval(m)
+                    print(f"index acc {acc:.4f}")
                 if STRUCT_EVAL:
                     acc, exact = struct_eval(m)
                     print(f"struct acc {acc:.4f}, exact {exact:.4f}")

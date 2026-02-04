@@ -62,7 +62,9 @@
 
 ## 可学习 DW‑JRT 注入（alpha）
 说明：
-- 每层一个可学习标量 `jrt_alpha`，注入强度为 `sigmoid(jrt_alpha)`
+- 每层每头一个可学习标量 `jrt_alpha`，注入强度为 `sigmoid(jrt_alpha)`
+- 注入加权：`inject * (1 - w)`，减小被 `w` 抹掉的影响
+- 可选 `DW_JRT_LAYER_START` 仅在高层启用
 - `DW_JRT_ALPHA_INIT=0` 表示初始注入强度 0.5
 
 ### 200 step（alpha init=0）
@@ -80,6 +82,25 @@
 - `rwkv-diff-dw-jrt/logs/struct_dw1_alpha0_smoke.log`
 - `rwkv-diff-dw-jrt/logs/add_dw0_alpha0_smoke.log`
 - `rwkv-diff-dw-jrt/logs/add_dw1_alpha0_smoke.log`
+
+### 200 step（右侧依赖任务）
+| task | DW_JRT=0 acc | DW_JRT=1 acc |
+|---|---:|---:|
+| rightcopy | 0.1087 | 0.7181 |
+| rightrev | 0.1175 | 0.7731 |
+| index | 0.3425 | 0.2888 |
+
+解读：
+- rightcopy/rightrev 明显受益，任务强依赖右侧信息
+- index 略差，可能是短跑噪声或索引解析更难
+
+日志：
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw1_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_dw0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_dw1_smoke.log`
+- `rwkv-diff-dw-jrt/logs/index_dw0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/index_dw1_smoke.log`
 
 ## 复现实验
 ### 200 step
