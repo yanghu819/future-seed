@@ -1,4 +1,4 @@
-# RWKVDLLM — Future‑Seed for Diffusion LLM
+# Future‑Seed — Diffusion RWKV
 
 A minimal, reproducible prototype that shows Future‑Seed (vertical state non‑causal initialization) can dramatically improve future‑aware tasks in a diffusion‑style RWKV7 model.
 
