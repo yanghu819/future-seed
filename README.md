@@ -20,22 +20,28 @@ Logs:
 ## Pixel sketch (one‑look intuition)
 ```
 Baseline:
-  ^
------
-
------
-  ^
+  ↑
+─────
+     
+─────
+  ↑
 
 Future‑Seed:
-  ^
------
- / 
------
-  ^
+  ↑
+─────
+  ↗
+─────
+  ↑
 ```
 
 ## One‑command Mac reproduction
 Assumes Python + torch are installed.
+
+```bash
+bash run.sh
+```
+
+Or inline:
 
 ```bash
 bash -lc 'cd rwkv-diff-future-seed && mkdir -p logs && \
@@ -78,5 +84,3 @@ IN[0:77]: P=5506062696895811|M=________________|R=06########################
 GT[21:37]: 1060606060606060
 PR[21:37]: 1060606066666660
 ```
-
-No weights are kept in the repo.
