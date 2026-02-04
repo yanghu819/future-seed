@@ -46,6 +46,20 @@
 - `rwkv-diff-dw-jrt/logs/struct_dw0_long2.log`
 - `rwkv-diff-dw-jrt/logs/struct_dw1_long2.log`
 
+### 固定评测集（已训练权重）
+配置：
+- `STRUCT_EVAL_FIXED=1 STRUCT_EVAL_N=200 STRUCT_EVAL_SEED=1234`
+- 权重：`struct_dw0_long2.pt` / `struct_dw1_long2.pt`
+
+| DW_JRT | struct acc | exact |
+|---:|---:|---:|
+| 0 | 0.5559 | 0.0000 |
+| 1 | 0.5919 | 0.0000 |
+
+日志：
+- `rwkv-diff-dw-jrt/logs/struct_eval_fixed_dw0.log`
+- `rwkv-diff-dw-jrt/logs/struct_eval_fixed_dw1.log`
+
 ## 复现实验
 ### 200 step
 ```

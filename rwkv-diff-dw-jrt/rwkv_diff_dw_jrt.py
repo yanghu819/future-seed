@@ -46,6 +46,9 @@ BIDIR_BASE = env_int("BIDIR_BASE", 10)
 STRUCT_TASK = env_int("STRUCT_TASK", 0) == 1
 STRUCT_LEN = env_int("STRUCT_LEN", 8)
 STRUCT_EVAL = env_int("STRUCT_EVAL", 0) == 1
+STRUCT_EVAL_FIXED = env_int("STRUCT_EVAL_FIXED", 0) == 1
+STRUCT_EVAL_SEED = env_int("STRUCT_EVAL_SEED", 1234)
+STRUCT_EVAL_N = env_int("STRUCT_EVAL_N", 200)
 RETR_TASK = env_int("RETR_TASK", 0) == 1
 RETR_K = env_int("RETR_K", 4)
 RETR_VLEN = env_int("RETR_VLEN", 4)
@@ -110,6 +113,8 @@ if STRUCT_TASK:
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
+
+    STRUCT_EVAL_SET = None
 elif RETR_TASK:
     keys = [chr(ord("a") + i) for i in range(RETR_K)]
     vocab_base = [str(i) for i in range(10)] + keys + ["=", ";", "|", "Q", "A", "N", "S", "#"]
@@ -709,10 +714,33 @@ def struct_eval(model, trials=200):
     model.eval()
     correct = 0
     total = 0
-    for _ in range(trials):
-        s = _struct_sample(STRUCT_LEN)
-        p1 = s.find("\"b\":")
-        p2 = s.find(",\"c\":")
+    exact = 0
+    used = 0
+    samples = None
+    if STRUCT_EVAL_FIXED:
+        global STRUCT_EVAL_SET
+        if STRUCT_EVAL_SET is None:
+            rng_state = random.getstate()
+            random.seed(STRUCT_EVAL_SEED)
+            STRUCT_EVAL_SET = []
+            for _ in range(STRUCT_EVAL_N):
+                s = _struct_sample(STRUCT_LEN)
+                p1 = s.find("\"b\":")
+                p2 = s.find(",\"c\":")
+                if p1 < 0 or p2 < 0:
+                    continue
+                STRUCT_EVAL_SET.append((s, p1, p2))
+            random.setstate(rng_state)
+        samples = STRUCT_EVAL_SET
+    if samples is None:
+        samples = [None] * trials
+    for item in samples:
+        if item is None:
+            s = _struct_sample(STRUCT_LEN)
+            p1 = s.find("\"b\":")
+            p2 = s.find(",\"c\":")
+        else:
+            s, p1, p2 = item
         if p1 < 0 or p2 < 0:
             continue
         tgt = torch.tensor(encode(s), device=device)
@@ -726,9 +754,12 @@ def struct_eval(model, trials=200):
         tgt_seg = tgt[p1 + 4 : p2]
         correct += (pred_seg == tgt_seg).sum().item()
         total += (p2 - p1 - 4)
+        exact += int((pred_seg == tgt_seg).all().item())
+        used += 1
     acc = correct / total if total > 0 else 0.0
+    exact_rate = exact / used if used > 0 else 0.0
     model.train()
-    return acc
+    return acc, exact_rate
 
 
 @torch.no_grad()
@@ -922,8 +953,8 @@ if __name__ == "__main__":
                     acc = bidir_eval(m)
                     print(f"bidir acc {acc:.4f}")
                 if STRUCT_EVAL:
-                    acc = struct_eval(m)
-                    print(f"struct acc {acc:.4f}")
+                    acc, exact = struct_eval(m)
+                    print(f"struct acc {acc:.4f}, exact {exact:.4f}")
                 if RETR_EVAL:
                     acc = retr_eval(m)
                     print(f"retr acc {acc:.4f}")
