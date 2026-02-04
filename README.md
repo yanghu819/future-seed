@@ -19,18 +19,12 @@ Logs:
 
 ## Pseudocode (one‑look intuition)
 ```
-for layer in layers:
-  s = 0                     # baseline
-  for t in tokens:
-    s = f(s, x[t])
-
-for layer in layers:
-  s = prev_layer_sT          # Future‑Seed
-  for t in tokens:
-    s = f(s, x[t])
+baseline:  s = 0  for each layer
+Future‑Seed: s = prev_layer_sT
+then:      s = f(s, x[t]) over t
 ```
 
-Simple: baseline starts each layer from zero state; Future‑Seed starts each layer from the previous layer’s final state `s_T`, so deeper layers “see the future summary” immediately.
+Simple: baseline starts each layer from 0; Future‑Seed starts from previous layer’s final state `s_T`.
 
 ## One‑command Mac reproduction
 Assumes Python + torch are installed.

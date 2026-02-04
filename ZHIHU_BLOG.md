@@ -10,20 +10,12 @@
 
 ## 伪代码（直观看懂）
 ```
-# baseline
-for layer in layers:
-  s = 0
-  for t in tokens:
-    s = f(s, x[t])
-
-# Future‑Seed
-for layer in layers:
-  s = prev_layer_sT
-  for t in tokens:
-    s = f(s, x[t])
+baseline：每层 s=0
+Future‑Seed：每层 s=上一层 s_T
+然后：s = f(s, x[t]) 逐 token 更新
 ```
 
-通俗解释：baseline 每层都从零状态开始；Future‑Seed 把上一层的末状态 `s_T` 作为下一层初始状态，相当于“深层一开始就带着未来摘要”。
+通俗解释：baseline 每层从 0 开始；Future‑Seed 用上一层末状态 `s_T` 开局。
 
 ## 最小任务（机制最清晰）
 - **rightcopy**：`L=...|M=...|R=...`，mask `M`，目标 `M=R`
