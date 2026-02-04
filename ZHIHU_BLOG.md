@@ -10,9 +10,8 @@
 
 ## 伪代码（直观看懂）
 ```
-baseline：每层 s=0
-Future‑Seed：每层 s=上一层 s_T
-然后：s = f(s, x[t]) 逐 token 更新
+baseline：s=0；for t: s=f(s,x[t])
+Future‑Seed：s=上一层 s_T；for t: s=f(s,x[t])
 ```
 
 通俗解释：baseline 每层从 0 开始；Future‑Seed 用上一层末状态 `s_T` 开局。

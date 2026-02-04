@@ -19,9 +19,8 @@ Logs:
 
 ## Pseudocode (one‑look intuition)
 ```
-baseline:  s = 0  for each layer
-Future‑Seed: s = prev_layer_sT
-then:      s = f(s, x[t]) over t
+baseline:   s=0;           for t: s=f(s,x[t])
+Future‑Seed: s=prev_layer_sT; for t: s=f(s,x[t])
 ```
 
 Simple: baseline starts each layer from 0; Future‑Seed starts from previous layer’s final state `s_T`.
