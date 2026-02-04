@@ -126,6 +126,7 @@
 | rightcopy | 0.0994 | 0.9581 |
 | rightrev | 0.0994 | 0.9500 |
 | rule（右侧指令 C/V） | 0.4850 | 0.4612 |
+| constr（LEN=16, alpha=-2） | 0.1584 | 0.6828 |
 
 解读：
 - rightcopy/rightrev 的优势在长跑更明显，DW‑JRT 接近完美恢复
@@ -137,6 +138,8 @@
 - `rwkv-diff-dw-jrt/logs/rightrev_dw1_long.log`
 - `rwkv-diff-dw-jrt/logs/rule_dw0_long.log`
 - `rwkv-diff-dw-jrt/logs/rule_dw1_long.log`
+- `rwkv-diff-dw-jrt/logs/constr_len16_dw0_long.log`
+- `rwkv-diff-dw-jrt/logs/constr_len16_dw1_aN2_long.log`
 
 ## 快速扫参（100 step）
 配置（共用）：
@@ -167,6 +170,7 @@
 | shift | LEN=16 | - | 0.0950 (alpha=-2) |
 | poscopy | LEN=8 | 0.2233 | 0.2333 (alpha=-2) |
 | constr | LEN=8 | 0.2137 | 0.7906 (alpha=-2) |
+| constr | LEN=16 | 0.1366 | 0.6653 (alpha=-2) |
 
 解读：
 - rightcopy/rightrev 对 DW‑JRT 极敏感，且 **alpha=-2** 在短跑最优
