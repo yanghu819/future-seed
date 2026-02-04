@@ -43,6 +43,24 @@ BIDIR_LEN = env_int("BIDIR_LEN", 16)
 BIDIR_EVAL = env_int("BIDIR_EVAL", 0) == 1
 BIDIR_MASK_MIDDLE = env_int("BIDIR_MASK_MIDDLE", 1) == 1
 BIDIR_BASE = env_int("BIDIR_BASE", 10)
+ADD_TASK = env_int("ADD_TASK", 0) == 1
+ADD_LEN = env_int("ADD_LEN", 8)
+ADD_MASK_LEN = env_int("ADD_MASK_LEN", 4)
+ADD_EVAL = env_int("ADD_EVAL", 0) == 1
+PERM_TASK = env_int("PERM_TASK", 0) == 1
+PERM_LEN = env_int("PERM_LEN", 8)
+PERM_EVAL = env_int("PERM_EVAL", 0) == 1
+INTER_TASK = env_int("INTER_TASK", 0) == 1
+INTER_LEN = env_int("INTER_LEN", 8)
+INTER_EVAL = env_int("INTER_EVAL", 0) == 1
+MULTI_TASK = env_int("MULTI_TASK", 0) == 1
+MULTI_LEN = env_int("MULTI_LEN", 8)
+MULTI_EVAL = env_int("MULTI_EVAL", 0) == 1
+PARITY_TASK = env_int("PARITY_TASK", 0) == 1
+PARITY_BLOCK = env_int("PARITY_BLOCK", 4)
+PARITY_BLOCKS = env_int("PARITY_BLOCKS", 8)
+PARITY_MASK_POS = env_int("PARITY_MASK_POS", 1)
+PARITY_EVAL = env_int("PARITY_EVAL", 0) == 1
 STRUCT_TASK = env_int("STRUCT_TASK", 0) == 1
 STRUCT_LEN = env_int("STRUCT_LEN", 8)
 STRUCT_EVAL = env_int("STRUCT_EVAL", 0) == 1
@@ -76,6 +94,14 @@ device = (
 muon_dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
 use_bin = len(DATA_BIN) > 0 and not REVERSE_TASK and not BIDIR_TASK and not STRUCT_TASK and not RETR_TASK and not SENT_TASK
+use_bin = (
+    use_bin
+    and not ADD_TASK
+    and not PERM_TASK
+    and not INTER_TASK
+    and not MULTI_TASK
+    and not PARITY_TASK
+)
 
 
 if STRUCT_TASK:
@@ -150,6 +176,186 @@ elif RETR_TASK:
             p2 = s.find("|Q=")
             if p1 >= 0 and p2 > p1:
                 mask[i, p1 + 5 : p2] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif PERM_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["P", "Y", "A", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _perm_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        perm = list(range(n))
+        random.shuffle(perm)
+        p = "".join([str(i) for i in perm])
+        y = "".join([a[i] for i in perm])
+        s = "P=" + p + "|Y=" + y + "|A=" + a
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _perm_sample(PERM_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|A=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + PERM_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif ADD_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["+", "=", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _add_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        b = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        c = str(int(a) + int(b)).zfill(n + 1)
+        s = a + "+" + b + "=" + c
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _add_sample(ADD_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("=")
+            if p1 >= 0:
+                start = p1 + 1 + (ADD_LEN + 1 - ADD_MASK_LEN) // 2
+                mask[i, start : start + ADD_MASK_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif INTER_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["A", "B", "M", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _inter_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        b = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        m = "".join([a[i] + b[i] for i in range(n)])
+        s = "A=" + a + "|B=" + b + "|M=" + m
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _inter_sample(INTER_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|M=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + 2 * INTER_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif MULTI_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["A", "B", "C", "D", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _multi_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        c = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        b = a + c
+        d = a[::-1] + c
+        s = "A=" + a + "|C=" + c + "|B=" + b + "|D=" + d
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _multi_sample(MULTI_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|B=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + 2 * MULTI_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif PARITY_TASK:
+    vocab_base = ["0", "1", "X", "P", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _parity_sample(block, blocks):
+        x = "".join([str(random.randint(0, 1)) for _ in range(block * blocks)])
+        p = []
+        for i in range(blocks):
+            seg = x[i * block : (i + 1) * block]
+            p.append(str(sum(int(ch) for ch in seg) % 2))
+        p = "".join(p)
+        s = "X=" + x + "|P=" + p
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _parity_sample(PARITY_BLOCK, PARITY_BLOCKS)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("X=")
+            if p1 >= 0:
+                start = p1 + 2
+                for b in range(PARITY_BLOCKS):
+                    pos = start + b * PARITY_BLOCK + PARITY_MASK_POS
+                    mask[i, pos] = True
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
@@ -708,6 +914,150 @@ def bidir_eval(model, trials=200):
 
 
 @torch.no_grad()
+def add_eval(model, trials=200):
+    if not ADD_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _add_sample(ADD_LEN)
+        p1 = s.find("=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        start = p1 + 1 + (ADD_LEN + 1 - ADD_MASK_LEN) // 2
+        mask[:, start : start + ADD_MASK_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[start : start + ADD_MASK_LEN]
+        tgt_seg = tgt[start : start + ADD_MASK_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += ADD_MASK_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def perm_eval(model, trials=200):
+    if not PERM_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _perm_sample(PERM_LEN)
+        p1 = s.find("|A=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + PERM_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + PERM_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + PERM_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += PERM_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def inter_eval(model, trials=200):
+    if not INTER_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _inter_sample(INTER_LEN)
+        p1 = s.find("|M=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + 2 * INTER_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + 2 * INTER_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + 2 * INTER_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += 2 * INTER_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def multi_eval(model, trials=200):
+    if not MULTI_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _multi_sample(MULTI_LEN)
+        p1 = s.find("|B=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + 2 * MULTI_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + 2 * MULTI_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + 2 * MULTI_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += 2 * MULTI_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def parity_eval(model, trials=200):
+    if not PARITY_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _parity_sample(PARITY_BLOCK, PARITY_BLOCKS)
+        p1 = s.find("X=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        start = p1 + 2
+        for b in range(PARITY_BLOCKS):
+            pos = start + b * PARITY_BLOCK + PARITY_MASK_POS
+            mask[:, pos] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[mask[0]]
+        tgt_seg = tgt[mask[0]]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += mask.sum().item()
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
 def struct_eval(model, trials=200):
     if not STRUCT_TASK:
         return None
@@ -813,6 +1163,21 @@ def sent_eval(model, trials=200):
 def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshold=0.95, top_k=3):
     if STRUCT_TASK:
         s = _struct_sample(STRUCT_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif ADD_TASK:
+        s = _add_sample(ADD_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif PERM_TASK:
+        s = _perm_sample(PERM_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif INTER_TASK:
+        s = _inter_sample(INTER_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif MULTI_TASK:
+        s = _multi_sample(MULTI_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif PARITY_TASK:
+        s = _parity_sample(PARITY_BLOCK, PARITY_BLOCKS)
         all_tokens = encode(s)[:prompt_len]
     elif RETR_TASK:
         s = _retr_sample()
@@ -952,6 +1317,21 @@ if __name__ == "__main__":
                 if BIDIR_EVAL:
                     acc = bidir_eval(m)
                     print(f"bidir acc {acc:.4f}")
+                if ADD_EVAL:
+                    acc = add_eval(m)
+                    print(f"add acc {acc:.4f}")
+                if PERM_EVAL:
+                    acc = perm_eval(m)
+                    print(f"perm acc {acc:.4f}")
+                if INTER_EVAL:
+                    acc = inter_eval(m)
+                    print(f"inter acc {acc:.4f}")
+                if MULTI_EVAL:
+                    acc = multi_eval(m)
+                    print(f"multi acc {acc:.4f}")
+                if PARITY_EVAL:
+                    acc = parity_eval(m)
+                    print(f"parity acc {acc:.4f}")
                 if STRUCT_EVAL:
                     acc, exact = struct_eval(m)
                     print(f"struct acc {acc:.4f}, exact {exact:.4f}")
