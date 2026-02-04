@@ -31,3 +31,9 @@
 - `rwkv-diff-dw-jrt/logs/rightcopy_dw1_big.log`
 - `rwkv-diff-dw-jrt/logs/constr_dw0_big.log`
 - `rwkv-diff-dw-jrt/logs/constr_dw1_big.log`
+
+## 近期提交摘要
+- 清理历史日志/权重，仅保留极简实验路径
+- 增加可读日志：评测打印 IN/GT/PR 窗口
+- 重新跑 1000 step 极简对比（rightcopy / constr）
+- 做了一个 clean snapshot 备份提交（保留历史）
