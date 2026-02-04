@@ -20,10 +20,18 @@ Logs:
 ## Pixel sketch (one‑look intuition)
 ```
 Baseline:
--> || ->
+  ^
+-----
+
+-----
+  ^
 
 Future‑Seed:
--> |J| ->
+  ^
+-----
+  /
+-----
+  ^
 ```
 
 ## One‑command Mac reproduction
