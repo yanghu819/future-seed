@@ -149,6 +149,33 @@
 - `rwkv-diff-dw-jrt/logs/rightrev_len32_dw0_long.log`
 - `rwkv-diff-dw-jrt/logs/rightrev_len32_dw1_aN2_long.log`
 
+### 200 step（小模型/小batch 快速版）
+配置：
+- `N_LAYER=4 N_EMBD=256 HEAD_SIZE=64`
+- `BATCH_SIZE=8 DEVICE_BSZ=8 SEQ_LEN=256`
+- `MAX_ITERS=200 EVAL_INTERVAL=200 EVAL_ITERS=3`
+
+| task | setting | DW_JRT=0 acc | DW_JRT=1 acc |
+|---|---|---:|---:|
+| struct | LEN=32 | 0.1593 | 0.1427 (alpha=-2) |
+| constr | LEN=64 | 0.0970 | 0.3914 (alpha=-2) |
+
+解读：
+- constr 仍显著受益（小模型/小batch 下依旧明显）
+- struct 在该快速配置下未体现优势
+
+日志：
+- `rwkv-diff-dw-jrt/logs/struct_len32_dw0_fast8.log`
+- `rwkv-diff-dw-jrt/logs/struct_len32_dw1_aN2_fast8.log`
+- `rwkv-diff-dw-jrt/logs/constr_len64_dw0_fast8.log`
+- `rwkv-diff-dw-jrt/logs/constr_len64_dw1_aN2_fast8.log`
+
+权重：
+- `rwkv-diff-dw-jrt/weights/struct_len32_dw0_fast8.pt`
+- `rwkv-diff-dw-jrt/weights/struct_len32_dw1_aN2_fast8.pt`
+- `rwkv-diff-dw-jrt/weights/constr_len64_dw0_fast8.pt`
+- `rwkv-diff-dw-jrt/weights/constr_len64_dw1_aN2_fast8.pt`
+
 ## 快速扫参（100 step）
 配置（共用）：
 - `N_LAYER=2 N_EMBD=128 HEAD_SIZE=32`
