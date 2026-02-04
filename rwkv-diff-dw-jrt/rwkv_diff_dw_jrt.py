@@ -32,6 +32,7 @@ HEAD_LR = env_float("HEAD_LR", 0.002)
 LAMBDA_LR = env_float("LAMBDA_LR", 0.02)
 DW_JRT = env_int("DW_JRT", 0) == 1
 DW_JRT_SCALE = env_float("DW_JRT_SCALE", 1.0)
+DW_JRT_ALPHA_INIT = env_float("DW_JRT_ALPHA_INIT", 0.0)
 TRAIN = env_int("TRAIN", 0) == 1
 MEM_CHECK = env_int("MEM_CHECK", 0) == 1
 REVERSE_TASK = env_int("REVERSE_TASK", 0) == 1
@@ -535,7 +536,7 @@ else:
         return x.to(device), y.to(device), mask.to(device)
 
 
-def rwkv7_recurrence(r, w, k, v, a, b, state):
+def rwkv7_recurrence(r, w, k, v, a, b, state, jrt_alpha):
     B, T, C = r.size()
     H = C // HEAD_SIZE
     N = HEAD_SIZE
@@ -550,8 +551,11 @@ def rwkv7_recurrence(r, w, k, v, a, b, state):
     has_state = state is not None
     if state is None:
         state = torch.zeros(B, H, N, N, device=r.device, dtype=torch.float32)
-    if has_state:
+        inject = 0.0
+    else:
+        base = state
         state = state * DW_JRT_SCALE
+        inject = base * jrt_alpha
 
     y = torch.empty(B, T, H, N, device=r.device, dtype=torch.float32)
     s = state
@@ -564,6 +568,7 @@ def rwkv7_recurrence(r, w, k, v, a, b, state):
         w_t = w[:, t]
         sa = torch.einsum("bhij,bhj->bhi", s, a_t)
         s = s * w_t.unsqueeze(-2) + sa.unsqueeze(-1) * b_t.unsqueeze(-2) + v_t.unsqueeze(-1) * k_t.unsqueeze(-2)
+        s = s + inject
         y_t = torch.einsum("bhij,bhj->bhi", s, r_t)
         y[:, t] = y_t
     return y.view(B, T, C), s
@@ -659,6 +664,7 @@ class RWKV7(nn.Module):
             self.key.weight.data.uniform_(-0.05 / (self.n_embd**0.5), 0.05 / (self.n_embd**0.5))
             self.value.weight.data.uniform_(-0.5 / (self.n_embd**0.5), 0.5 / (self.n_embd**0.5))
             self.output.weight.data.zero_()
+            self.jrt_alpha = nn.Parameter(torch.tensor(DW_JRT_ALPHA_INIT))
 
     def forward(self, x, v1, state):
         B, T, C = x.size()
@@ -696,7 +702,8 @@ class RWKV7(nn.Module):
         mk = torch.sigmoid(self.time_misc_k + (xk @ self.mk_w1) @ self.mk_w2)
         k = k * torch.clamp(w * mk, max=0).exp()
 
-        x, state = rwkv7_recurrence(r, w, k, v, -kk, kk * a, state)
+        jrt_alpha = torch.sigmoid(self.jrt_alpha)
+        x, state = rwkv7_recurrence(r, w, k, v, -kk, kk * a, state, jrt_alpha)
         x = self.ln_x(x.view(B * T, C)).view(B, T, C)
 
         x = x + (
