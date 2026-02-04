@@ -163,6 +163,8 @@
 | index | LEN=16 | 0.2425 | 0.2387 |
 | rule | LEN=8 | 0.3912 | 0.3787 |
 | cipher | LEN=16 | 0.0966 | 0.0966 |
+| shift | LEN=16 | 0.0950 | 0.0950 |
+| shift | LEN=16 | - | 0.0950 (alpha=-2) |
 
 解读：
 - rightcopy/rightrev 对 DW‑JRT 极敏感，且 **alpha=-2** 在短跑最优
@@ -179,6 +181,7 @@
 - `rwkv-diff-dw-jrt/logs/index_len16_*.log`
 - `rwkv-diff-dw-jrt/logs/rule_len8_*.log`
 - `rwkv-diff-dw-jrt/logs/cipher_len16_*.log`
+- `rwkv-diff-dw-jrt/logs/shift_len16_*.log`
 
 ## 复现实验
 ### 200 step
