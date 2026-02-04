@@ -2,4 +2,4 @@
 __pycache__/
 *.pyc
 .venv/
-rwkv-diff-dw-jrt/weights/
+rwkv-diff-vsni/weights/
