@@ -17,6 +17,23 @@ Logs:
 - `rwkv-diff-future-seed/logs/constr_base_big.log`
 - `rwkv-diff-future-seed/logs/constr_future_seed_big.log`
 
+## Pixel sketch (one‑look intuition)
+```
+Causal RWKV (one‑pass):
+[x1][x2][x3][x4][x5]
+  |   |   |   |   |
+[s ]->[s ]->[s ]->[s ]->[sT]
+Layers start from 0 state
+
+Future‑Seed (non‑causal init):
+[x1][x2][x3][x4][x5]
+  |   |   |   |   |
+[s ]->[s ]->[s ]->[s ]->[sT]
+          |──────────────┐
+          v              v
+       next layer init = sT
+```
+
 ## One‑command Mac reproduction
 Assumes Python + torch are installed.
 
