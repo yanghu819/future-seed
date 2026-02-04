@@ -138,6 +138,48 @@
 - `rwkv-diff-dw-jrt/logs/rule_dw0_long.log`
 - `rwkv-diff-dw-jrt/logs/rule_dw1_long.log`
 
+## 快速扫参（100 step）
+配置（共用）：
+- `N_LAYER=2 N_EMBD=128 HEAD_SIZE=32`
+- `MAX_ITERS=100 EVAL_INTERVAL=50 EVAL_ITERS=10`
+
+### rightcopy/rightrev
+| task | setting | DW_JRT=0 | DW_JRT=1 | 备注 |
+|---|---|---:|---:|---|
+| rightcopy | LEN=8 | 0.0875 | 0.3969 | alpha=0 |
+| rightcopy | LEN=8 | - | 0.6281 | alpha=-2 |
+| rightcopy | LEN=8 | - | 0.5875 | alpha=2 |
+| rightrev | LEN=8 | 0.0875 | 0.5587 | alpha=0 |
+| rightcopy | LEN=32 | 0.0969 | 0.2197 | alpha=0 |
+| rightcopy | LEN=32 | - | 0.2166 | layer_start=1 |
+| rightrev | LEN=32 | 0.0969 | 0.2291 | alpha=0 |
+| rightrev | LEN=32 | - | 0.2286 | layer_start=1 |
+
+### 其它任务
+| task | setting | DW_JRT=0 | DW_JRT=1 |
+|---|---|---:|---:|
+| struct | LEN=8 | 0.3672 | 0.5397 |
+| add | LEN=8 | 0.1100 | 0.0912 |
+| index | LEN=16 | 0.2425 | 0.2387 |
+| rule | LEN=8 | 0.3912 | 0.3787 |
+| cipher | LEN=16 | 0.0966 | 0.0966 |
+
+解读：
+- rightcopy/rightrev 对 DW‑JRT 极敏感，且 **alpha=-2** 在短跑最优
+- LEN=32 仍有收益，但需要更长训练才能接近满分
+- struct 有提升，其它任务短跑无优势或略差
+
+日志（100 step sweep）：
+- `rwkv-diff-dw-jrt/logs/rightcopy_len8_*.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_len8_*.log`
+- `rwkv-diff-dw-jrt/logs/rightcopy_len32_*.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_len32_*.log`
+- `rwkv-diff-dw-jrt/logs/struct_len8_*.log`
+- `rwkv-diff-dw-jrt/logs/add_len8_*.log`
+- `rwkv-diff-dw-jrt/logs/index_len16_*.log`
+- `rwkv-diff-dw-jrt/logs/rule_len8_*.log`
+- `rwkv-diff-dw-jrt/logs/cipher_len16_*.log`
+
 ## 复现实验
 ### 200 step
 ```
