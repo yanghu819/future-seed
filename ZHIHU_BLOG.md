@@ -8,21 +8,22 @@
 ## 机制一句话
 把上一层末状态 s_T 作为下一层初始状态，让深层一开始就带着“未来上下文摘要”，加速全局一致解的收敛。
 
-## 像素风线框示意（直观看懂）
+## 伪代码（直观看懂）
 ```
-Baseline:
-        Ln                 L(n+1)
-     ---------          ---------
-        ^                  ^
-        |                  |
+# baseline
+for layer in layers:
+  s = 0
+  for t in tokens:
+    s = f(s, x[t])
 
-Future‑Seed:
-        Ln                 L(n+1)
-     ---------          ---------
-        ^                  ^
-        | \..............> |
-        |                  |
+# Future‑Seed
+for layer in layers:
+  s = prev_layer_sT
+  for t in tokens:
+    s = f(s, x[t])
 ```
+
+通俗解释：baseline 每层都从零状态开始；Future‑Seed 把上一层的末状态 `s_T` 作为下一层初始状态，相当于“深层一开始就带着未来摘要”。
 
 ## 最小任务（机制最清晰）
 - **rightcopy**：`L=...|M=...|R=...`，mask `M`，目标 `M=R`

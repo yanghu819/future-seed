@@ -17,21 +17,20 @@ Logs:
 - `rwkv-diff-future-seed/logs/constr_base_big.log`
 - `rwkv-diff-future-seed/logs/constr_future_seed_big.log`
 
-## Pixel sketch (one‑look intuition)
+## Pseudocode (one‑look intuition)
 ```
-Baseline:
-        Ln                 L(n+1)
-     ---------          ---------
-        ^                  ^
-        |                  |
+for layer in layers:
+  s = 0                     # baseline
+  for t in tokens:
+    s = f(s, x[t])
 
-Future‑Seed:
-        Ln                 L(n+1)
-     ---------          ---------
-        ^                  ^
-        | \..............> |
-        |                  |
+for layer in layers:
+  s = prev_layer_sT          # Future‑Seed
+  for t in tokens:
+    s = f(s, x[t])
 ```
+
+Simple: baseline starts each layer from zero state; Future‑Seed starts each layer from the previous layer’s final state `s_T`, so deeper layers “see the future summary” immediately.
 
 ## One‑command Mac reproduction
 Assumes Python + torch are installed.
