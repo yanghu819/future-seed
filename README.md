@@ -17,6 +17,10 @@ Logs:
 - `rwkv-diff-future-seed/logs/constr_base_big.log`
 - `rwkv-diff-future-seed/logs/constr_future_seed_big.log`
 
+## Minimal setup
+- Python 3.10+
+- torch (CPU or MPS)
+
 ## Pseudocode (one‑look intuition)
 ```
 baseline:   s=0;           for t: s=f(s,x[t])

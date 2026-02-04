@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .venv/
 rwkv-diff-future-seed/weights/
+modded-nanogpt-rwkv/
+tiny-diffusion/
