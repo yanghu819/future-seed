@@ -10,13 +10,11 @@
 
 ## 像素风线框示意（直观看懂）
 ```
-Baseline (no init):
-L0: [x1][x2][x3][x4] -> sT0
-L1: [x1][x2][x3][x4] -> sT1 (init=0)
+Baseline:
+-> || ->
 
 Future‑Seed:
-L0: [x1][x2][x3][x4] -> sT0
-L1: [x1][x2][x3][x4] -> sT1 (init=sT0)
+-> |J| ->
 ```
 
 ## 最小任务（机制最清晰）

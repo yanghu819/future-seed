@@ -19,19 +19,11 @@ Logs:
 
 ## Pixel sketch (one‑look intuition)
 ```
-Causal RWKV (one‑pass):
-[x1][x2][x3][x4][x5]
-  |   |   |   |   |
-[s ]->[s ]->[s ]->[s ]->[sT]
-Layers start from 0 state
+Baseline:
+-> || ->
 
-Future‑Seed (non‑causal init):
-[x1][x2][x3][x4][x5]
-  |   |   |   |   |
-[s ]->[s ]->[s ]->[s ]->[sT]
-          |──────────────┐
-          v              v
-       next layer init = sT
+Future‑Seed:
+-> |J| ->
 ```
 
 ## One‑command Mac reproduction
