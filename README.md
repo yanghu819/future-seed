@@ -90,6 +90,7 @@
 | rightrev | 0.1175 | 0.7731 |
 | index（I 在右侧） | 0.2737 | 0.2650 |
 | rule（右侧指令 C/V） | 0.3881 | 0.3806 |
+| cipher（右侧置换表） | 0.0916 | 0.0916 |
 
 解读：
 - rightcopy/rightrev 明显受益，任务强依赖右侧信息
@@ -104,6 +105,20 @@
 - `rwkv-diff-dw-jrt/logs/index_dw1_smoke2.log`
 - `rwkv-diff-dw-jrt/logs/rule_dw0_smoke.log`
 - `rwkv-diff-dw-jrt/logs/rule_dw1_smoke.log`
+- `rwkv-diff-dw-jrt/logs/cipher_dw0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/cipher_dw1_smoke.log`
+
+### 200 step（更长序列）
+| task | setting | DW_JRT=0 acc | DW_JRT=1 acc |
+|---|---|---:|---:|
+| rightcopy | LEN=32 | 0.0991 | 0.2680 |
+| rightrev | LEN=32 | 0.0991 | 0.3042 |
+
+日志：
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw0_len32_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw1_len32_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_dw0_len32_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_dw1_len32_smoke.log`
 
 ### 1000 step（右侧依赖任务）
 | task | DW_JRT=0 acc | DW_JRT=1 acc |

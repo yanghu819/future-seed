@@ -75,6 +75,9 @@ INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
 RULE_TASK = env_int("RULE_TASK", 0) == 1
 RULE_LEN = env_int("RULE_LEN", 8)
 RULE_EVAL = env_int("RULE_EVAL", 0) == 1
+CIPHER_TASK = env_int("CIPHER_TASK", 0) == 1
+CIPHER_LEN = env_int("CIPHER_LEN", 16)
+CIPHER_EVAL = env_int("CIPHER_EVAL", 0) == 1
 STRUCT_TASK = env_int("STRUCT_TASK", 0) == 1
 STRUCT_LEN = env_int("STRUCT_LEN", 8)
 STRUCT_EVAL = env_int("STRUCT_EVAL", 0) == 1
@@ -119,6 +122,7 @@ use_bin = (
     and not RIGHTREV_TASK
     and not INDEX_TASK
     and not RULE_TASK
+    and not CIPHER_TASK
 )
 
 
@@ -515,6 +519,42 @@ elif RULE_TASK:
             p1 = s.find("|M=")
             if p1 >= 0:
                 mask[i, p1 + 3 : p1 + 3 + RULE_LEN] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif CIPHER_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["A", "M", "K", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _cipher_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        perm = list(range(10))
+        random.shuffle(perm)
+        k = "".join([str(i) for i in perm])
+        m = "".join([k[int(ch)] for ch in a])
+        s = "A=" + a + "|M=" + m + "|K=" + k
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _cipher_sample(CIPHER_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|M=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + CIPHER_LEN] = True
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
@@ -1337,6 +1377,34 @@ def rule_eval(model, trials=200):
 
 
 @torch.no_grad()
+def cipher_eval(model, trials=200):
+    if not CIPHER_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _cipher_sample(CIPHER_LEN)
+        p1 = s.find("|M=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + CIPHER_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + CIPHER_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + CIPHER_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += CIPHER_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
 def struct_eval(model, trials=200):
     if not STRUCT_TASK:
         return None
@@ -1442,6 +1510,9 @@ def sent_eval(model, trials=200):
 def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshold=0.95, top_k=3):
     if STRUCT_TASK:
         s = _struct_sample(STRUCT_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif CIPHER_TASK:
+        s = _cipher_sample(CIPHER_LEN)
         all_tokens = encode(s)[:prompt_len]
     elif RULE_TASK:
         s = _rule_sample(RULE_LEN)
@@ -1635,6 +1706,9 @@ if __name__ == "__main__":
                 if RULE_EVAL:
                     acc = rule_eval(m)
                     print(f"rule acc {acc:.4f}")
+                if CIPHER_EVAL:
+                    acc = cipher_eval(m)
+                    print(f"cipher acc {acc:.4f}")
                 if STRUCT_EVAL:
                     acc, exact = struct_eval(m)
                     print(f"struct acc {acc:.4f}, exact {exact:.4f}")
