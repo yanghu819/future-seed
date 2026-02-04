@@ -88,7 +88,7 @@
 |---|---:|---:|
 | rightcopy | 0.1087 | 0.7181 |
 | rightrev | 0.1175 | 0.7731 |
-| index | 0.3425 | 0.2888 |
+| index（I 在右侧） | 0.2737 | 0.2650 |
 
 解读：
 - rightcopy/rightrev 明显受益，任务强依赖右侧信息
@@ -99,8 +99,8 @@
 - `rwkv-diff-dw-jrt/logs/rightcopy_dw1_smoke.log`
 - `rwkv-diff-dw-jrt/logs/rightrev_dw0_smoke.log`
 - `rwkv-diff-dw-jrt/logs/rightrev_dw1_smoke.log`
-- `rwkv-diff-dw-jrt/logs/index_dw0_smoke.log`
-- `rwkv-diff-dw-jrt/logs/index_dw1_smoke.log`
+- `rwkv-diff-dw-jrt/logs/index_dw0_smoke2.log`
+- `rwkv-diff-dw-jrt/logs/index_dw1_smoke2.log`
 
 ### 1000 step（右侧依赖任务）
 | task | DW_JRT=0 acc | DW_JRT=1 acc |

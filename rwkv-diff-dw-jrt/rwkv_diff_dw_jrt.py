@@ -460,7 +460,7 @@ elif INDEX_TASK:
         i = random.randint(0, n - 4)
         j = i + 3
         y = a[i : j + 1]
-        s = "A=" + a + "|I=" + str(i) + "," + str(j) + "|Y=" + y
+        s = "A=" + a + "|Y=" + y + "|I=" + str(i) + "," + str(j)
         s = s + "#" * (SEQ_LEN - len(s))
         return s
 
