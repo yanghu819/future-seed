@@ -40,4 +40,14 @@
 - `rwkv-diff-dw-jrt/logs/struct_dw0_long2.log`
 - `rwkv-diff-dw-jrt/logs/struct_dw1_long2.log`
 
+权重（仅保留主实验）：
+- `rwkv-diff-dw-jrt/weights/rightcopy_dw0_long.pt`
+- `rwkv-diff-dw-jrt/weights/rightcopy_dw1_long.pt`
+- `rwkv-diff-dw-jrt/weights/rightrev_dw0_long.pt`
+- `rwkv-diff-dw-jrt/weights/rightrev_dw1_long.pt`
+- `rwkv-diff-dw-jrt/weights/constr_len16_dw0_long.pt`
+- `rwkv-diff-dw-jrt/weights/constr_len16_dw1_aN2_long.pt`
+- `rwkv-diff-dw-jrt/weights/struct_dw0_long2.pt`
+- `rwkv-diff-dw-jrt/weights/struct_dw1_long2.pt`
+
 说明：其它探索性日志已删除；需要可复现时直接按脚本参数重跑即可。
