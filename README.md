@@ -60,6 +60,27 @@
 - `rwkv-diff-dw-jrt/logs/struct_eval_fixed_dw0.log`
 - `rwkv-diff-dw-jrt/logs/struct_eval_fixed_dw1.log`
 
+## 可学习 DW‑JRT 注入（alpha）
+说明：
+- 每层一个可学习标量 `jrt_alpha`，注入强度为 `sigmoid(jrt_alpha)`
+- `DW_JRT_ALPHA_INIT=0` 表示初始注入强度 0.5
+
+### 200 step（alpha init=0）
+| task | DW_JRT=0 acc | DW_JRT=1 acc |
+|---|---:|---:|
+| struct | 0.5484 | 0.7172 |
+| add | 0.1013 | 0.1125 |
+
+解读：
+- struct 仍明显受益，说明可学习注入没有破坏 DW‑JRT 的主收益
+- add 只有小幅提升，可能仍是短跑噪声，需要更长步数验证
+
+日志：
+- `rwkv-diff-dw-jrt/logs/struct_dw0_alpha0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/struct_dw1_alpha0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/add_dw0_alpha0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/add_dw1_alpha0_smoke.log`
+
 ## 复现实验
 ### 200 step
 ```
