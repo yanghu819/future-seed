@@ -1,39 +1,48 @@
-# rwkvdllm
+# RWKVDLLM — DW‑JRT for Diffusion LLM
 
-## 目标
-- 用 RWKV7 作为 backbone，在离散 diffusion LLM 设定下验证 DW‑JRT
-- 只保留“DW‑JRT 有优势”的最小实验
+A minimal, reproducible prototype that shows DW‑JRT (vertical state non‑causal initialization) can dramatically improve global‑consistency tasks in a diffusion‑style RWKV7 model.
 
-## 日志怎么读
-- `xxx acc`：只统计被 mask 段的 token 准确率（和 GT 对比）
-- 每次评测打印 `IN/GT/PR`（mask 附近窗口），直观看懂
-- `LOG_WIN=80` 控制窗口大小（默认 80）
-- 不保留权重（跑完即删）
+## Why it matters
+DW‑JRT passes the previous layer’s final state `s_T` as the next layer’s initial state. In diffusion LM (non‑causal), this behaves like “re‑reading” the sequence across depth, strengthening global constraints instead of one‑pass online updates.
 
-## 极简实验（1000 step）
-配置（共用）：
-- `N_LAYER=2 N_EMBD=128 HEAD_SIZE=32`
-- `BATCH_SIZE=32 DEVICE_BSZ=8 SEQ_LEN=128`
-- `MAX_ITERS=1000 EVAL_INTERVAL=500 EVAL_ITERS=3`
-
-任务：
-- rightcopy：`L=...|M=...|R=...`，mask `M`，目标 `M=R`
-- constr：`P=...|M=...|R=dd`，mask `M`，目标 `M = last(P) + (d1,d2交替)`
-
-结果：
+## Results (1000 steps, tiny model)
 | task | DW_JRT=0 acc | DW_JRT=1 acc |
 |---|---:|---:|
-| rightcopy（LEN=16, alpha=-2） | 0.1075 | 0.5787 |
-| constr（LEN=16, alpha=-2） | 0.1628 | 0.8281 |
+| rightcopy (LEN=16) | 0.1075 | 0.5787 |
+| constr (LEN=16) | 0.1628 | 0.8281 |
 
-日志：
+Logs:
 - `rwkv-diff-dw-jrt/logs/rightcopy_dw0_big.log`
 - `rwkv-diff-dw-jrt/logs/rightcopy_dw1_big.log`
 - `rwkv-diff-dw-jrt/logs/constr_dw0_big.log`
 - `rwkv-diff-dw-jrt/logs/constr_dw1_big.log`
 
-## 近期提交摘要
-- 清理历史日志/权重，仅保留极简实验路径
-- 增加可读日志：评测打印 IN/GT/PR 窗口
-- 重新跑 1000 step 极简对比（rightcopy / constr）
-- 做了一个 clean snapshot 备份提交（保留历史）
+## One‑command Mac reproduction
+Assumes Python + torch are installed.
+
+```bash
+bash -lc 'cd rwkv-diff-dw-jrt && mkdir -p logs && \
+PYTHONUNBUFFERED=1 TRAIN=1 DW_JRT=0 RIGHTCOPY_TASK=1 RIGHTCOPY_LEN=16 RIGHTCOPY_EVAL=1 \
+MAX_ITERS=1000 EVAL_INTERVAL=500 EVAL_ITERS=3 BATCH_SIZE=32 DEVICE_BSZ=8 SEQ_LEN=128 \
+N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 LOG_WIN=40 LOG_SAMPLE=1 LOG_OUTPUT=0 \
+python rwkv_diff_dw_jrt.py | tee logs/rightcopy_dw0_big.log && \
+PYTHONUNBUFFERED=1 TRAIN=1 DW_JRT=1 DW_JRT_ALPHA_INIT=-2 RIGHTCOPY_TASK=1 RIGHTCOPY_LEN=16 RIGHTCOPY_EVAL=1 \
+MAX_ITERS=1000 EVAL_INTERVAL=500 EVAL_ITERS=3 BATCH_SIZE=32 DEVICE_BSZ=8 SEQ_LEN=128 \
+N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 LOG_WIN=40 LOG_SAMPLE=1 LOG_OUTPUT=0 \
+python rwkv_diff_dw_jrt.py | tee logs/rightcopy_dw1_big.log && \
+PYTHONUNBUFFERED=1 TRAIN=1 DW_JRT=0 CONSTR_TASK=1 CONSTR_LEN=16 CONSTR_EVAL=1 \
+MAX_ITERS=1000 EVAL_INTERVAL=500 EVAL_ITERS=3 BATCH_SIZE=32 DEVICE_BSZ=8 SEQ_LEN=128 \
+N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 LOG_WIN=40 LOG_SAMPLE=1 LOG_OUTPUT=0 \
+python rwkv_diff_dw_jrt.py | tee logs/constr_dw0_big.log && \
+PYTHONUNBUFFERED=1 TRAIN=1 DW_JRT=1 DW_JRT_ALPHA_INIT=-2 CONSTR_TASK=1 CONSTR_LEN=16 CONSTR_EVAL=1 \
+MAX_ITERS=1000 EVAL_INTERVAL=500 EVAL_ITERS=3 BATCH_SIZE=32 DEVICE_BSZ=8 SEQ_LEN=128 \
+N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 LOG_WIN=40 LOG_SAMPLE=1 LOG_OUTPUT=0 \
+python rwkv_diff_dw_jrt.py | tee logs/constr_dw1_big.log'
+```
+
+## Log readability
+Each evaluation prints:
+- `IN/GT/PR` around the masked span
+- mask range and token‑level accuracy
+
+No weights are kept in the repo.
