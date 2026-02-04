@@ -89,6 +89,7 @@
 | rightcopy | 0.1087 | 0.7181 |
 | rightrev | 0.1175 | 0.7731 |
 | index（I 在右侧） | 0.2737 | 0.2650 |
+| rule（右侧指令 C/V） | 0.3881 | 0.3806 |
 
 解读：
 - rightcopy/rightrev 明显受益，任务强依赖右侧信息
@@ -101,12 +102,15 @@
 - `rwkv-diff-dw-jrt/logs/rightrev_dw1_smoke.log`
 - `rwkv-diff-dw-jrt/logs/index_dw0_smoke2.log`
 - `rwkv-diff-dw-jrt/logs/index_dw1_smoke2.log`
+- `rwkv-diff-dw-jrt/logs/rule_dw0_smoke.log`
+- `rwkv-diff-dw-jrt/logs/rule_dw1_smoke.log`
 
 ### 1000 step（右侧依赖任务）
 | task | DW_JRT=0 acc | DW_JRT=1 acc |
 |---|---:|---:|
 | rightcopy | 0.0994 | 0.9581 |
 | rightrev | 0.0994 | 0.9500 |
+| rule（右侧指令 C/V） | 0.4850 | 0.4612 |
 
 解读：
 - rightcopy/rightrev 的优势在长跑更明显，DW‑JRT 接近完美恢复
@@ -116,6 +120,8 @@
 - `rwkv-diff-dw-jrt/logs/rightcopy_dw1_long.log`
 - `rwkv-diff-dw-jrt/logs/rightrev_dw0_long.log`
 - `rwkv-diff-dw-jrt/logs/rightrev_dw1_long.log`
+- `rwkv-diff-dw-jrt/logs/rule_dw0_long.log`
+- `rwkv-diff-dw-jrt/logs/rule_dw1_long.log`
 
 ## 复现实验
 ### 200 step

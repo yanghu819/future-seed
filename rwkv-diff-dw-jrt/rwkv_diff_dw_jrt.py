@@ -72,6 +72,9 @@ RIGHTREV_EVAL = env_int("RIGHTREV_EVAL", 0) == 1
 INDEX_TASK = env_int("INDEX_TASK", 0) == 1
 INDEX_LEN = env_int("INDEX_LEN", 16)
 INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
+RULE_TASK = env_int("RULE_TASK", 0) == 1
+RULE_LEN = env_int("RULE_LEN", 8)
+RULE_EVAL = env_int("RULE_EVAL", 0) == 1
 STRUCT_TASK = env_int("STRUCT_TASK", 0) == 1
 STRUCT_LEN = env_int("STRUCT_LEN", 8)
 STRUCT_EVAL = env_int("STRUCT_EVAL", 0) == 1
@@ -115,6 +118,7 @@ use_bin = (
     and not RIGHTCOPY_TASK
     and not RIGHTREV_TASK
     and not INDEX_TASK
+    and not RULE_TASK
 )
 
 
@@ -473,6 +477,44 @@ elif INDEX_TASK:
             p1 = s.find("|Y=")
             if p1 >= 0:
                 mask[i, p1 + 3 : p1 + 3 + 4] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
+elif RULE_TASK:
+    vocab_base = [str(i) for i in range(10)] + ["A", "M", "R", "=", "|", "#", "C", "V"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _rule_sample(n):
+        a = "".join([str(random.randint(0, 9)) for _ in range(n)])
+        if random.random() < 0.5:
+            r = "C"
+            m = a
+        else:
+            r = "V"
+            m = a[::-1]
+        s = "A=" + a + "|M=" + m + "|R=" + r
+        s = s + "#" * (SEQ_LEN - len(s))
+        return s
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            s = _rule_sample(RULE_LEN)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            p1 = s.find("|M=")
+            if p1 >= 0:
+                mask[i, p1 + 3 : p1 + 3 + RULE_LEN] = True
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
@@ -1267,6 +1309,34 @@ def index_eval(model, trials=200):
 
 
 @torch.no_grad()
+def rule_eval(model, trials=200):
+    if not RULE_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        s = _rule_sample(RULE_LEN)
+        p1 = s.find("|M=")
+        if p1 < 0:
+            continue
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, p1 + 3 : p1 + 3 + RULE_LEN] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[p1 + 3 : p1 + 3 + RULE_LEN]
+        tgt_seg = tgt[p1 + 3 : p1 + 3 + RULE_LEN]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += RULE_LEN
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
 def struct_eval(model, trials=200):
     if not STRUCT_TASK:
         return None
@@ -1372,6 +1442,9 @@ def sent_eval(model, trials=200):
 def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshold=0.95, top_k=3):
     if STRUCT_TASK:
         s = _struct_sample(STRUCT_LEN)
+        all_tokens = encode(s)[:prompt_len]
+    elif RULE_TASK:
+        s = _rule_sample(RULE_LEN)
         all_tokens = encode(s)[:prompt_len]
     elif RIGHTCOPY_TASK:
         s = _rightcopy_sample(RIGHTCOPY_LEN)
@@ -1559,6 +1632,9 @@ if __name__ == "__main__":
                 if INDEX_EVAL:
                     acc = index_eval(m)
                     print(f"index acc {acc:.4f}")
+                if RULE_EVAL:
+                    acc = rule_eval(m)
+                    print(f"rule acc {acc:.4f}")
                 if STRUCT_EVAL:
                     acc, exact = struct_eval(m)
                     print(f"struct acc {acc:.4f}, exact {exact:.4f}")
