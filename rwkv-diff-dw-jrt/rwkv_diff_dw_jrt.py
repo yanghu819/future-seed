@@ -36,6 +36,9 @@ DW_JRT_ALPHA_INIT = env_float("DW_JRT_ALPHA_INIT", 0.0)
 DW_JRT_LAYER_START = env_int("DW_JRT_LAYER_START", 0)
 TRAIN = env_int("TRAIN", 0) == 1
 MEM_CHECK = env_int("MEM_CHECK", 0) == 1
+LOG_SAMPLE = env_int("LOG_SAMPLE", 1) == 1
+LOG_WIN = env_int("LOG_WIN", 80)
+LOG_OUTPUT = env_int("LOG_OUTPUT", 0) == 1
 REVERSE_TASK = env_int("REVERSE_TASK", 0) == 1
 REVERSE_DIGIT_MAX = env_int("REVERSE_DIGIT_MAX", 60)
 REVERSE_EVAL = env_int("REVERSE_EVAL", 0) == 1
@@ -1802,6 +1805,28 @@ def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshol
 
 
 @torch.no_grad()
+def log_eval_sample(model, split="val"):
+    model.eval()
+    xb, yb, mb = get_batch(split)
+    xb = xb[:1]
+    yb = yb[:1]
+    mb = mb[:1]
+    logits, _ = model(xb, yb, mb)
+    pred = logits.argmax(dim=-1)
+    out = torch.where(mb, pred, xb)
+    idx = mb[0].nonzero().squeeze(-1)
+    start = idx[0].item()
+    end = idx[-1].item() + 1
+    s = max(start - LOG_WIN, 0)
+    e = min(end + LOG_WIN, xb.size(1))
+    print(f"mask[{start}:{end}] len={end - start}")
+    print(f"IN[{s}:{e}]: {decode(xb[0, s:e].tolist())}")
+    print(f"GT[{start}:{end}]: {decode(yb[0, start:end].tolist())}")
+    print(f"PR[{start}:{end}]: {decode(out[0, start:end].tolist())}")
+    model.train()
+
+
+@torch.no_grad()
 def mem_check(model, prompt_len=16):
     model.eval()
     if STRUCT_TASK:
@@ -1937,9 +1962,8 @@ if __name__ == "__main__":
                 if SENT_EVAL:
                     acc = sent_eval(m)
                     print(f"sent acc {acc:.4f}")
-                if not use_bin:
-                    sample = generate(m, max_new_tokens=240)
-                    print(f"Sample:\n{sample}\n")
+                if LOG_SAMPLE:
+                    log_eval_sample(m, "val")
 
             m.train()
             m.zero_grad(set_to_none=True)
@@ -1961,5 +1985,6 @@ if __name__ == "__main__":
 
     if MEM_CHECK:
         mem_check(m, prompt_len=PROMPT_LEN)
-    output = generate(m, max_new_tokens=GEN_TOKENS, temp=0.8, confidence_threshold=0.95, top_k=2)
-    print(f"\nOutput:\n{output}")
+    if LOG_OUTPUT:
+        output = generate(m, max_new_tokens=GEN_TOKENS, temp=0.8, confidence_threshold=0.95, top_k=2)
+        print(f"\nOutput:\n{output}")

@@ -11,8 +11,10 @@
 
 ## 日志怎么读
 - `xxx acc`：只统计被 mask 段的 token 准确率（和 GT 对比）
-- `Sample`：模型补全后的整段字符串（默认不打印 GT）
-- 需要看 GT/PR：运行时加 `MEM_CHECK=1`（会打印 GT/PR）
+- 默认每次评测会打印 `IN/GT/PR`（可读窗口），由 `LOG_SAMPLE=1` 控制
+- 窗口大小：`LOG_WIN=80`（只展示 mask 附近）
+- 需要整段 GT/PR：运行时加 `MEM_CHECK=1`
+- 额外生成输出：`LOG_OUTPUT=1`（默认关闭）
 
 ## 主实验任务（双向依赖）
 - rightcopy：`L=...|M=...|R=...`，mask `M`，目标 `M=R`
