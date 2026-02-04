@@ -45,4 +45,21 @@ Each evaluation prints:
 - `IN/GT/PR` around the masked span
 - mask range and token‑level accuracy
 
+## Log example (baseline vs Future‑Seed)
+baseline (FUTURE_SEED=0):
+```
+mask[21:37] len=16
+IN[0:77]: P=5506062696895811|M=________________|R=06########################
+GT[21:37]: 1060606060606060
+PR[21:37]: 1888888888888888
+```
+
+Future‑Seed (FUTURE_SEED=1):
+```
+mask[21:37] len=16
+IN[0:77]: P=5506062696895811|M=________________|R=06########################
+GT[21:37]: 1060606060606060
+PR[21:37]: 1060606066666660
+```
+
 No weights are kept in the repo.
