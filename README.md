@@ -102,6 +102,21 @@
 - `rwkv-diff-dw-jrt/logs/index_dw0_smoke.log`
 - `rwkv-diff-dw-jrt/logs/index_dw1_smoke.log`
 
+### 1000 step（右侧依赖任务）
+| task | DW_JRT=0 acc | DW_JRT=1 acc |
+|---|---:|---:|
+| rightcopy | 0.0994 | 0.9581 |
+| rightrev | 0.0994 | 0.9500 |
+
+解读：
+- rightcopy/rightrev 的优势在长跑更明显，DW‑JRT 接近完美恢复
+
+日志：
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw0_long.log`
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw1_long.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_dw0_long.log`
+- `rwkv-diff-dw-jrt/logs/rightrev_dw1_long.log`
+
 ## 复现实验
 ### 200 step
 ```
