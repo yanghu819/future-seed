@@ -165,11 +165,13 @@
 | cipher | LEN=16 | 0.0966 | 0.0966 |
 | shift | LEN=16 | 0.0950 | 0.0950 |
 | shift | LEN=16 | - | 0.0950 (alpha=-2) |
+| poscopy | LEN=8 | 0.2233 | 0.2333 (alpha=-2) |
+| constr | LEN=8 | 0.2137 | 0.7906 (alpha=-2) |
 
 解读：
 - rightcopy/rightrev 对 DW‑JRT 极敏感，且 **alpha=-2** 在短跑最优
 - LEN=32 仍有收益，但需要更长训练才能接近满分
-- struct 有提升，其它任务短跑无优势或略差
+- struct 有提升；constr 在 **alpha=-2** 下提升显著；其它任务短跑无优势或略差
 
 日志（100 step sweep）：
 - `rwkv-diff-dw-jrt/logs/rightcopy_len8_*.log`
@@ -182,6 +184,8 @@
 - `rwkv-diff-dw-jrt/logs/rule_len8_*.log`
 - `rwkv-diff-dw-jrt/logs/cipher_len16_*.log`
 - `rwkv-diff-dw-jrt/logs/shift_len16_*.log`
+- `rwkv-diff-dw-jrt/logs/poscopy_len8_*.log`
+- `rwkv-diff-dw-jrt/logs/constr_len8_*.log`
 
 ## 复现实验
 ### 200 step
