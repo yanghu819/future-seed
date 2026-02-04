@@ -20,7 +20,7 @@ Baseline:
 Future‑Seed:
   ^
 -----
-  /
+ / 
 -----
   ^
 ```
