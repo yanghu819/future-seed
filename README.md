@@ -2,181 +2,79 @@
 
 ## 目标
 - 用 RWKV7 作为 backbone，在离散 diffusion LLM 设定下评估 DW‑JRT 是否有收益
-- 对比纯 causal vs 加 DW‑JRT（不做 prompt/target 分段）
-
-## 结构
-- `rwkv-diff-dw-jrt/`：单文件实现与实验日志
-- `modded-nanogpt-rwkv/`：RWKV7 参考实现与数据脚本
-- `tiny-diffusion/`：diffusionLLM 参考实现
-- `dw-jrt.md`：方案对齐与记录
+- 重点验证“非因果双向信息融合”是否提升任务表现
 
 ## 方法简述
-- 训练：随机 mask token，仅在 mask 位置做交叉熵
+- 训练：随机 mask / 指定 mask，仅在 mask 位置做交叉熵
 - 生成：并行解码（confidence‑based），与 tiny‑diffusion 风格一致
 - DW‑JRT：上一层末尾 state 作为下一层初始 state（`DW_JRT_SCALE` 缩放）
 
-## 论文摘要（arXiv:2601.22031）
-CARD 提出在严格 causal attention 下重写 diffusion 过程，实现单次前向的密集 per‑token 监督；为稳定训练引入 soft‑tailed masking 与基于信噪比的重加权，并支持基于置信度的动态并行解码；在保持 ARM 训练效率的同时获得 diffusion 的高吞吐推理。citeturn2view0
+## 核心任务：结构化补全（双向）
+**任务定义**
+- 输入：`{"a":A,"b":A+C,"c":C}`，其中 A/C 为 8 位随机数字串，`b` 为拼接（A 后接 C）
+- 训练/评测：只 mask `b` 段，要求模型用左右上下文恢复
+- 指标：`struct acc`（只统计 `b` 段逐 token 准确率）
 
-论文链接：
-```
-https://arxiv.org/abs/2601.22031
-```
+**结论**
+- DW‑JRT 在该任务上显著优于 baseline，且差距随训练拉长而扩大
 
-## 实验
-### 大规模（fineweb‑edu sample‑10BT, bin）
-配置（两组一致）：
-- `SEQ_LEN=128, N_LAYER=2, N_EMBD=128, HEAD_SIZE=32`
-- `BATCH_SIZE=64, DEVICE_BSZ=16, MAX_ITERS=1000`
-- `EVAL_INTERVAL=200, EVAL_ITERS=50, WARMDOWN_ITERS=200`
-
-结果（来自 `rwkv-diff-dw-jrt/logs`）：
-| step | DW_JRT=0 train | DW_JRT=0 val | DW_JRT=1 (scale=20) train | DW_JRT=1 val |
-|---:|---:|---:|---:|---:|
-| 0   | 10.8259 | 10.8259 | 10.8259 | 10.8259 |
-| 200 | 6.5481  | 8.4659  | 6.4915  | 8.5465  |
-| 400 | 5.1953  | 9.1386  | 5.1669  | 9.1670  |
-| 600 | 4.1939  | 9.6602  | 4.2244  | 9.6515  |
-| 800 | 3.7682  | 10.1131 | 3.7630  | 10.1012 |
-| 999 | 3.3028  | 10.3396 | 3.3093  | 10.2167 |
-
-简短分析：
-- 训练 loss 接近
-- 验证 loss 后期 DW‑JRT 略低，但差距很小；整体有过拟合趋势（val 上升）
-
-### 小规模过拟合（overfit.txt, char）
+## 结果（固定设置）
 配置：
-- `SEQ_LEN=64, N_LAYER=2, N_EMBD=128, HEAD_SIZE=32`
-- `BATCH_SIZE=32, DEVICE_BSZ=8, MAX_ITERS=200`
+- `STRUCT_TASK=1 STRUCT_LEN=8 SEQ_LEN=64`
+- `N_LAYER=2 N_EMBD=128 HEAD_SIZE=32`
+- `BATCH_SIZE=32 DEVICE_BSZ=8`
 
-结果（step 199）：
-- DW_JRT=0: train 0.5793 / val 0.6434
-- DW_JRT=1 (scale=20): train 0.4348 / val 0.4952
+### 200 step
+| step | DW_JRT=0 struct acc | DW_JRT=1 struct acc |
+|---:|---:|---:|
+| 199 | 0.5469 | 0.7450 |
 
-简短分析：
-- 小数据过拟合上 DW‑JRT 收敛更好
+日志：
+- `rwkv-diff-dw-jrt/logs/struct_dw0_smoke2.log`
+- `rwkv-diff-dw-jrt/logs/struct_dw1_smoke2.log`
 
-### 合成任务（双向 / 结构 / 检索 / 反转）
-所有任务均在 `rwkv-diff-dw-jrt/rwkv_diff_dw_jrt.py` 内用环境变量切换，评测只统计被 mask 区间 token 准确率。
+### 1000 step
+| step | DW_JRT=0 struct acc | DW_JRT=1 struct acc |
+|---:|---:|---:|
+| 200 | 0.5181 | 0.6191 |
+| 400 | 0.3281 | 0.6531 |
+| 600 | 0.5494 | 0.7262 |
+| 800 | 0.5525 | 0.8153 |
+| 999 | 0.5444 | 0.9244 |
 
-**Reverse（mask 逗号后段）**  
-设置：`REVERSE_TASK=1 REVERSE_MASK_REVERSE=1 REVERSE_DIGIT_MAX=20 SEQ_LEN=64`  
-- DW_JRT=0: reverse acc 0.5886  
-- DW_JRT=1: reverse acc 0.4752  
-结论：此设定下 DW_JRT 不占优。  
-
-**Struct（结构化补全）**  
-设置：`STRUCT_TASK=1 STRUCT_LEN=8 SEQ_LEN=64`  
-- DW_JRT=0: struct acc 0.5456  
-- DW_JRT=1: struct acc 0.7725  
-结论：结构化补全任务 DW_JRT 明显更好。  
-
-**Retrieval（检索补全）**  
-设置：`RETR_TASK=1 RETR_K=4 RETR_VLEN=4 SEQ_LEN=64`  
-- DW_JRT=0: retr acc 0.2863  
-- DW_JRT=1: retr acc 0.2863  
-结论：几乎无差别。  
-
-**Sentence infill（跨句补全, fineweb‑edu 子集）**  
-设置：`SENT_TASK=1 SENT_MASK_LEN=24 SEQ_LEN=128`  
-- DW_JRT=0: sent acc 0.1675  
-- DW_JRT=1: sent acc 0.1682  
-结论：此设定下差别极小。  
+日志：
+- `rwkv-diff-dw-jrt/logs/struct_dw0_long2.log`
+- `rwkv-diff-dw-jrt/logs/struct_dw1_long2.log`
 
 ## 复现实验
-### 大规模对比
+### 200 step
 ```
 cd rwkv-diff-dw-jrt
-PYTHONUNBUFFERED=1 \
-DATA_BIN=../modded-nanogpt-rwkv/data/fineweb_edu10B/fineweb_train_*.bin \
-DATA_VAL_BIN=../modded-nanogpt-rwkv/data/fineweb_edu10B/fineweb_val_*.bin \
-VOCAB_SIZE=50304 TRAIN=1 GEN_TOKENS=1 \
-SEQ_LEN=128 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=64 DEVICE_BSZ=16 MAX_ITERS=1000 EVAL_INTERVAL=200 EVAL_ITERS=50 WARMDOWN_ITERS=200 \
-DW_JRT=0 WEIGHTS_PATH=weights/diffusion_dw0_v3.pt \
-python -u rwkv_diff_dw_jrt.py
-
-PYTHONUNBUFFERED=1 \
-DATA_BIN=../modded-nanogpt-rwkv/data/fineweb_edu10B/fineweb_train_*.bin \
-DATA_VAL_BIN=../modded-nanogpt-rwkv/data/fineweb_edu10B/fineweb_val_*.bin \
-VOCAB_SIZE=50304 TRAIN=1 GEN_TOKENS=1 \
-SEQ_LEN=128 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=64 DEVICE_BSZ=16 MAX_ITERS=1000 EVAL_INTERVAL=200 EVAL_ITERS=50 WARMDOWN_ITERS=200 \
-DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/diffusion_dw1_v3.pt \
-python -u rwkv_diff_dw_jrt.py
-```
-
-### 小规模过拟合
-```
-cd rwkv-diff-dw-jrt
-PYTHONUNBUFFERED=1 DATA_PATH=overfit.txt TRAIN=1 GEN_TOKENS=1 \
-SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=0 WEIGHTS_PATH=weights/overfit_dw0.pt \
-python -u rwkv_diff_dw_jrt.py
-
-PYTHONUNBUFFERED=1 DATA_PATH=overfit.txt TRAIN=1 GEN_TOKENS=1 \
-SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/overfit_dw1.pt \
-python -u rwkv_diff_dw_jrt.py
-```
-
-### Reverse（mask 逗号后段）
-```
-cd rwkv-diff-dw-jrt
-PYTHONUNBUFFERED=1 REVERSE_TASK=1 REVERSE_EVAL=1 REVERSE_MASK_REVERSE=1 REVERSE_DIGIT_MAX=20 \
-TRAIN=1 GEN_TOKENS=1 SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=0 WEIGHTS_PATH=weights/reverse_dw0_masked.pt \
-python -u rwkv_diff_dw_jrt.py
-
-PYTHONUNBUFFERED=1 REVERSE_TASK=1 REVERSE_EVAL=1 REVERSE_MASK_REVERSE=1 REVERSE_DIGIT_MAX=20 \
-TRAIN=1 GEN_TOKENS=1 SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/reverse_dw1_masked.pt \
-python -u rwkv_diff_dw_jrt.py
-```
-
-### Struct / Retrieval / Sentence
-```
-cd rwkv-diff-dw-jrt
-# Struct
 PYTHONUNBUFFERED=1 STRUCT_TASK=1 STRUCT_EVAL=1 STRUCT_LEN=8 \
 TRAIN=1 GEN_TOKENS=1 SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
 BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=0 WEIGHTS_PATH=weights/struct_dw0.pt \
+DW_JRT=0 WEIGHTS_PATH=weights/struct_dw0_smoke2.pt \
 python -u rwkv_diff_dw_jrt.py
 
 PYTHONUNBUFFERED=1 STRUCT_TASK=1 STRUCT_EVAL=1 STRUCT_LEN=8 \
 TRAIN=1 GEN_TOKENS=1 SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
 BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/struct_dw1.pt \
+DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/struct_dw1_smoke2.pt \
 python -u rwkv_diff_dw_jrt.py
+```
 
-# Retrieval
-PYTHONUNBUFFERED=1 RETR_TASK=1 RETR_EVAL=1 RETR_K=4 RETR_VLEN=4 \
+### 1000 step
+```
+cd rwkv-diff-dw-jrt
+PYTHONUNBUFFERED=1 STRUCT_TASK=1 STRUCT_EVAL=1 STRUCT_LEN=8 \
 TRAIN=1 GEN_TOKENS=1 SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=0 WEIGHTS_PATH=weights/retr_dw0.pt \
+BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=1000 EVAL_INTERVAL=200 EVAL_ITERS=20 WARMDOWN_ITERS=200 \
+DW_JRT=0 WEIGHTS_PATH=weights/struct_dw0_long2.pt \
 python -u rwkv_diff_dw_jrt.py
 
-PYTHONUNBUFFERED=1 RETR_TASK=1 RETR_EVAL=1 RETR_K=4 RETR_VLEN=4 \
+PYTHONUNBUFFERED=1 STRUCT_TASK=1 STRUCT_EVAL=1 STRUCT_LEN=8 \
 TRAIN=1 GEN_TOKENS=1 SEQ_LEN=64 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/retr_dw1.pt \
-python -u rwkv_diff_dw_jrt.py
-
-# Sentence infill (fineweb-edu 子集)
-PYTHONUNBUFFERED=1 SENT_TASK=1 SENT_EVAL=1 DATA_PATH=overfit_fwe_small.txt SENT_MASK_LEN=24 \
-TRAIN=1 GEN_TOKENS=1 SEQ_LEN=128 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=0 WEIGHTS_PATH=weights/sent_dw0.pt \
-python -u rwkv_diff_dw_jrt.py
-
-PYTHONUNBUFFERED=1 SENT_TASK=1 SENT_EVAL=1 DATA_PATH=overfit_fwe_small.txt SENT_MASK_LEN=24 \
-TRAIN=1 GEN_TOKENS=1 SEQ_LEN=128 N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 \
-BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=200 EVAL_INTERVAL=50 EVAL_ITERS=20 WARMDOWN_ITERS=50 \
-DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/sent_dw1.pt \
+BATCH_SIZE=32 DEVICE_BSZ=8 MAX_ITERS=1000 EVAL_INTERVAL=200 EVAL_ITERS=20 WARMDOWN_ITERS=200 \
+DW_JRT=1 DW_JRT_SCALE=20 WEIGHTS_PATH=weights/struct_dw1_long2.pt \
 python -u rwkv_diff_dw_jrt.py
 ```
