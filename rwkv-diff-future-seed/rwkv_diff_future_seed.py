@@ -30,10 +30,10 @@ LN_LR = env_float("LN_LR", 0.0090)
 WTE_LR = env_float("WTE_LR", 0.3)
 HEAD_LR = env_float("HEAD_LR", 0.002)
 LAMBDA_LR = env_float("LAMBDA_LR", 0.02)
-VSNI = env_int("VSNI", 0) == 1
-VSNI_SCALE = env_float("VSNI_SCALE", 1.0)
-VSNI_ALPHA_INIT = env_float("VSNI_ALPHA_INIT", 0.0)
-VSNI_LAYER_START = env_int("VSNI_LAYER_START", 0)
+FUTURE_SEED = env_int("FUTURE_SEED", 0) == 1
+FUTURE_SEED_SCALE = env_float("FUTURE_SEED_SCALE", 1.0)
+FUTURE_SEED_ALPHA_INIT = env_float("FUTURE_SEED_ALPHA_INIT", 0.0)
+FUTURE_SEED_LAYER_START = env_int("FUTURE_SEED_LAYER_START", 0)
 TRAIN = env_int("TRAIN", 0) == 1
 MEM_CHECK = env_int("MEM_CHECK", 0) == 1
 LOG_SAMPLE = env_int("LOG_SAMPLE", 1) == 1
@@ -854,7 +854,7 @@ else:
         return x.to(device), y.to(device), mask.to(device)
 
 
-def rwkv7_recurrence(r, w, k, v, a, b, state, vsni_alpha):
+def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
     B, T, C = r.size()
     H = C // HEAD_SIZE
     N = HEAD_SIZE
@@ -872,8 +872,8 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, vsni_alpha):
         inject = 0.0
     else:
         base = state
-        state = state * VSNI_SCALE
-        inject = base * vsni_alpha
+        state = state * FUTURE_SEED_SCALE
+        inject = base * future_seed_alpha
 
     y = torch.empty(B, T, H, N, device=r.device, dtype=torch.float32)
     s = state
@@ -982,7 +982,7 @@ class RWKV7(nn.Module):
             self.key.weight.data.uniform_(-0.05 / (self.n_embd**0.5), 0.05 / (self.n_embd**0.5))
             self.value.weight.data.uniform_(-0.5 / (self.n_embd**0.5), 0.5 / (self.n_embd**0.5))
             self.output.weight.data.zero_()
-            self.vsni_alpha = nn.Parameter(torch.full((1, self.n_head, 1, 1), VSNI_ALPHA_INIT))
+            self.future_seed_alpha = nn.Parameter(torch.full((1, self.n_head, 1, 1), FUTURE_SEED_ALPHA_INIT))
 
     def forward(self, x, v1, state):
         B, T, C = x.size()
@@ -1020,8 +1020,8 @@ class RWKV7(nn.Module):
         mk = torch.sigmoid(self.time_misc_k + (xk @ self.mk_w1) @ self.mk_w2)
         k = k * torch.clamp(w * mk, max=0).exp()
 
-        vsni_alpha = torch.sigmoid(self.vsni_alpha)
-        x, state = rwkv7_recurrence(r, w, k, v, -kk, kk * a, state, vsni_alpha)
+        future_seed_alpha = torch.sigmoid(self.future_seed_alpha)
+        x, state = rwkv7_recurrence(r, w, k, v, -kk, kk * a, state, future_seed_alpha)
         x = self.ln_x(x.view(B * T, C)).view(B, T, C)
 
         x = x + (
@@ -1073,10 +1073,10 @@ class GPTConfig:
 
 
 class GPT(nn.Module):
-    def __init__(self, config, vsni=False):
+    def __init__(self, config, future_seed=False):
         super().__init__()
         self.config = config
-        self.vsni = vsni
+        self.future_seed = future_seed
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
@@ -1093,9 +1093,9 @@ class GPT(nn.Module):
         v1 = None
         state0 = None
         for block in self.transformer.h:
-            use_state = state0 if (self.vsni and block.layer_id >= VSNI_LAYER_START) else None
+            use_state = state0 if (self.future_seed and block.layer_id >= FUTURE_SEED_LAYER_START) else None
             x, v1, state1 = block(x, v1, x0, use_state)
-            if self.vsni:
+            if self.future_seed:
                 state0 = state1
         x = F.rms_norm(x, (x.size(-1),))
 
@@ -1867,7 +1867,7 @@ def mem_check(model, prompt_len=16):
 
 if __name__ == "__main__":
     os.makedirs(os.path.dirname(WEIGHTS_PATH), exist_ok=True)
-    model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), vsni=VSNI)
+    model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), future_seed=FUTURE_SEED)
     m = model.to(device)
 
     print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")

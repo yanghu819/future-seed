@@ -2,4 +2,4 @@
 __pycache__/
 *.pyc
 .venv/
-rwkv-diff-vsni/weights/
+rwkv-diff-future-seed/weights/
