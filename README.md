@@ -1,53 +1,33 @@
 # rwkvdllm
 
 ## 目标
-- 用 RWKV7 作为 backbone，在离散 diffusion LLM 设定下评估 DW‑JRT 是否有收益
-- 重点验证“非因果双向信息融合”是否提升任务表现
-
-## 方法
-- 训练：随机/指定 mask，仅在 mask 位置做交叉熵
-- 生成：并行解码（confidence‑based），与 tiny‑diffusion 风格一致
-- DW‑JRT：上一层末尾 state 作为下一层初始 state（`DW_JRT_SCALE` 缩放）
+- 用 RWKV7 作为 backbone，在离散 diffusion LLM 设定下验证 DW‑JRT
+- 只保留“对 DW‑JRT 有优势”的最小实验
 
 ## 日志怎么读
 - `xxx acc`：只统计被 mask 段的 token 准确率（和 GT 对比）
-- 默认每次评测会打印 `IN/GT/PR`（可读窗口），由 `LOG_SAMPLE=1` 控制
-- 窗口大小：`LOG_WIN=80`（只展示 mask 附近）
-- 需要整段 GT/PR：运行时加 `MEM_CHECK=1`
-- 额外生成输出：`LOG_OUTPUT=1`（默认关闭）
+- 每次评测打印 `IN/GT/PR`（mask 附近窗口），方便直观看
+- `LOG_WIN=80` 控制窗口大小（默认 80）
+- 不保留权重（跑完即删）
 
-## 主实验任务（双向依赖）
+## 极简实验（200 step）
+配置（共用）：
+- `N_LAYER=2 N_EMBD=128 HEAD_SIZE=32`
+- `BATCH_SIZE=32 DEVICE_BSZ=8 SEQ_LEN=128`
+- `MAX_ITERS=200 EVAL_INTERVAL=200 EVAL_ITERS=3`
+
+任务：
 - rightcopy：`L=...|M=...|R=...`，mask `M`，目标 `M=R`
-- rightrev：`L=...|M=...|R=...`，mask `M`，目标 `M=reverse(R)`
 - constr：`P=...|M=...|R=dd`，mask `M`，目标 `M = last(P) + (d1,d2交替)`
-- struct：`{"a":A,"b":A+C,"c":C}`，mask `b`
 
-## 主结果（1000 step，小模型约 0.56M params）
+结果：
 | task | DW_JRT=0 acc | DW_JRT=1 acc |
 |---|---:|---:|
-| rightcopy | 0.0994 | 0.9581 |
-| rightrev | 0.0994 | 0.9500 |
-| constr（LEN=16, alpha=-2） | 0.1584 | 0.6828 |
-| struct | 0.5444 | 0.9244 |
+| rightcopy（LEN=8, alpha=-2） | 0.0956 | 0.2031 |
+| constr（LEN=16, alpha=-2） | 0.1066 | 0.2766 |
 
-日志（仅保留主实验）：
-- `rwkv-diff-dw-jrt/logs/rightcopy_dw0_long.log`
-- `rwkv-diff-dw-jrt/logs/rightcopy_dw1_long.log`
-- `rwkv-diff-dw-jrt/logs/rightrev_dw0_long.log`
-- `rwkv-diff-dw-jrt/logs/rightrev_dw1_long.log`
-- `rwkv-diff-dw-jrt/logs/constr_len16_dw0_long.log`
-- `rwkv-diff-dw-jrt/logs/constr_len16_dw1_aN2_long.log`
-- `rwkv-diff-dw-jrt/logs/struct_dw0_long2.log`
-- `rwkv-diff-dw-jrt/logs/struct_dw1_long2.log`
-
-权重（仅保留主实验）：
-- `rwkv-diff-dw-jrt/weights/rightcopy_dw0_long.pt`
-- `rwkv-diff-dw-jrt/weights/rightcopy_dw1_long.pt`
-- `rwkv-diff-dw-jrt/weights/rightrev_dw0_long.pt`
-- `rwkv-diff-dw-jrt/weights/rightrev_dw1_long.pt`
-- `rwkv-diff-dw-jrt/weights/constr_len16_dw0_long.pt`
-- `rwkv-diff-dw-jrt/weights/constr_len16_dw1_aN2_long.pt`
-- `rwkv-diff-dw-jrt/weights/struct_dw0_long2.pt`
-- `rwkv-diff-dw-jrt/weights/struct_dw1_long2.pt`
-
-说明：其它探索性日志已删除；需要可复现时直接按脚本参数重跑即可。
+日志：
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw0_min.log`
+- `rwkv-diff-dw-jrt/logs/rightcopy_dw1_min.log`
+- `rwkv-diff-dw-jrt/logs/constr_dw0_min.log`
+- `rwkv-diff-dw-jrt/logs/constr_dw1_min.log`

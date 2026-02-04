@@ -1,0 +1,14 @@
+0.557452 M parameters
+step 0: train loss 2.8332, val loss 2.8332, time 0.25 seconds
+rightcopy acc 0.1006
+mask[13:21] len=8
+IN[0:61]: L=69351247|M=________|R=90739497#############################
+GT[13:21]: 90739497
+PR[13:21]: 00000000
+step 199: train loss 2.3058, val loss 2.3090, time 114.84 seconds
+rightcopy acc 0.0956
+mask[13:21] len=8
+IN[0:61]: L=02221641|M=________|R=85246563#############################
+GT[13:21]: 85246563
+PR[13:21]: 22222222
+Total training time: 120.81 seconds
