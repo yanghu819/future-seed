@@ -2,8 +2,8 @@
 
 ## 结论先行
 在 RWKV7 + DiffusionLM 上，Future‑Seed（vertical state non‑causal initialization）能显著提升“未来上下文约束”任务：
-- rightcopy：0.1075 → 0.5787
-- constr：0.1628 → 0.8281
+- rightcopy：0.1075 → 0.6341
+- constr：0.1628 → 0.7384
 
 ## 机制一句话
 把上一层末状态 s_T 作为下一层初始状态，让深层一开始就带着“未来上下文摘要”，加速全局一致解的收敛。
@@ -25,8 +25,8 @@ Future‑Seed：s=上一层 s_T；for t: s=f(s,x[t])
 ## 结果（1000 step）
 | task | FUTURE_SEED=0 acc | FUTURE_SEED=1 acc |
 |---|---:|---:|
-| rightcopy（LEN=16） | 0.1075 | 0.5787 |
-| constr（LEN=16） | 0.1628 | 0.8281 |
+| rightcopy（LEN=16） | 0.1075 | 0.6341 |
+| constr（LEN=16） | 0.1628 | 0.7384 |
 
 日志：
 - `rwkv-diff-future-seed/logs/rightcopy_base_big.log`

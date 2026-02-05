@@ -1,20 +1,20 @@
 0.557452 M parameters
-step 0: train loss 2.8332, val loss 2.8332, time 0.24 seconds
+step 0: train loss 2.8332, val loss 2.8332, time 0.34 seconds
 rightcopy acc 0.0944
 mask[21:37] len=16
 IN[0:77]: L=9298700279200132|M=________________|R=6875139176085332#####################
 GT[21:37]: 6875139176085332
 PR[21:37]: 0000000000000000
-step 500: train loss 1.2693, val loss 1.1561, time 276.51 seconds
-rightcopy acc 0.4344
+step 500: train loss 1.1198, val loss 1.0068, time 274.43 seconds
+rightcopy acc 0.5297
 mask[21:37] len=16
 IN[0:77]: L=3477167249418189|M=________________|R=7821483449715963#####################
 GT[21:37]: 7821483449715963
-PR[21:37]: 7884444449999963
-step 999: train loss 0.9359, val loss 1.0049, time 548.80 seconds
-rightcopy acc 0.5787
+PR[21:37]: 7888884444499963
+step 999: train loss 0.8523, val loss 0.8989, time 546.46 seconds
+rightcopy acc 0.6341
 mask[21:37] len=16
 IN[0:77]: L=3215429687816290|M=________________|R=4953739260159590#####################
 GT[21:37]: 4953739260159590
-PR[21:37]: 4999777965595590
-Total training time: 554.59 seconds
+PR[21:37]: 4553779365555590
+Total training time: 552.27 seconds

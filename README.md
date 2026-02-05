@@ -8,8 +8,8 @@ Future‑Seed passes the previous layer’s final state `s_T` as the next layer�
 ## Results (1000 steps, tiny model)
 | task | FUTURE_SEED=0 acc | FUTURE_SEED=1 acc |
 |---|---:|---:|
-| rightcopy (LEN=16) | 0.1075 | 0.5787 |
-| constr (LEN=16) | 0.1628 | 0.8281 |
+| rightcopy (LEN=16) | 0.1075 | 0.6341 |
+| constr (LEN=16) | 0.1628 | 0.7384 |
 
 Logs:
 - `rwkv-diff-future-seed/logs/rightcopy_base_big.log`
