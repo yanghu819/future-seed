@@ -28,12 +28,6 @@ Future‑Seed：s=上一层 s_T；for t: s=f(s,x[t])
 | rightcopy（LEN=16） | 0.1075 | 0.6341 |
 | constr（LEN=16） | 0.1628 | 0.7384 |
 
-日志：
-- `rwkv-diff-future-seed/logs/rightcopy_base_big.log`
-- `rwkv-diff-future-seed/logs/rightcopy_future_seed_big.log`
-- `rwkv-diff-future-seed/logs/constr_base_big.log`
-- `rwkv-diff-future-seed/logs/constr_future_seed_big.log`
-
 ## 读日志示例（直接看懂）
 baseline（FUTURE_SEED=0）：
 ```
