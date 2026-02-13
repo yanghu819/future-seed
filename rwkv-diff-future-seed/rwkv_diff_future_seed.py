@@ -1525,14 +1525,17 @@ def qa_eval(model, trials=200, mode="qa"):
 
 
 @torch.no_grad()
-def kvsort_eval(model, trials=200):
+def kvsort_eval(model, trials=200, mode="test"):
     model.eval()
     ok_exact = 0
     ok_key_valid = 0
     ok_key_order = 0
     pair_acc_sum = 0.0
     for _ in range(trials):
-        n = KVSORT_N_TEST
+        if mode == "train":
+            n = random.randint(KVSORT_N_MIN, KVSORT_N_MAX)
+        else:
+            n = KVSORT_N_TEST
         s, m0, m1 = _kvsort_pack(n)
         y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
         x = y.clone()
@@ -2336,8 +2339,10 @@ if __name__ == "__main__":
                     acc_aq = qa_eval(m, mode="aq")
                     print(f"qa->a acc {acc_qa:.4f}, a->q acc {acc_aq:.4f}")
                 if KVSORT_EVAL:
-                    ex, kv, ko, pa = kvsort_eval(m)
-                    print(f"kvsort exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
+                    ex, kv, ko, pa = kvsort_eval(m, mode="train")
+                    ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
+                    print(f"kvsort_id exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
+                    print(f"kvsort_ood exact {ex2:.4f}, key_valid {kv2:.4f}, key_order {ko2:.4f}, pair_acc {pa2:.4f}")
                 if LOG_SAMPLE:
                     log_eval_sample(m, "val")
 
