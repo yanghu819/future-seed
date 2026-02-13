@@ -84,6 +84,7 @@ KVSORT_EVAL = env_int("KVSORT_EVAL", 0) == 1
 KVSORT_PAD = env_int("KVSORT_PAD", 8)
 KVSORT_NOISE = env_int("KVSORT_NOISE", 0)
 KVSORT_USE_ORDER = env_int("KVSORT_USE_ORDER", 1) == 1
+KVSORT_KEYS_ONLY = env_int("KVSORT_KEYS_ONLY", 0) == 1
 INDEX_TASK = env_int("INDEX_TASK", 0) == 1
 INDEX_LEN = env_int("INDEX_LEN", 16)
 INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
@@ -884,7 +885,10 @@ elif KVSORT_TASK:
             gt_keys = sorted(keys, key=lambda x: rank[x])
         else:
             gt_keys = sorted(keys, key=lambda x: int(x))
-        gt = ";".join([f"{k}:{vals[k]}" for k in gt_keys])
+        if KVSORT_KEYS_ONLY:
+            gt = ";".join(gt_keys)
+        else:
+            gt = ";".join([f"{k}:{vals[k]}" for k in gt_keys])
         p = "#" * KVSORT_PAD
         if KVSORT_USE_ORDER:
             s = "P=" + p + "|M=" + gt + "|R=O=" + order + ";" + right
@@ -1567,8 +1571,12 @@ def kvsort_eval(model, trials=200, mode="test"):
 
         pred_pairs = parse_pairs(out_m)
         gt_pairs = parse_pairs(gt_m)
-        pred_keys = [k for k, _ in pred_pairs]
-        gt_keys = [k for k, _ in gt_pairs]
+        if KVSORT_KEYS_ONLY:
+            pred_keys = [p[0] for p in out_m.split(";") if len(p) == 1]
+            gt_keys = [p[0] for p in gt_m.split(";") if len(p) == 1]
+        else:
+            pred_keys = [k for k, _ in pred_pairs]
+            gt_keys = [k for k, _ in gt_pairs]
 
         if (
             len(pred_keys) == len(gt_keys)
@@ -1579,13 +1587,14 @@ def kvsort_eval(model, trials=200, mode="test"):
         if pred_keys == gt_keys:
             ok_key_order += 1
 
-        gt_map = {k: v for k, v in gt_pairs}
-        if len(gt_map) > 0 and len(pred_pairs) > 0:
-            corr = 0
-            for k, v in pred_pairs:
-                if k in gt_map and gt_map[k] == v:
-                    corr += 1
-            pair_acc_sum += corr / max(1, len(gt_map))
+        if not KVSORT_KEYS_ONLY:
+            gt_map = {k: v for k, v in gt_pairs}
+            if len(gt_map) > 0 and len(pred_pairs) > 0:
+                corr = 0
+                for k, v in pred_pairs:
+                    if k in gt_map and gt_map[k] == v:
+                        corr += 1
+                pair_acc_sum += corr / max(1, len(gt_map))
     model.train()
     return ok_exact / trials, ok_key_valid / trials, ok_key_order / trials, pair_acc_sum / trials
 
