@@ -1015,8 +1015,7 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
         if state is None:
             s0 = torch.zeros(B, H, N, N, device=r.device, dtype=torch.bfloat16)
         else:
-            gate = torch.sigmoid(future_seed_alpha).to(torch.float32)
-            s0 = (state.float() * FUTURE_SEED_SCALE * gate).to(torch.bfloat16)
+            s0 = (state.float() * FUTURE_SEED_SCALE).to(torch.bfloat16)
         y, sT = RUN_CUDA_RWKV7_STATE(w4, q4, k4, v4, a4, b4, s0)
         return y.view(B, T, C).float(), sT.float()
 
