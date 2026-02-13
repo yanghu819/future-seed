@@ -58,6 +58,22 @@ N_LAYER=2 N_EMBD=128 HEAD_SIZE=32 LOG_WIN=40 LOG_SAMPLE=1 LOG_OUTPUT=0 \
 python rwkv_diff_future_seed.py | tee logs/constr_future_seed_big.log'
 ```
 
+## QA 双向任务（Q->A / A->Q）
+新增了 `QA_TASK`，同一条样本格式为 `Q:...|A:...`，可按 `QA_MODE` 控制掩码方向：
+- `QA_MODE=qa`：给问题补答案
+- `QA_MODE=aq`：给答案反推问题
+- `QA_MODE=both`：两种方向混合
+
+关键开关：
+- `FUTURE_SEED=1`：开启 Future‑Seed
+- `FS_MASK_ONLY=1`：只训练 `future_seed_alpha`（state 参数）和 `mask_emb`（mask 参数）
+- `QA_FILE=/path/to/qa.tsv`：可选；每行 `question<TAB>answer`。不提供则自动用合成加法 QA。
+
+运行：
+```bash
+bash run_qa.sh
+```
+
 ## Log readability
 Each evaluation prints:
 - `IN/GT/PR` around the masked span

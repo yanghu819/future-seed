@@ -104,6 +104,13 @@ RETR_EVAL = env_int("RETR_EVAL", 0) == 1
 SENT_TASK = env_int("SENT_TASK", 0) == 1
 SENT_MASK_LEN = env_int("SENT_MASK_LEN", 16)
 SENT_EVAL = env_int("SENT_EVAL", 0) == 1
+QA_TASK = env_int("QA_TASK", 0) == 1
+QA_EVAL = env_int("QA_EVAL", 0) == 1
+QA_MODE = os.getenv("QA_MODE", "both")
+QA_FILE = os.getenv("QA_FILE", "")
+QA_SYNTH_A_MAX = env_int("QA_SYNTH_A_MAX", 99)
+QA_SYNTH_B_MAX = env_int("QA_SYNTH_B_MAX", 99)
+FS_MASK_ONLY = env_int("FS_MASK_ONLY", 0) == 1
 WEIGHTS_PATH = os.getenv("WEIGHTS_PATH", "weights/diffusion.pt")
 DATA_PATH = os.getenv("DATA_PATH", "../tiny-diffusion/data.txt")
 DATA_BIN = os.getenv("DATA_BIN", "")
@@ -123,7 +130,7 @@ device = (
 )
 muon_dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
-use_bin = len(DATA_BIN) > 0 and not REVERSE_TASK and not BIDIR_TASK and not STRUCT_TASK and not RETR_TASK and not SENT_TASK
+use_bin = len(DATA_BIN) > 0 and not REVERSE_TASK and not BIDIR_TASK and not STRUCT_TASK and not RETR_TASK and not SENT_TASK and not QA_TASK
 use_bin = (
     use_bin
     and not ADD_TASK
@@ -678,6 +685,88 @@ elif CONSTR_TASK:
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
+elif QA_TASK:
+    qa_pairs = []
+    if len(QA_FILE) > 0 and os.path.exists(QA_FILE):
+        with open(QA_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip("\n")
+                if "\t" in line:
+                    q, a = line.split("\t", 1)
+                elif "|||" in line:
+                    q, a = line.split("|||", 1)
+                else:
+                    continue
+                q = q.strip()
+                a = a.strip()
+                if len(q) > 0 and len(a) > 0:
+                    qa_pairs.append((q, a))
+
+    def _qa_synth_pair():
+        x = random.randint(0, QA_SYNTH_A_MAX)
+        y = random.randint(0, QA_SYNTH_B_MAX)
+        return f"{x}+{y}=?", str(x + y)
+
+    if len(qa_pairs) == 0:
+        qa_pairs = [_qa_synth_pair() for _ in range(max(4096, DEVICE_BSZ * 16))]
+
+    vocab_set = set(["Q", "A", ":", "|", "#"])
+    for q, a in qa_pairs:
+        vocab_set.update(list(q))
+        vocab_set.update(list(a))
+    vocab_base = sorted(list(vocab_set))
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _qa_pack(q, a):
+        raw = ("Q:" + q + "|A:" + a)[:SEQ_LEN]
+        sep = raw.find("|A:")
+        if sep < 0:
+            sep = max(2, min(len(raw), SEQ_LEN // 2))
+            raw = (raw[:sep] + "|A:" + raw[sep:])[:SEQ_LEN]
+            sep = raw.find("|A:")
+        valid_len = len(raw)
+        q_start = 2
+        q_end = sep
+        a_start = min(sep + 3, valid_len)
+        s = raw + "#" * (SEQ_LEN - valid_len)
+        return s, q_start, q_end, a_start, valid_len
+
+    def _qa_pick(split):
+        return qa_pairs[random.randint(0, len(qa_pairs) - 1)]
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            q, a = _qa_pick(split)
+            s, q_start, q_end, a_start, valid_len = _qa_pack(q, a)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            if QA_MODE == "qa":
+                m_start, m_end = a_start, valid_len
+            elif QA_MODE == "aq":
+                m_start, m_end = q_start, q_end
+            else:
+                if random.random() < 0.5:
+                    m_start, m_end = a_start, valid_len
+                else:
+                    m_start, m_end = q_start, q_end
+            if m_end <= m_start:
+                m_start = max(0, valid_len - 1)
+                m_end = valid_len
+            mask[i, m_start:m_end] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
 elif BIDIR_TASK:
     vocab_base = [str(i) for i in range(BIDIR_BASE)] + ["|", "#"]
     vocab_size = len(vocab_base) + 1
@@ -1083,11 +1172,13 @@ class GPT(nn.Module):
                 h=nn.ModuleList([Block(config, layer_id) for layer_id in range(config.n_layer)]),
             )
         )
+        self.mask_emb = nn.Parameter(torch.zeros(1, 1, config.n_embd))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         self.lm_head.weight.data.zero_()
 
     def forward(self, idx, targets=None, mask=None):
         x = self.transformer.wte(idx)
+        x = x + (idx == mask_token_id).unsqueeze(-1).to(x.dtype) * self.mask_emb
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         v1 = None
@@ -1235,6 +1326,39 @@ def bidir_eval(model, trials=200):
         tgt_seg = tgt[p1 + 1 : p2]
         correct += (pred_seg == tgt_seg).sum().item()
         total += (p2 - p1 - 1)
+    acc = correct / total if total > 0 else 0.0
+    model.train()
+    return acc
+
+
+@torch.no_grad()
+def qa_eval(model, trials=200, mode="qa"):
+    if not QA_TASK:
+        return None
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(trials):
+        q, a = qa_pairs[random.randint(0, len(qa_pairs) - 1)]
+        s, q_start, q_end, a_start, valid_len = _qa_pack(q, a)
+        tgt = torch.tensor(encode(s), device=device)
+        x = tgt.clone().unsqueeze(0)
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        if mode == "qa":
+            m_start, m_end = a_start, valid_len
+        else:
+            m_start, m_end = q_start, q_end
+        if m_end <= m_start:
+            m_start = max(0, valid_len - 1)
+            m_end = valid_len
+        mask[:, m_start:m_end] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)[0]
+        pred_seg = pred[m_start:m_end]
+        tgt_seg = tgt[m_start:m_end]
+        correct += (pred_seg == tgt_seg).sum().item()
+        total += (m_end - m_start)
     acc = correct / total if total > 0 else 0.0
     model.train()
     return acc
@@ -1757,6 +1881,10 @@ def generate(model, max_new_tokens, prompt_len=16, temp=1.0, confidence_threshol
     elif RETR_TASK:
         s = _retr_sample()
         all_tokens = encode(s)[:prompt_len]
+    elif QA_TASK:
+        q, a = qa_pairs[random.randint(0, len(qa_pairs) - 1)]
+        s, _, _, _, _ = _qa_pack(q, a)
+        all_tokens = encode(s)[:prompt_len]
     elif BIDIR_TASK:
         s = _bidir_sample(BIDIR_LEN)
         all_tokens = encode(s)[:prompt_len]
@@ -1837,6 +1965,11 @@ def mem_check(model, prompt_len=16):
         s = _retr_sample()
         y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
         x = y.clone()
+    elif QA_TASK:
+        q, a = qa_pairs[random.randint(0, len(qa_pairs) - 1)]
+        s, _, _, _, _ = _qa_pack(q, a)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
     elif BIDIR_TASK:
         s = _bidir_sample(BIDIR_LEN)
         y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
@@ -1870,26 +2003,39 @@ if __name__ == "__main__":
     model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), future_seed=FUTURE_SEED)
     m = model.to(device)
 
+    if FS_MASK_ONLY:
+        for p in m.parameters():
+            p.requires_grad = False
+        for n, p in m.named_parameters():
+            if "future_seed_alpha" in n or n == "mask_emb":
+                p.requires_grad = True
+
     print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")
+    print(sum(p.numel() for p in m.parameters() if p.requires_grad) / 1e6, "M trainable")
 
     if os.path.exists(WEIGHTS_PATH) and not TRAIN:
         m.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device))
     else:
         fused_ok = device == "cuda"
-        optimizer1 = torch.optim.Adam([m.transformer.wte.weight], lr=WTE_LR, betas=(0.9, 0.95), fused=fused_ok)
-        optimizer2 = torch.optim.Adam([m.lm_head.weight], lr=HEAD_LR, betas=(0.9, 0.95), fused=fused_ok)
+        if FS_MASK_ONLY:
+            trainable = [p for p in m.parameters() if p.requires_grad]
+            optimizer = torch.optim.Adam(trainable, lr=ADAM_LR, betas=(0.9, 0.95), fused=fused_ok)
+            optimizers = [optimizer]
+        else:
+            optimizer1 = torch.optim.Adam([m.transformer.wte.weight], lr=WTE_LR, betas=(0.9, 0.95), fused=fused_ok)
+            optimizer2 = torch.optim.Adam([m.lm_head.weight], lr=HEAD_LR, betas=(0.9, 0.95), fused=fused_ok)
 
-        params = list(m.transformer.h.named_parameters())
-        optimizer3 = Muon([p for n, p in params if p.ndim == 2 and "_w1" not in n and "_w2" not in n], lr=MUON_LR, momentum=0.95)
-        optimizer4 = torch.optim.Adam(
-            [p for n, p in params if (p.ndim != 2 or "_w1" in n or "_w2" in n) and ("lambdas" not in n and "ln" not in n)],
-            lr=ADAM_LR,
-            betas=(0.9, 0.95),
-            fused=fused_ok,
-        )
-        optimizer5 = torch.optim.Adam([p for n, p in params if "lambdas" in n], lr=LAMBDA_LR, betas=(0.9, 0.95), fused=fused_ok)
-        optimizer6 = torch.optim.Adam([p for n, p in params if "ln" in n], lr=LN_LR, betas=(0.9, 0.95), fused=fused_ok)
-        optimizers = [optimizer1, optimizer2, optimizer3, optimizer4, optimizer5, optimizer6]
+            params = list(m.transformer.h.named_parameters())
+            optimizer3 = Muon([p for n, p in params if p.ndim == 2 and "_w1" not in n and "_w2" not in n], lr=MUON_LR, momentum=0.95)
+            optimizer4 = torch.optim.Adam(
+                [p for n, p in params if (p.ndim != 2 or "_w1" in n or "_w2" in n) and ("lambdas" not in n and "ln" not in n)],
+                lr=ADAM_LR,
+                betas=(0.9, 0.95),
+                fused=fused_ok,
+            )
+            optimizer5 = torch.optim.Adam([p for n, p in params if "lambdas" in n], lr=LAMBDA_LR, betas=(0.9, 0.95), fused=fused_ok)
+            optimizer6 = torch.optim.Adam([p for n, p in params if "ln" in n], lr=LN_LR, betas=(0.9, 0.95), fused=fused_ok)
+            optimizers = [optimizer1, optimizer2, optimizer3, optimizer4, optimizer5, optimizer6]
 
         def get_lr(it):
             if it < WARMUP_ITERS:
@@ -1962,6 +2108,10 @@ if __name__ == "__main__":
                 if SENT_EVAL:
                     acc = sent_eval(m)
                     print(f"sent acc {acc:.4f}")
+                if QA_EVAL:
+                    acc_qa = qa_eval(m, mode="qa")
+                    acc_aq = qa_eval(m, mode="aq")
+                    print(f"qa->a acc {acc_qa:.4f}, a->q acc {acc_aq:.4f}")
                 if LOG_SAMPLE:
                     log_eval_sample(m, "val")
 
@@ -1973,8 +2123,9 @@ if __name__ == "__main__":
                 _, loss = m(xb, yb, mb)
                 (loss / grad_accum_steps).backward()
 
-            frac = min(iter / 500, 1)
-            optimizer3.param_groups[0]["momentum"] = (1 - frac) * 0.85 + frac * 0.95
+            if not FS_MASK_ONLY:
+                frac = min(iter / 500, 1)
+                optimizer3.param_groups[0]["momentum"] = (1 - frac) * 0.85 + frac * 0.95
 
             for opt, sched in zip(optimizers, schedulers):
                 opt.step()
