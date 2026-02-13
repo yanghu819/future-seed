@@ -82,6 +82,8 @@ KVSORT_N_MAX = env_int("KVSORT_N_MAX", 6)
 KVSORT_N_TEST = env_int("KVSORT_N_TEST", 10)
 KVSORT_EVAL = env_int("KVSORT_EVAL", 0) == 1
 KVSORT_PAD = env_int("KVSORT_PAD", 8)
+KVSORT_NOISE = env_int("KVSORT_NOISE", 0)
+KVSORT_USE_ORDER = env_int("KVSORT_USE_ORDER", 1) == 1
 INDEX_TASK = env_int("INDEX_TASK", 0) == 1
 INDEX_LEN = env_int("INDEX_LEN", 16)
 INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
@@ -851,13 +853,43 @@ elif KVSORT_TASK:
 
     def _kvsort_pack(n):
         keys = random.sample(digits, n)
-        vals = {k: random.choice(letters) for k in keys}
+        vpool = random.sample(letters, n)
+        vals = {k: vpool[i] for i, k in enumerate(keys)}
+
         inp_keys = keys[:]
         random.shuffle(inp_keys)
-        right = ";".join([f"{k}:{vals[k]}" for k in inp_keys])
-        gt = ";".join([f"{k}:{vals[k]}" for k in sorted(keys, key=lambda x: int(x))])
+
+        noise_keys = []
+        if KVSORT_NOISE > 0:
+            avail = [k for k in digits if k not in keys]
+            if len(avail) > 0:
+                noise_keys = random.sample(avail, min(KVSORT_NOISE, len(avail)))
+        noise_vals = random.sample(letters, len(noise_keys)) if len(noise_keys) > 0 else []
+        noise = {k: noise_vals[i] for i, k in enumerate(noise_keys)}
+
+        order = "".join(random.sample(digits, len(digits))) if KVSORT_USE_ORDER else ""
+        rank = {ch: i for i, ch in enumerate(order)} if KVSORT_USE_ORDER else None
+
+        pairs = inp_keys + noise_keys
+        random.shuffle(pairs)
+        right_pairs = []
+        for k in pairs:
+            if k in vals:
+                right_pairs.append(f"{k}:{vals[k]}")
+            else:
+                right_pairs.append(f"{k}:{noise[k]}")
+        right = ";".join(right_pairs)
+
+        if KVSORT_USE_ORDER:
+            gt_keys = sorted(keys, key=lambda x: rank[x])
+        else:
+            gt_keys = sorted(keys, key=lambda x: int(x))
+        gt = ";".join([f"{k}:{vals[k]}" for k in gt_keys])
         p = "#" * KVSORT_PAD
-        s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=" + right
+        if KVSORT_USE_ORDER:
+            s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=O=" + order + ";" + right
+        else:
+            s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=" + right
         s = s + "#" * (SEQ_LEN - len(s))
         m0 = s.find("|M=") + 3
         m1 = m0 + len(gt)
@@ -1495,8 +1527,9 @@ def qa_eval(model, trials=200, mode="qa"):
 def kvsort_eval(model, trials=200):
     model.eval()
     ok_exact = 0
-    ok_valid = 0
-    ok_sorted = 0
+    ok_key_valid = 0
+    ok_key_order = 0
+    pair_acc_sum = 0.0
     for _ in range(trials):
         n = KVSORT_N_TEST
         s, m0, m1 = _kvsort_pack(n)
@@ -1514,14 +1547,43 @@ def kvsort_eval(model, trials=200):
         gt_m = gt_s[m0:m1]
         if out_m == gt_m:
             ok_exact += 1
-        pred_keys = [out_m[i] for i in range(0, len(out_m), 4) if i + 2 < len(out_m)]
-        gt_keys = [gt_m[i] for i in range(0, len(gt_m), 4) if i + 2 < len(gt_m)]
-        if len(pred_keys) == len(gt_keys) and set(pred_keys) == set(gt_keys):
-            ok_valid += 1
+
+        def parse_pairs(seg):
+            pairs = []
+            parts = seg.split(";")
+            for p in parts:
+                if len(p) < 3:
+                    continue
+                if ":" not in p:
+                    continue
+                k, v = p.split(":", 1)
+                if len(k) == 1 and len(v) >= 1:
+                    pairs.append((k[0], v[0]))
+            return pairs
+
+        pred_pairs = parse_pairs(out_m)
+        gt_pairs = parse_pairs(gt_m)
+        pred_keys = [k for k, _ in pred_pairs]
+        gt_keys = [k for k, _ in gt_pairs]
+
+        if (
+            len(pred_keys) == len(gt_keys)
+            and sorted(pred_keys) == sorted(gt_keys)
+            and len(set(pred_keys)) == len(pred_keys)
+        ):
+            ok_key_valid += 1
         if pred_keys == gt_keys:
-            ok_sorted += 1
+            ok_key_order += 1
+
+        gt_map = {k: v for k, v in gt_pairs}
+        if len(gt_map) > 0 and len(pred_pairs) > 0:
+            corr = 0
+            for k, v in pred_pairs:
+                if k in gt_map and gt_map[k] == v:
+                    corr += 1
+            pair_acc_sum += corr / max(1, len(gt_map))
     model.train()
-    return ok_exact / trials, ok_valid / trials, ok_sorted / trials
+    return ok_exact / trials, ok_key_valid / trials, ok_key_order / trials, pair_acc_sum / trials
 
 
 @torch.no_grad()
@@ -2273,8 +2335,8 @@ if __name__ == "__main__":
                     acc_aq = qa_eval(m, mode="aq")
                     print(f"qa->a acc {acc_qa:.4f}, a->q acc {acc_aq:.4f}")
                 if KVSORT_EVAL:
-                    ex, va, so = kvsort_eval(m)
-                    print(f"kvsort exact {ex:.4f}, valid {va:.4f}, sorted {so:.4f}")
+                    ex, kv, ko, pa = kvsort_eval(m)
+                    print(f"kvsort exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
                 if LOG_SAMPLE:
                     log_eval_sample(m, "val")
 
