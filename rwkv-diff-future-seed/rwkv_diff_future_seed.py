@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.cpp_extension import load
 
 
 def env_int(name, default):
@@ -34,6 +35,8 @@ FUTURE_SEED = env_int("FUTURE_SEED", 0) == 1
 FUTURE_SEED_SCALE = env_float("FUTURE_SEED_SCALE", 1.0)
 FUTURE_SEED_ALPHA_INIT = env_float("FUTURE_SEED_ALPHA_INIT", 0.0)
 FUTURE_SEED_LAYER_START = env_int("FUTURE_SEED_LAYER_START", 0)
+RWKV7_KERNEL = os.getenv("RWKV7_KERNEL", "python")
+RWKV7_CUDA_SRC = os.getenv("RWKV7_CUDA_SRC", "")
 TRAIN = env_int("TRAIN", 0) == 1
 MEM_CHECK = env_int("MEM_CHECK", 0) == 1
 LOG_SAMPLE = env_int("LOG_SAMPLE", 1) == 1
@@ -147,6 +150,61 @@ use_bin = (
     and not POSCOPY_TASK
     and not CONSTR_TASK
 )
+
+
+RUN_CUDA_RWKV7_STATE = None
+if RWKV7_KERNEL == "cuda_wind":
+    if device != "cuda":
+        raise RuntimeError("RWKV7_KERNEL=cuda_wind requires CUDA device")
+    cuda_src = RWKV7_CUDA_SRC
+    if len(cuda_src) == 0:
+        cuda_src = os.path.join(os.path.dirname(__file__), "..", "modded-nanogpt-rwkv", "rwkv_cuda_wind")
+    wind_cu = os.path.join(cuda_src, "wind_rwkv7.cu")
+    wind_cpp = os.path.join(cuda_src, "wind_rwkv7.cpp")
+    if (not os.path.exists(wind_cu)) or (not os.path.exists(wind_cpp)):
+        raise FileNotFoundError(f"rwkv cuda sources missing: {wind_cu} | {wind_cpp}")
+    mod_name = f"wind_fs_h{HEAD_SIZE}"
+    load(
+        name=mod_name,
+        sources=[wind_cu, wind_cpp],
+        is_python_module=False,
+        verbose=True,
+        extra_cuda_cflags=[
+            "-res-usage",
+            "--use_fast_math",
+            "-O3",
+            "-Xptxas -O3",
+            "--extra-device-vectorization",
+            f"-D_C_={HEAD_SIZE}",
+        ],
+    )
+
+    class WindRWKV7State(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, w, q, k, v, a, b, s0):
+            B, T, H, C = w.shape
+            assert T % 16 == 0
+            assert all(i.dtype == torch.bfloat16 for i in [w, q, k, v, a, b, s0])
+            w, q, k, v, a, b, s0 = [i.contiguous() for i in [w, q, k, v, a, b, s0]]
+            y = torch.empty_like(v)
+            sT = torch.empty_like(s0)
+            s = torch.zeros(B, H, T // 16, C, C, dtype=w.dtype, device=w.device)
+            torch.ops.wind.forward(w, q, k, v, a, b, s0, y, s, sT)
+            ctx.save_for_backward(w, q, k, v, a, b, s)
+            return y, sT
+
+        @staticmethod
+        def backward(ctx, dy, dsT):
+            w, q, k, v, a, b, s = ctx.saved_tensors
+            B, T, H, C = w.shape
+            dy = dy.contiguous()
+            dsT = dsT.contiguous()
+            dw, dq, dk, dv, da, db, ds0 = [torch.empty_like(x) for x in [w, q, k, v, a, b, dsT]]
+            torch.ops.wind.backward(w, q, k, v, a, b, dy, s, dsT, dw, dq, dk, dv, da, db, ds0)
+            return dw, dq, dk, dv, da, db, ds0
+
+    def RUN_CUDA_RWKV7_STATE(w, q, k, v, a, b, s0):
+        return WindRWKV7State.apply(w, q, k, v, a, b, s0)
 
 
 if STRUCT_TASK:
@@ -947,6 +1005,21 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
     B, T, C = r.size()
     H = C // HEAD_SIZE
     N = HEAD_SIZE
+    if RUN_CUDA_RWKV7_STATE is not None:
+        q4 = r.view(B, T, H, N).to(torch.bfloat16)
+        w4 = w.view(B, T, H, N).to(torch.bfloat16)
+        k4 = k.view(B, T, H, N).to(torch.bfloat16)
+        v4 = v.view(B, T, H, N).to(torch.bfloat16)
+        a4 = a.view(B, T, H, N).to(torch.bfloat16)
+        b4 = b.view(B, T, H, N).to(torch.bfloat16)
+        if state is None:
+            s0 = torch.zeros(B, H, N, N, device=r.device, dtype=torch.bfloat16)
+        else:
+            gate = torch.sigmoid(future_seed_alpha).to(torch.float32)
+            s0 = (state.float() * FUTURE_SEED_SCALE * gate).to(torch.bfloat16)
+        y, sT = RUN_CUDA_RWKV7_STATE(w4, q4, k4, v4, a4, b4, s0)
+        return y.view(B, T, C).float(), sT.float()
+
     r = r.view(B, T, H, N).float()
     w = w.view(B, T, H, N).float()
     k = k.view(B, T, H, N).float()
