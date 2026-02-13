@@ -2374,6 +2374,12 @@ if __name__ == "__main__":
         print(f"Total training time: {time.time() - start:.2f} seconds")
         torch.save(m.state_dict(), WEIGHTS_PATH)
 
+    if (not TRAIN) and KVSORT_EVAL:
+        ex, kv, ko, pa = kvsort_eval(m, mode="train")
+        ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
+        print(f"kvsort_id exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
+        print(f"kvsort_ood exact {ex2:.4f}, key_valid {kv2:.4f}, key_order {ko2:.4f}, pair_acc {pa2:.4f}")
+
     if MEM_CHECK:
         mem_check(m, prompt_len=PROMPT_LEN)
     if LOG_OUTPUT:
