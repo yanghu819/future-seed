@@ -838,7 +838,7 @@ elif QA_TASK:
 elif KVSORT_TASK:
     digits = [str(i) for i in range(10)]
     letters = [chr(ord("a") + i) for i in range(26)]
-    vocab_base = digits + letters + ["P", "M", "R", "=", ":", ";", "|", "#"]
+    vocab_base = digits + letters + ["P", "M", "R", "O", "=", ":", ";", "|", "#"]
     vocab_size = len(vocab_base) + 1
     mask_token_id = len(vocab_base)
     stoi = {ch: i for i, ch in enumerate(vocab_base)}
@@ -890,6 +890,7 @@ elif KVSORT_TASK:
             s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=O=" + order + ";" + right
         else:
             s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=" + right
+        s = s[:SEQ_LEN]
         s = s + "#" * (SEQ_LEN - len(s))
         m0 = s.find("|M=") + 3
         m1 = m0 + len(gt)
