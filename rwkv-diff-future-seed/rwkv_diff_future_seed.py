@@ -887,9 +887,9 @@ elif KVSORT_TASK:
         gt = ";".join([f"{k}:{vals[k]}" for k in gt_keys])
         p = "#" * KVSORT_PAD
         if KVSORT_USE_ORDER:
-            s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=O=" + order + ";" + right
+            s = "P=" + p + "|M=" + gt + "|R=O=" + order + ";" + right
         else:
-            s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=" + right
+            s = "P=" + p + "|M=" + gt + "|R=" + right
         s = s[:SEQ_LEN]
         s = s + "#" * (SEQ_LEN - len(s))
         m0 = s.find("|M=") + 3
