@@ -839,6 +839,7 @@ elif QA_TASK:
 elif KVSORT_TASK:
     digits = [str(i) for i in range(10)]
     letters = [chr(ord("a") + i) for i in range(26)]
+    key_pool = digits + letters
     vocab_base = digits + letters + ["P", "M", "R", "O", "=", ":", ";", "|", "#"]
     vocab_size = len(vocab_base) + 1
     mask_token_id = len(vocab_base)
@@ -853,7 +854,7 @@ elif KVSORT_TASK:
         return "".join([itos[n] for n in l])
 
     def _kvsort_pack(n):
-        keys = random.sample(digits, n)
+        keys = random.sample(key_pool, n)
         vpool = random.sample(letters, n)
         vals = {k: vpool[i] for i, k in enumerate(keys)}
 
@@ -862,14 +863,17 @@ elif KVSORT_TASK:
 
         noise_keys = []
         if KVSORT_NOISE > 0:
-            avail = [k for k in digits if k not in keys]
+            avail = [k for k in key_pool if k not in keys]
             if len(avail) > 0:
                 noise_keys = random.sample(avail, min(KVSORT_NOISE, len(avail)))
         noise_vals = random.sample(letters, len(noise_keys)) if len(noise_keys) > 0 else []
         noise = {k: noise_vals[i] for i, k in enumerate(noise_keys)}
 
-        order = "".join(random.sample(digits, len(digits))) if KVSORT_USE_ORDER else ""
-        rank = {ch: i for i, ch in enumerate(order)} if KVSORT_USE_ORDER else None
+        if KVSORT_USE_ORDER:
+            order = "".join(random.sample(key_pool, len(key_pool)))
+        else:
+            order = "".join(key_pool)
+        rank = {ch: i for i, ch in enumerate(order)}
 
         pairs = inp_keys + noise_keys
         random.shuffle(pairs)
@@ -881,10 +885,7 @@ elif KVSORT_TASK:
                 right_pairs.append(f"{k}:{noise[k]}")
         right = ";".join(right_pairs)
 
-        if KVSORT_USE_ORDER:
-            gt_keys = sorted(keys, key=lambda x: rank[x])
-        else:
-            gt_keys = sorted(keys, key=lambda x: int(x))
+        gt_keys = sorted(keys, key=lambda x: rank[x])
         if KVSORT_KEYS_ONLY:
             gt = ";".join(gt_keys)
         else:
