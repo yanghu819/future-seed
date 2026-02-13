@@ -85,6 +85,8 @@ KVSORT_PAD = env_int("KVSORT_PAD", 8)
 KVSORT_NOISE = env_int("KVSORT_NOISE", 0)
 KVSORT_USE_ORDER = env_int("KVSORT_USE_ORDER", 1) == 1
 KVSORT_KEYS_ONLY = env_int("KVSORT_KEYS_ONLY", 0) == 1
+KVSORT_KEYS_SEP = env_int("KVSORT_KEYS_SEP", 1) == 1
+KVSORT_MASK_SEP = env_int("KVSORT_MASK_SEP", 1) == 1
 INDEX_TASK = env_int("INDEX_TASK", 0) == 1
 INDEX_LEN = env_int("INDEX_LEN", 16)
 INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
@@ -885,7 +887,7 @@ elif KVSORT_TASK:
 
         gt_keys = sorted(keys, key=lambda x: rank[x])
         if KVSORT_KEYS_ONLY:
-            gt = ";".join(gt_keys)
+            gt = (";".join(gt_keys)) if KVSORT_KEYS_SEP else ("".join(gt_keys))
         else:
             gt = ";".join([f"{k}:{vals[k]}" for k in gt_keys])
         p = "#" * KVSORT_PAD
@@ -909,7 +911,12 @@ elif KVSORT_TASK:
                 n = KVSORT_N_TEST
             s, m0, m1 = _kvsort_pack(n)
             x[i] = torch.tensor(encode(s), dtype=torch.long)
-            mask[i, m0:m1] = True
+            if KVSORT_KEYS_ONLY and KVSORT_KEYS_SEP and (not KVSORT_MASK_SEP):
+                for j in range(m0, m1):
+                    if s[j] in key_pool:
+                        mask[i, j] = True
+            else:
+                mask[i, m0:m1] = True
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
@@ -1543,7 +1550,13 @@ def kvsort_eval(model, trials=200, mode="test"):
         y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
         x = y.clone()
         mask = torch.zeros_like(x, dtype=torch.bool)
-        mask[:, m0:m1] = True
+        if KVSORT_KEYS_ONLY and KVSORT_KEYS_SEP and (not KVSORT_MASK_SEP):
+            s_chars = list(s)
+            for j in range(m0, m1):
+                if s_chars[j] in key_pool:
+                    mask[:, j] = True
+        else:
+            mask[:, m0:m1] = True
         x[mask] = mask_token_id
         logits, _ = model(x)
         pred = logits.argmax(dim=-1)
@@ -1571,8 +1584,8 @@ def kvsort_eval(model, trials=200, mode="test"):
         pred_pairs = parse_pairs(out_m)
         gt_pairs = parse_pairs(gt_m)
         if KVSORT_KEYS_ONLY:
-            pred_keys = [p[0] for p in out_m.split(";") if len(p) == 1]
-            gt_keys = [p[0] for p in gt_m.split(";") if len(p) == 1]
+            pred_keys = [ch for ch in out_m if ch in key_pool]
+            gt_keys = [ch for ch in gt_m if ch in key_pool]
         else:
             pred_keys = [k for k, _ in pred_pairs]
             gt_keys = [k for k, _ in gt_pairs]
