@@ -126,6 +126,10 @@ QA_FILE = os.getenv("QA_FILE", "")
 QA_SYNTH_A_MAX = env_int("QA_SYNTH_A_MAX", 99)
 QA_SYNTH_B_MAX = env_int("QA_SYNTH_B_MAX", 99)
 FS_MASK_ONLY = env_int("FS_MASK_ONLY", 0) == 1
+FS_ENCDEC = env_int("FS_ENCDEC", 0) == 1
+FS_ENCDEC_LAMBDA = env_float("FS_ENCDEC_LAMBDA", 0.3)
+FS_ENCDEC_RATIO = env_float("FS_ENCDEC_RATIO", 0.5)
+FS_ENCDEC_STATE_DROPOUT = env_float("FS_ENCDEC_STATE_DROPOUT", 0.1)
 WEIGHTS_PATH = os.getenv("WEIGHTS_PATH", "weights/diffusion.pt")
 DATA_PATH = os.getenv("DATA_PATH", "../tiny-diffusion/data.txt")
 DATA_BIN = os.getenv("DATA_BIN", "")
@@ -1346,18 +1350,28 @@ class GPT(nn.Module):
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         self.lm_head.weight.data.zero_()
 
-    def forward(self, idx, targets=None, mask=None):
+    def forward(self, idx, targets=None, mask=None, return_states=False, seed_states=None, seed_dropout=0.0):
         x = self.transformer.wte(idx)
         x = x + (idx == mask_token_id).unsqueeze(-1).to(x.dtype) * self.mask_emb
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         v1 = None
         state0 = None
+        states = [] if return_states else None
         for block in self.transformer.h:
-            use_state = state0 if (self.future_seed and block.layer_id >= FUTURE_SEED_LAYER_START) else None
+            use_state = None
+            if self.future_seed and block.layer_id >= FUTURE_SEED_LAYER_START:
+                if seed_states is not None:
+                    use_state = seed_states[block.layer_id]
+                    if seed_dropout > 0:
+                        use_state = F.dropout(use_state, p=seed_dropout, training=self.training)
+                else:
+                    use_state = state0
             x, v1, state1 = block(x, v1, x0, use_state)
-            if self.future_seed:
+            if self.future_seed and seed_states is None:
                 state0 = state1
+            if return_states:
+                states.append(state1)
         x = F.rms_norm(x, (x.size(-1),))
 
         logits = self.lm_head(x)
@@ -1375,6 +1389,8 @@ class GPT(nn.Module):
                 loss = (loss * mask_flat).sum() / mask_flat.sum()
             else:
                 loss = F.cross_entropy(logits_flat, targets_flat)
+        if return_states:
+            return logits, loss, states
         return logits, loss
 
 
@@ -1427,6 +1443,22 @@ def zeropower_via_newtonschulz5(G, steps=10, eps=1e-7):
     return X
 
 
+def batch_loss(model, X, Y, M):
+    if not FS_ENCDEC:
+        _, loss = model(X, Y, M)
+        return loss
+    r = torch.rand_like(X.float())
+    M_enc = M & (r < FS_ENCDEC_RATIO)
+    M_dec = M & (~M_enc)
+    X_enc = Y.clone()
+    X_enc[M_enc] = mask_token_id
+    X_dec = Y.clone()
+    X_dec[M_dec] = mask_token_id
+    _, loss_enc, states_enc = model(X_enc, Y, M_enc, return_states=True)
+    _, loss_dec = model(X_dec, Y, M_dec, seed_states=states_enc, seed_dropout=FS_ENCDEC_STATE_DROPOUT)
+    return loss_enc + FS_ENCDEC_LAMBDA * loss_dec
+
+
 @torch.no_grad()
 def estimate_loss(model):
     out = {}
@@ -1435,7 +1467,7 @@ def estimate_loss(model):
         losses = torch.zeros(EVAL_ITERS)
         for k in range(EVAL_ITERS):
             X, Y, M = get_batch(split)
-            _, loss = model(X, Y, M)
+            loss = batch_loss(model, X, Y, M)
             losses[k] = loss.item()
         out[split] = losses.mean()
     model.train()
@@ -2372,7 +2404,7 @@ if __name__ == "__main__":
             grad_accum_steps = BATCH_SIZE // DEVICE_BSZ
             for _ in range(grad_accum_steps):
                 xb, yb, mb = get_batch("train")
-                _, loss = m(xb, yb, mb)
+                loss = batch_loss(m, xb, yb, mb)
                 (loss / grad_accum_steps).backward()
 
             if not FS_MASK_ONLY:
