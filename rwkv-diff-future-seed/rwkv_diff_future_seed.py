@@ -87,6 +87,15 @@ KVSORT_USE_ORDER = env_int("KVSORT_USE_ORDER", 1) == 1
 KVSORT_KEYS_ONLY = env_int("KVSORT_KEYS_ONLY", 0) == 1
 KVSORT_KEYS_SEP = env_int("KVSORT_KEYS_SEP", 1) == 1
 KVSORT_MASK_SEP = env_int("KVSORT_MASK_SEP", 1) == 1
+PERMFILL_TASK = env_int("PERMFILL_TASK", 0) == 1
+PERMFILL_N_MIN = env_int("PERMFILL_N_MIN", 3)
+PERMFILL_N_MAX = env_int("PERMFILL_N_MAX", 6)
+PERMFILL_N_TEST = env_int("PERMFILL_N_TEST", 10)
+PERMFILL_EVAL = env_int("PERMFILL_EVAL", 0) == 1
+PERMFILL_PAD = env_int("PERMFILL_PAD", 8)
+PERMFILL_USE_ORDER = env_int("PERMFILL_USE_ORDER", 1) == 1
+PERMFILL_ANCHOR = env_int("PERMFILL_ANCHOR", 0) == 1
+PERMFILL_ANCHOR_K = env_int("PERMFILL_ANCHOR_K", 2)
 INDEX_TASK = env_int("INDEX_TASK", 0) == 1
 INDEX_LEN = env_int("INDEX_LEN", 16)
 INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
@@ -127,6 +136,7 @@ QA_SYNTH_A_MAX = env_int("QA_SYNTH_A_MAX", 99)
 QA_SYNTH_B_MAX = env_int("QA_SYNTH_B_MAX", 99)
 FS_MASK_ONLY = env_int("FS_MASK_ONLY", 0) == 1
 FS_ENCDEC = env_int("FS_ENCDEC", 0) == 1
+FS_ENCDEC_AUX = env_int("FS_ENCDEC_AUX", 1) == 1
 FS_ENCDEC_LAMBDA = env_float("FS_ENCDEC_LAMBDA", 0.3)
 FS_ENCDEC_RATIO = env_float("FS_ENCDEC_RATIO", 0.5)
 FS_ENCDEC_STATE_DROPOUT = env_float("FS_ENCDEC_STATE_DROPOUT", 0.1)
@@ -160,6 +170,7 @@ use_bin = (
     and not RIGHTCOPY_TASK
     and not RIGHTREV_TASK
     and not KVSORT_TASK
+    and not PERMFILL_TASK
     and not INDEX_TASK
     and not RULE_TASK
     and not CIPHER_TASK
@@ -924,6 +935,60 @@ elif KVSORT_TASK:
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
+elif PERMFILL_TASK:
+    digits = [str(i) for i in range(10)]
+    letters = [chr(ord("a") + i) for i in range(26)]
+    key_pool = digits + letters
+    vocab_base = digits + letters + ["P", "M", "R", "O", "=", ":", ";", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _permfill_pack(n):
+        items = random.sample(key_pool, n)
+        if PERMFILL_USE_ORDER:
+            order = "".join(random.sample(key_pool, len(key_pool)))
+        else:
+            order = "".join(key_pool)
+        rank = {ch: i for i, ch in enumerate(order)}
+        gt = "".join(sorted(items, key=lambda x: rank[x]))
+        right = "".join(items)
+        p = "#" * PERMFILL_PAD
+        s = "P=" + p + "|M=" + gt + "|R=O=" + order + ";" + right
+        s = s[:SEQ_LEN]
+        s = s + "#" * (SEQ_LEN - len(s))
+        m0 = s.find("|M=") + 3
+        m1 = m0 + len(gt)
+        anchors = []
+        if PERMFILL_ANCHOR:
+            k = min(PERMFILL_ANCHOR_K, max(1, n))
+            anchors = random.sample(list(range(n)), k)
+        return s, m0, m1, anchors
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            if split == "train":
+                n = random.randint(PERMFILL_N_MIN, PERMFILL_N_MAX)
+            else:
+                n = PERMFILL_N_TEST
+            s, m0, m1, anchors = _permfill_pack(n)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            mask[i, m0:m1] = True
+            for a in anchors:
+                mask[i, m0 + a] = False
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
 elif BIDIR_TASK:
     vocab_base = [str(i) for i in range(BIDIR_BASE)] + ["|", "#"]
     vocab_size = len(vocab_base) + 1
@@ -1444,9 +1509,9 @@ def zeropower_via_newtonschulz5(G, steps=10, eps=1e-7):
 
 
 def batch_loss(model, X, Y, M):
+    _, loss_main = model(X, Y, M)
     if not FS_ENCDEC:
-        _, loss = model(X, Y, M)
-        return loss
+        return loss_main
     r = torch.rand_like(X.float())
     M_enc = M & (r < FS_ENCDEC_RATIO)
     M_dec = M & (~M_enc)
@@ -1456,6 +1521,8 @@ def batch_loss(model, X, Y, M):
     X_dec[M_dec] = mask_token_id
     _, loss_enc, states_enc = model(X_enc, Y, M_enc, return_states=True)
     _, loss_dec = model(X_dec, Y, M_dec, seed_states=states_enc, seed_dropout=FS_ENCDEC_STATE_DROPOUT)
+    if FS_ENCDEC_AUX:
+        return loss_main + FS_ENCDEC_LAMBDA * (loss_enc + loss_dec)
     return loss_enc + FS_ENCDEC_LAMBDA * loss_dec
 
 
@@ -1698,6 +1765,59 @@ def perm_eval(model, trials=200):
     acc = correct / total if total > 0 else 0.0
     model.train()
     return acc
+
+
+@torch.no_grad()
+def permfill_eval(model, trials=200, mode="test"):
+    if not PERMFILL_TASK:
+        return None
+    model.eval()
+    ok_exact = 0
+    ok_valid = 0
+    ok_anchor = 0
+    for _ in range(trials):
+        if mode == "train":
+            n = random.randint(PERMFILL_N_MIN, PERMFILL_N_MAX)
+        else:
+            n = PERMFILL_N_TEST
+        s, m0, m1, anchors = _permfill_pack(n)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, m0:m1] = True
+        for a in anchors:
+            mask[:, m0 + a] = False
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)
+        out = torch.where(mask, pred, x)
+        out_s = decode(out[0].tolist())
+        gt_s = decode(y[0].tolist())
+        out_m = out_s[m0:m1]
+        gt_m = gt_s[m0:m1]
+        if out_m == gt_m:
+            ok_exact += 1
+        if PERMFILL_ANCHOR:
+            good = True
+            for a in anchors:
+                if out_s[m0 + a] != gt_s[m0 + a]:
+                    good = False
+                    break
+            if good:
+                ok_anchor += 1
+        pred_keys = [ch for ch in out_m if ch in key_pool]
+        gt_keys = [ch for ch in gt_m if ch in key_pool]
+        if (
+            len(pred_keys) == len(gt_keys)
+            and sorted(pred_keys) == sorted(gt_keys)
+            and len(set(pred_keys)) == len(pred_keys)
+        ):
+            ok_valid += 1
+    model.train()
+    exact = ok_exact / trials
+    valid = ok_valid / trials
+    anchor = ok_anchor / trials if PERMFILL_ANCHOR else 0.0
+    return exact, valid, anchor
 
 
 @torch.no_grad()
@@ -2396,6 +2516,11 @@ if __name__ == "__main__":
                     ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
                     print(f"kvsort_id exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
                     print(f"kvsort_ood exact {ex2:.4f}, key_valid {kv2:.4f}, key_order {ko2:.4f}, pair_acc {pa2:.4f}")
+                if PERMFILL_EVAL:
+                    ex, va, an = permfill_eval(m, mode="train")
+                    ex2, va2, an2 = permfill_eval(m, mode="test")
+                    print(f"permfill_id exact {ex:.4f}, valid {va:.4f}, anchor {an:.4f}")
+                    print(f"permfill_ood exact {ex2:.4f}, valid {va2:.4f}, anchor {an2:.4f}")
                 if LOG_SAMPLE:
                     log_eval_sample(m, "val")
 
@@ -2423,6 +2548,11 @@ if __name__ == "__main__":
         ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
         print(f"kvsort_id exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
         print(f"kvsort_ood exact {ex2:.4f}, key_valid {kv2:.4f}, key_order {ko2:.4f}, pair_acc {pa2:.4f}")
+    if (not TRAIN) and PERMFILL_EVAL:
+        ex, va, an = permfill_eval(m, mode="train")
+        ex2, va2, an2 = permfill_eval(m, mode="test")
+        print(f"permfill_id exact {ex:.4f}, valid {va:.4f}, anchor {an:.4f}")
+        print(f"permfill_ood exact {ex2:.4f}, valid {va2:.4f}, anchor {an2:.4f}")
 
     if MEM_CHECK:
         mem_check(m, prompt_len=PROMPT_LEN)
