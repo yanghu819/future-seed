@@ -855,8 +855,7 @@ elif KVSORT_TASK:
 
     def _kvsort_pack(n):
         keys = random.sample(key_pool, n)
-        vpool = random.sample(letters, n)
-        vals = {k: vpool[i] for i, k in enumerate(keys)}
+        vals = {k: random.choice(letters) for k in keys}
 
         inp_keys = keys[:]
         random.shuffle(inp_keys)
@@ -866,8 +865,7 @@ elif KVSORT_TASK:
             avail = [k for k in key_pool if k not in keys]
             if len(avail) > 0:
                 noise_keys = random.sample(avail, min(KVSORT_NOISE, len(avail)))
-        noise_vals = random.sample(letters, len(noise_keys)) if len(noise_keys) > 0 else []
-        noise = {k: noise_vals[i] for i, k in enumerate(noise_keys)}
+        noise = {k: random.choice(letters) for k in noise_keys}
 
         if KVSORT_USE_ORDER:
             order = "".join(random.sample(key_pool, len(key_pool)))
