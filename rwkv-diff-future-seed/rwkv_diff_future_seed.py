@@ -35,6 +35,7 @@ FUTURE_SEED = env_int("FUTURE_SEED", 0) == 1
 FUTURE_SEED_SCALE = env_float("FUTURE_SEED_SCALE", 1.0)
 FUTURE_SEED_ALPHA_INIT = env_float("FUTURE_SEED_ALPHA_INIT", 0.0)
 FUTURE_SEED_LAYER_START = env_int("FUTURE_SEED_LAYER_START", 0)
+FUTURE_SEED_S0_GATE = env_int("FUTURE_SEED_S0_GATE", 0) == 1
 RWKV7_KERNEL = os.getenv("RWKV7_KERNEL", "python")
 RWKV7_CUDA_SRC = os.getenv("RWKV7_CUDA_SRC", "")
 TRAIN = env_int("TRAIN", 0) == 1
@@ -1015,7 +1016,10 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
         if state is None:
             s0 = torch.zeros(B, H, N, N, device=r.device, dtype=torch.bfloat16)
         else:
-            s0 = (state.float() * FUTURE_SEED_SCALE).to(torch.bfloat16)
+            s0f = state.float() * FUTURE_SEED_SCALE
+            if FUTURE_SEED_S0_GATE:
+                s0f = s0f * future_seed_alpha.float()
+            s0 = s0f.to(torch.bfloat16)
         y, sT = RUN_CUDA_RWKV7_STATE(w4, q4, k4, v4, a4, b4, s0)
         return y.view(B, T, C).float(), sT.float()
 
