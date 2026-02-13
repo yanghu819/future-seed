@@ -76,6 +76,12 @@ RIGHTCOPY_EVAL = env_int("RIGHTCOPY_EVAL", 0) == 1
 RIGHTREV_TASK = env_int("RIGHTREV_TASK", 0) == 1
 RIGHTREV_LEN = env_int("RIGHTREV_LEN", 8)
 RIGHTREV_EVAL = env_int("RIGHTREV_EVAL", 0) == 1
+KVSORT_TASK = env_int("KVSORT_TASK", 0) == 1
+KVSORT_N_MIN = env_int("KVSORT_N_MIN", 3)
+KVSORT_N_MAX = env_int("KVSORT_N_MAX", 6)
+KVSORT_N_TEST = env_int("KVSORT_N_TEST", 10)
+KVSORT_EVAL = env_int("KVSORT_EVAL", 0) == 1
+KVSORT_PAD = env_int("KVSORT_PAD", 8)
 INDEX_TASK = env_int("INDEX_TASK", 0) == 1
 INDEX_LEN = env_int("INDEX_LEN", 16)
 INDEX_EVAL = env_int("INDEX_EVAL", 0) == 1
@@ -144,6 +150,7 @@ use_bin = (
     and not PARITY_TASK
     and not RIGHTCOPY_TASK
     and not RIGHTREV_TASK
+    and not KVSORT_TASK
     and not INDEX_TASK
     and not RULE_TASK
     and not CIPHER_TASK
@@ -826,6 +833,50 @@ elif QA_TASK:
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
+elif KVSORT_TASK:
+    digits = [str(i) for i in range(10)]
+    letters = [chr(ord("a") + i) for i in range(26)]
+    vocab_base = digits + letters + ["P", "M", "R", "=", ":", ";", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _kvsort_pack(n):
+        keys = random.sample(digits, n)
+        vals = {k: random.choice(letters) for k in keys}
+        inp_keys = keys[:]
+        random.shuffle(inp_keys)
+        right = ";".join([f"{k}:{vals[k]}" for k in inp_keys])
+        gt = ";".join([f"{k}:{vals[k]}" for k in sorted(keys, key=lambda x: int(x))])
+        p = "#" * KVSORT_PAD
+        s = "P=" + p + "|M=" + ("#" * len(gt)) + "|R=" + right
+        s = s + "#" * (SEQ_LEN - len(s))
+        m0 = s.find("|M=") + 3
+        m1 = m0 + len(gt)
+        return s, m0, m1
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            if split == "train":
+                n = random.randint(KVSORT_N_MIN, KVSORT_N_MAX)
+            else:
+                n = KVSORT_N_TEST
+            s, m0, m1 = _kvsort_pack(n)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            mask[i, m0:m1] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
 elif BIDIR_TASK:
     vocab_base = [str(i) for i in range(BIDIR_BASE)] + ["|", "#"]
     vocab_size = len(vocab_base) + 1
@@ -1438,6 +1489,39 @@ def qa_eval(model, trials=200, mode="qa"):
     acc = correct / total if total > 0 else 0.0
     model.train()
     return acc
+
+
+@torch.no_grad()
+def kvsort_eval(model, trials=200):
+    model.eval()
+    ok_exact = 0
+    ok_valid = 0
+    ok_sorted = 0
+    for _ in range(trials):
+        n = KVSORT_N_TEST
+        s, m0, m1 = _kvsort_pack(n)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        mask[:, m0:m1] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)
+        out = torch.where(mask, pred, x)
+        out_s = decode(out[0].tolist())
+        gt_s = decode(y[0].tolist())
+        out_m = out_s[m0:m1]
+        gt_m = gt_s[m0:m1]
+        if out_m == gt_m:
+            ok_exact += 1
+        pred_keys = [out_m[i] for i in range(0, len(out_m), 4) if i + 2 < len(out_m)]
+        gt_keys = [gt_m[i] for i in range(0, len(gt_m), 4) if i + 2 < len(gt_m)]
+        if len(pred_keys) == len(gt_keys) and set(pred_keys) == set(gt_keys):
+            ok_valid += 1
+        if pred_keys == gt_keys:
+            ok_sorted += 1
+    model.train()
+    return ok_exact / trials, ok_valid / trials, ok_sorted / trials
 
 
 @torch.no_grad()
@@ -2188,6 +2272,9 @@ if __name__ == "__main__":
                     acc_qa = qa_eval(m, mode="qa")
                     acc_aq = qa_eval(m, mode="aq")
                     print(f"qa->a acc {acc_qa:.4f}, a->q acc {acc_aq:.4f}")
+                if KVSORT_EVAL:
+                    ex, va, so = kvsort_eval(m)
+                    print(f"kvsort exact {ex:.4f}, valid {va:.4f}, sorted {so:.4f}")
                 if LOG_SAMPLE:
                     log_eval_sample(m, "val")
 
