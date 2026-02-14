@@ -7,6 +7,7 @@ Future‑Seed passes the previous layer’s final state `s_T` as the next layer�
 
 ## Results
 See `RESULTS.md` and `paper/future-seed-report.pdf`.
+English report: `paper/future-seed-report-en.pdf`.
 
 Quick highlights (single GPU 4090, RWKV7 `cuda_wind`):
 | task | FUTURE_SEED=0 | FUTURE_SEED=1 |
@@ -83,6 +84,23 @@ bash run_qa.sh
 Each evaluation prints:
 - `IN/GT/PR` around the masked span
 - mask range and token‑level accuracy
+
+## NeurIPS-Style Baselines (WIP)
+New switches (all optional):
+- `MODEL=rwkv|transformer`: RWKV7 vs Transformer-MLM baseline (same task generator).
+- `DECODE=argmax|hungarian`: (Permutation tasks) optional Hungarian decoding for uniqueness.
+- `REFINE_STEPS>0`: iterative refinement for in-place fill (helps hard constraints).
+- `BIN_MASK_MODE=prefix`: future-dependent prefix infill for `DATA_BIN` experiments.
+
+Scripts (CUDA, logs under `rwkv-diff-future-seed/exp/`):
+- `rwkv-diff-future-seed/run_kvsort_baselines.sh`
+- `rwkv-diff-future-seed/run_permfill_anchor_sweep.sh`
+- `rwkv-diff-future-seed/run_wikitext_prefix.sh`
+- `rwkv-diff-future-seed/run_mbpp_prefix.sh`
+
+Helpers:
+- `tools/build_hf_bins.py`: build byte-level `train.bin` / `val.bin` from HF datasets.
+- `tools/summarize_jsonl.py`: summarize `LOG_JSONL=...` runs into a Markdown table.
 
 ## Log example (baseline vs Future‑Seed)
 baseline (FUTURE_SEED=0):

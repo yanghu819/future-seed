@@ -1,4 +1,4 @@
-import os, time, math, glob, random
+import os, time, math, glob, random, json
 import numpy as np
 import torch
 import torch.nn as nn
@@ -13,6 +13,17 @@ def env_int(name, default):
 def env_float(name, default):
     return float(os.getenv(name, default))
 
+
+MODEL = os.getenv("MODEL", "rwkv")  # rwkv|transformer
+DECODE = os.getenv("DECODE", "argmax")  # argmax|hungarian
+REFINE_STEPS = env_int("REFINE_STEPS", 0)
+REFINE_CONF = env_float("REFINE_CONF", 0.90)
+BIN_MASK_MODE = os.getenv("BIN_MASK_MODE", "random")  # random|prefix|span
+BIN_PREFIX_RATIO = env_float("BIN_PREFIX_RATIO", 0.50)
+BIN_SPAN_LEN = env_int("BIN_SPAN_LEN", 128)
+TRANS_N_HEAD = env_int("TRANS_N_HEAD", 8)
+TRANS_DROPOUT = env_float("TRANS_DROPOUT", 0.0)
+TRANS_FF_MULT = env_int("TRANS_FF_MULT", 4)
 
 HEAD_SIZE = env_int("HEAD_SIZE", 64)
 SEQ_LEN = env_int("SEQ_LEN", 1024)
@@ -43,6 +54,10 @@ MEM_CHECK = env_int("MEM_CHECK", 0) == 1
 LOG_SAMPLE = env_int("LOG_SAMPLE", 1) == 1
 LOG_WIN = env_int("LOG_WIN", 80)
 LOG_OUTPUT = env_int("LOG_OUTPUT", 0) == 1
+LOG_JSONL = os.getenv("LOG_JSONL", "")
+MASKACC_EVAL = env_int("MASKACC_EVAL", 0) == 1
+MASKACC_SPLIT = os.getenv("MASKACC_SPLIT", "val")
+MASKACC_ITERS = env_int("MASKACC_ITERS", 200)
 REVERSE_TASK = env_int("REVERSE_TASK", 0) == 1
 REVERSE_DIGIT_MAX = env_int("REVERSE_DIGIT_MAX", 60)
 REVERSE_EVAL = env_int("REVERSE_EVAL", 0) == 1
@@ -157,6 +172,9 @@ VOCAB_SIZE = env_int("VOCAB_SIZE", 50304)
 GEN_TOKENS = env_int("GEN_TOKENS", 2000)
 PROMPT_LEN = env_int("PROMPT_LEN", 16)
 
+if MODEL != "rwkv" and (FS_MASK_ONLY or FS_ENCDEC):
+    raise RuntimeError("FS_MASK_ONLY/FS_ENCDEC are only supported for MODEL=rwkv")
+
 random_seed = env_int("RANDOM_SEED", 1337)
 random.seed(random_seed)
 np.random.seed(random_seed)
@@ -199,7 +217,7 @@ use_bin = (
 
 
 RUN_CUDA_RWKV7_STATE = None
-if RWKV7_KERNEL == "cuda_wind":
+if MODEL == "rwkv" and RWKV7_KERNEL == "cuda_wind":
     if device != "cuda":
         raise RuntimeError("RWKV7_KERNEL=cuda_wind requires CUDA device")
     cuda_src = RWKV7_CUDA_SRC
@@ -1211,12 +1229,22 @@ elif use_bin:
         data_loader = train_loader if split == "train" else val_loader
         x = data_loader.next_batch()
         y = x.clone()
-        mask_probs = torch.rand(DEVICE_BSZ, 1)
-        mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
-        missing = ~mask.any(dim=1)
-        if missing.any():
-            idx = torch.randint(0, SEQ_LEN, (int(missing.sum()),))
-            mask[missing, idx] = True
+        if BIN_MASK_MODE == "prefix":
+            prefix_len = max(1, min(SEQ_LEN, int(SEQ_LEN * BIN_PREFIX_RATIO)))
+            mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+            mask[:, :prefix_len] = True
+        elif BIN_MASK_MODE == "span":
+            span_len = max(1, min(SEQ_LEN, int(BIN_SPAN_LEN)))
+            start = max(0, (SEQ_LEN - span_len) // 2)
+            mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+            mask[:, start : start + span_len] = True
+        else:
+            mask_probs = torch.rand(DEVICE_BSZ, 1)
+            mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
+            missing = ~mask.any(dim=1)
+            if missing.any():
+                idx = torch.randint(0, SEQ_LEN, (int(missing.sum()),))
+                mask[missing, idx] = True
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
 
@@ -1557,6 +1585,53 @@ class GPT(nn.Module):
         return logits, loss
 
 
+class TransformerMLM(nn.Module):
+    def __init__(self, vocab_size, n_layer, n_embd, n_head, dropout=0.0, ff_mult=4):
+        super().__init__()
+        if n_embd % n_head != 0:
+            raise ValueError(f"TRANS_N_HEAD must divide N_EMBD: {n_head} | {n_embd}")
+        self.wte = nn.Embedding(vocab_size, n_embd)
+        self.wpe = nn.Embedding(SEQ_LEN, n_embd)
+        self.mask_emb = nn.Parameter(torch.zeros(1, 1, n_embd))
+
+        layer = nn.TransformerEncoderLayer(
+            d_model=n_embd,
+            nhead=n_head,
+            dim_feedforward=int(ff_mult) * n_embd,
+            dropout=float(dropout),
+            activation="gelu",
+            batch_first=True,
+            norm_first=True,
+        )
+        self.enc = nn.TransformerEncoder(layer, num_layers=n_layer)
+        self.ln_f = nn.LayerNorm(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size, bias=False)
+
+    def forward(self, idx, targets=None, mask=None, **_ignored):
+        B, T = idx.shape
+        pos = torch.arange(T, device=idx.device).unsqueeze(0).expand(B, T)
+        x = self.wte(idx) + self.wpe(pos)
+        x = x + (idx == mask_token_id).unsqueeze(-1).to(x.dtype) * self.mask_emb
+        x = self.enc(x)
+        x = self.ln_f(x)
+        logits = self.lm_head(x)
+        logits = 30 * torch.tanh(logits / 30)
+        logits = logits.float()
+
+        loss = None
+        if targets is not None:
+            B, T, C = logits.shape
+            logits_flat = logits.view(B * T, C)
+            targets_flat = targets.view(B * T)
+            if mask is not None:
+                mask_flat = mask.view(B * T).float()
+                loss = F.cross_entropy(logits_flat, targets_flat, reduction="none")
+                loss = (loss * mask_flat).sum() / mask_flat.sum()
+            else:
+                loss = F.cross_entropy(logits_flat, targets_flat)
+        return logits, loss
+
+
 class Muon(torch.optim.Optimizer):
     def __init__(self, params, lr=0.02, momentum=0.95, nesterov=True, backend_steps=5):
         defaults = dict(lr=lr, momentum=momentum, nesterov=nesterov, backend_steps=backend_steps)
@@ -1664,6 +1739,129 @@ def batch_loss(model, X, Y, M):
     if FS_ENCDEC_AUX:
         return loss_main + FS_ENCDEC_LAMBDA * (loss_enc + loss_dec)
     return loss_enc + FS_ENCDEC_LAMBDA * loss_dec
+
+
+@torch.no_grad()
+def maskacc_eval(model, split="val", iters=200):
+    model.eval()
+    correct = 0
+    total = 0
+    for _ in range(iters):
+        xb, yb, mb = get_batch(split)
+        logits, _ = model(xb, yb, mb)
+        pred = logits.argmax(dim=-1)
+        correct += (pred[mb] == yb[mb]).sum().item()
+        total += mb.sum().item()
+    model.train()
+    return correct / total if total > 0 else 0.0
+
+
+def _hungarian_min_cost(cost):
+    """
+    Solve min-cost assignment for cost matrix [n,n] or [n,m] (n<=m).
+    Returns a list `assign` of length n with assigned column indices in [0,m).
+    """
+    cost = np.asarray(cost, dtype=np.float64)
+    n, m = cost.shape
+    transposed = False
+    if n > m:
+        cost = cost.T
+        n, m = cost.shape
+        transposed = True
+
+    u = np.zeros(n + 1, dtype=np.float64)
+    v = np.zeros(m + 1, dtype=np.float64)
+    p = np.zeros(m + 1, dtype=np.int64)
+    way = np.zeros(m + 1, dtype=np.int64)
+
+    for i in range(1, n + 1):
+        p[0] = i
+        j0 = 0
+        minv = np.full(m + 1, np.inf, dtype=np.float64)
+        used = np.zeros(m + 1, dtype=np.bool_)
+        while True:
+            used[j0] = True
+            i0 = p[j0]
+            delta = np.inf
+            j1 = 0
+            for j in range(1, m + 1):
+                if not used[j]:
+                    cur = cost[i0 - 1, j - 1] - u[i0] - v[j]
+                    if cur < minv[j]:
+                        minv[j] = cur
+                        way[j] = j0
+                    if minv[j] < delta:
+                        delta = minv[j]
+                        j1 = j
+            for j in range(0, m + 1):
+                if used[j]:
+                    u[p[j]] += delta
+                    v[j] -= delta
+                else:
+                    minv[j] -= delta
+            j0 = j1
+            if p[j0] == 0:
+                break
+        while True:
+            j1 = way[j0]
+            p[j0] = p[j1]
+            j0 = j1
+            if j0 == 0:
+                break
+
+    # p[j] = assigned row for column j
+    assign_row_to_col = np.full(n + 1, -1, dtype=np.int64)
+    for j in range(1, m + 1):
+        if p[j] != 0:
+            assign_row_to_col[p[j]] = j - 1
+    assign = assign_row_to_col[1:].tolist()
+
+    if transposed:
+        # We solved for cost.T; convert to assignment for original rows (m of them).
+        # For our use (square matrices), this case should not happen.
+        raise RuntimeError("hungarian: unexpected rectangular transpose case")
+    return assign
+
+
+@torch.no_grad()
+def _infer_fill_refine(model, x, mask):
+    if REFINE_STEPS <= 0:
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)
+        return torch.where(mask, pred, x)
+
+    x = x.clone()
+    m = mask.clone()
+    for _ in range(int(REFINE_STEPS)):
+        if not m.any():
+            break
+        logits, _ = model(x)
+        probs = torch.softmax(logits, dim=-1)
+        conf, tok = probs.max(dim=-1)
+        conf = conf.masked_fill(~m, -1.0)
+        fill = (conf >= REFINE_CONF) & m
+        if not fill.any():
+            flat = conf.view(-1)
+            idx = flat.argmax().item()
+            fill.view(-1)[idx] = True
+        x = torch.where(fill, tok, x)
+        m = m & ~fill
+
+    if m.any():
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)
+        x = torch.where(m, pred, x)
+    return x
+
+
+def _jsonl_append(path, obj):
+    if not path:
+        return
+    d = os.path.dirname(path)
+    if d:
+        os.makedirs(d, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
 
 @torch.no_grad()
@@ -1815,9 +2013,7 @@ def sudoku_eval(model, trials=200, holes=8):
         for j in idx:
             mask[:, m0 + j] = True
         x[mask] = mask_token_id
-        logits, _ = model(x)
-        pred = logits.argmax(dim=-1)
-        out = torch.where(mask, pred, x)
+        out = _infer_fill_refine(model, x, mask)
         out_s = decode(out[0].tolist())
         out_m = out_s[m0:m1]
         if out_m == sol:
@@ -1828,6 +2024,66 @@ def sudoku_eval(model, trials=200, holes=8):
     exact_rate = ok_exact / trials if trials > 0 else 0.0
     model.train()
     return valid_rate, exact_rate
+
+
+def _kvsort_parse_keys_from_input(s):
+    # Parse keys from right context. Works for KVSORT_NOISE=0 (recommended).
+    p = s.find("|R=")
+    if p < 0:
+        return []
+    right = s[p + 3 :]
+    if right.startswith("O="):
+        semi = right.find(";")
+        if semi >= 0:
+            right = right[semi + 1 :]
+        else:
+            right = ""
+    sharp = right.find("#")
+    if sharp >= 0:
+        right = right[:sharp]
+    keys = []
+    for part in right.split(";"):
+        if len(part) >= 2 and part[1] == ":":
+            keys.append(part[0])
+        elif ":" in part:
+            k = part.split(":", 1)[0]
+            if len(k) > 0:
+                keys.append(k[0])
+    # unique, keep order
+    out = []
+    seen = set()
+    for k in keys:
+        if k not in seen:
+            out.append(k)
+            seen.add(k)
+    return out
+
+
+def _permfill_parse_items_from_input(s, n):
+    p = s.find("|R=O=")
+    if p < 0:
+        return []
+    semi = s.find(";", p)
+    if semi < 0:
+        return []
+    right = s[semi + 1 :]
+    sharp = right.find("#")
+    if sharp >= 0:
+        right = right[:sharp]
+    return list(right[:n])
+
+
+@torch.no_grad()
+def _decode_perm_hungarian(logits, pos_list, allowed_token_ids):
+    # logits: [1,T,V]; pos_list: list[int]; allowed_token_ids: list[int] length n
+    if len(pos_list) != len(allowed_token_ids):
+        return None
+    lp = F.log_softmax(logits[0, pos_list, :], dim=-1)  # [n,V]
+    mat = lp[:, allowed_token_ids].detach().cpu().numpy()  # [n,n]
+    cost = (-mat).astype(np.float64)
+    assign = _hungarian_min_cost(cost)  # row -> col
+    out = [allowed_token_ids[j] for j in assign]
+    return out
 
 
 @torch.no_grad()
@@ -1854,13 +2110,29 @@ def kvsort_eval(model, trials=200, mode="test"):
         else:
             mask[:, m0:m1] = True
         x[mask] = mask_token_id
-        logits, _ = model(x)
-        pred = logits.argmax(dim=-1)
-        out = torch.where(mask, pred, x)
-        out_s = decode(out[0].tolist())
         gt_s = decode(y[0].tolist())
-        out_m = out_s[m0:m1]
         gt_m = gt_s[m0:m1]
+        logits, _ = model(x)
+        if DECODE == "hungarian" and KVSORT_KEYS_ONLY and (not KVSORT_KEYS_SEP):
+            # Only supports the keys-only / no-sep permutation setting.
+            n_pos = m1 - m0
+            keys = _kvsort_parse_keys_from_input(s)
+            if len(keys) != n_pos:
+                gt_keys = [ch for ch in gt_m if ch in key_pool]
+                keys = gt_keys
+            allowed = [stoi[k] for k in keys]
+            decoded = _decode_perm_hungarian(logits, list(range(m0, m1)), allowed)
+            if decoded is None:
+                pred = logits.argmax(dim=-1)
+                out = torch.where(mask, pred, x)
+            else:
+                out = x.clone()
+                out[0, m0:m1] = torch.tensor(decoded, device=out.device, dtype=out.dtype)
+        else:
+            pred = logits.argmax(dim=-1)
+            out = torch.where(mask, pred, x)
+        out_s = decode(out[0].tolist())
+        out_m = out_s[m0:m1]
         if out_m == gt_m:
             ok_exact += 1
 
@@ -1985,13 +2257,39 @@ def permfill_eval(model, trials=200, mode="test"):
         for a in anchors:
             mask[:, m0 + a] = False
         x[mask] = mask_token_id
-        logits, _ = model(x)
-        pred = logits.argmax(dim=-1)
-        out = torch.where(mask, pred, x)
-        out_s = decode(out[0].tolist())
         gt_s = decode(y[0].tolist())
-        out_m = out_s[m0:m1]
         gt_m = gt_s[m0:m1]
+        logits, _ = model(x)
+        if DECODE == "hungarian":
+            n_pos = m1 - m0
+            items = _permfill_parse_items_from_input(s, n_pos)
+            if len(items) != n_pos:
+                items = [ch for ch in gt_m if ch in key_pool][:n_pos]
+            allowed = [stoi[k] for k in items]
+
+            fixed_pos = sorted([m0 + a for a in anchors])
+            fixed_tok = [int(y[0, p].item()) for p in fixed_pos]
+            # remove fixed
+            pos_list = [p for p in range(m0, m1) if p not in set(fixed_pos)]
+            allowed_rem = [t for t in allowed if t not in set(fixed_tok)]
+            decoded_rem = _decode_perm_hungarian(logits, pos_list, allowed_rem) if len(pos_list) > 0 else []
+            if decoded_rem is None and len(pos_list) > 0:
+                pred = logits.argmax(dim=-1)
+                out = torch.where(mask, pred, x)
+            else:
+                out = x.clone()
+                # fill fixed
+                for p, t in zip(fixed_pos, fixed_tok):
+                    out[0, p] = t
+                # fill remaining (ordered by pos_list)
+                if len(pos_list) > 0:
+                    out_vals = torch.tensor(decoded_rem, device=out.device, dtype=out.dtype)
+                    out[0, pos_list] = out_vals
+        else:
+            pred = logits.argmax(dim=-1)
+            out = torch.where(mask, pred, x)
+        out_s = decode(out[0].tolist())
+        out_m = out_s[m0:m1]
         if out_m == gt_m:
             ok_exact += 1
         if PERMFILL_ANCHOR:
@@ -2596,10 +2894,20 @@ def mem_check(model, prompt_len=16):
 
 if __name__ == "__main__":
     os.makedirs(os.path.dirname(WEIGHTS_PATH), exist_ok=True)
-    model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), future_seed=FUTURE_SEED)
+    if MODEL == "transformer":
+        model = TransformerMLM(
+            vocab_size=vocab_size,
+            n_layer=N_LAYER,
+            n_embd=N_EMBD,
+            n_head=TRANS_N_HEAD,
+            dropout=TRANS_DROPOUT,
+            ff_mult=TRANS_FF_MULT,
+        )
+    else:
+        model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), future_seed=FUTURE_SEED)
     m = model.to(device)
 
-    if FS_MASK_ONLY:
+    if FS_MASK_ONLY and MODEL == "rwkv":
         for p in m.parameters():
             p.requires_grad = False
         for n, p in m.named_parameters():
@@ -2612,9 +2920,43 @@ if __name__ == "__main__":
     if os.path.exists(WEIGHTS_PATH):
         m.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device))
 
+    run_meta = dict(
+        model=MODEL,
+        future_seed=int(bool(FUTURE_SEED)),
+        decode=DECODE,
+        refine_steps=int(REFINE_STEPS),
+        refine_conf=float(REFINE_CONF),
+        bin_mask_mode=BIN_MASK_MODE,
+        bin_prefix_ratio=float(BIN_PREFIX_RATIO),
+        seq_len=int(SEQ_LEN),
+        n_layer=int(N_LAYER),
+        n_embd=int(N_EMBD),
+        head_size=int(HEAD_SIZE),
+        random_seed=int(random_seed),
+        weights_path=str(WEIGHTS_PATH),
+        task=dict(
+            rightcopy=bool(RIGHTCOPY_TASK),
+            constr=bool(CONSTR_TASK),
+            kvsort=bool(KVSORT_TASK),
+            permfill=bool(PERMFILL_TASK),
+            sudoku=bool(SUDOKU_TASK),
+            struct=bool(STRUCT_TASK),
+            sent=bool(SENT_TASK),
+        ),
+    )
+    _jsonl_append(LOG_JSONL, {"event": "start", **run_meta})
+
     if TRAIN:
         fused_ok = device == "cuda"
-        if FS_MASK_ONLY:
+        if MODEL == "transformer":
+            optimizer = torch.optim.AdamW(
+                [p for p in m.parameters() if p.requires_grad],
+                lr=ADAM_LR,
+                betas=(0.9, 0.95),
+                fused=fused_ok,
+            )
+            optimizers = [optimizer]
+        elif FS_MASK_ONLY:
             trainable = [p for p in m.parameters() if p.requires_grad]
             optimizer = torch.optim.Adam(trainable, lr=ADAM_LR, betas=(0.9, 0.95), fused=fused_ok)
             optimizers = [optimizer]
@@ -2651,81 +2993,122 @@ if __name__ == "__main__":
                 print(
                     f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}, time {time.time() - start:.2f} seconds"
                 )
+                rec = {"event": "eval", "iter": int(iter), "train_loss": float(losses["train"]), "val_loss": float(losses["val"])}
                 if REVERSE_EVAL:
                     acc = reverse_eval(m)
                     print(f"reverse acc {acc:.4f}")
+                    rec["reverse_acc"] = float(acc)
                 if BIDIR_EVAL:
                     acc = bidir_eval(m)
                     print(f"bidir acc {acc:.4f}")
+                    rec["bidir_acc"] = float(acc)
                 if ADD_EVAL:
                     acc = add_eval(m)
                     print(f"add acc {acc:.4f}")
+                    rec["add_acc"] = float(acc)
                 if PERM_EVAL:
                     acc = perm_eval(m)
                     print(f"perm acc {acc:.4f}")
+                    rec["perm_acc"] = float(acc)
                 if INTER_EVAL:
                     acc = inter_eval(m)
                     print(f"inter acc {acc:.4f}")
+                    rec["inter_acc"] = float(acc)
                 if MULTI_EVAL:
                     acc = multi_eval(m)
                     print(f"multi acc {acc:.4f}")
+                    rec["multi_acc"] = float(acc)
                 if PARITY_EVAL:
                     acc = parity_eval(m)
                     print(f"parity acc {acc:.4f}")
+                    rec["parity_acc"] = float(acc)
                 if RIGHTCOPY_EVAL:
                     acc = rightcopy_eval(m)
                     print(f"rightcopy acc {acc:.4f}")
+                    rec["rightcopy_acc"] = float(acc)
                 if RIGHTREV_EVAL:
                     acc = rightrev_eval(m)
                     print(f"rightrev acc {acc:.4f}")
+                    rec["rightrev_acc"] = float(acc)
                 if INDEX_EVAL:
                     acc = index_eval(m)
                     print(f"index acc {acc:.4f}")
+                    rec["index_acc"] = float(acc)
                 if RULE_EVAL:
                     acc = rule_eval(m)
                     print(f"rule acc {acc:.4f}")
+                    rec["rule_acc"] = float(acc)
                 if CIPHER_EVAL:
                     acc = cipher_eval(m)
                     print(f"cipher acc {acc:.4f}")
+                    rec["cipher_acc"] = float(acc)
                 if SHIFT_EVAL:
                     acc = shift_eval(m)
                     print(f"shift acc {acc:.4f}")
+                    rec["shift_acc"] = float(acc)
                 if POSCOPY_EVAL:
                     acc = poscopy_eval(m)
                     print(f"poscopy acc {acc:.4f}")
+                    rec["poscopy_acc"] = float(acc)
                 if CONSTR_EVAL:
                     acc = constr_eval(m)
                     print(f"constr acc {acc:.4f}")
+                    rec["constr_acc"] = float(acc)
                 if STRUCT_EVAL:
                     acc, exact = struct_eval(m)
                     print(f"struct acc {acc:.4f}, exact {exact:.4f}")
+                    rec["struct_acc"] = float(acc)
+                    rec["struct_exact"] = float(exact)
                 if RETR_EVAL:
                     acc = retr_eval(m)
                     print(f"retr acc {acc:.4f}")
+                    rec["retr_acc"] = float(acc)
                 if SENT_EVAL:
                     acc = sent_eval(m)
                     print(f"sent acc {acc:.4f}")
+                    rec["sent_acc"] = float(acc)
+                if MASKACC_EVAL:
+                    acc = maskacc_eval(m, split=MASKACC_SPLIT, iters=MASKACC_ITERS)
+                    print(f"maskacc_{MASKACC_SPLIT} {acc:.4f}")
+                    rec[f"maskacc_{MASKACC_SPLIT}"] = float(acc)
                 if QA_EVAL:
                     acc_qa = qa_eval(m, mode="qa")
                     acc_aq = qa_eval(m, mode="aq")
                     print(f"qa->a acc {acc_qa:.4f}, a->q acc {acc_aq:.4f}")
+                    rec["qa_to_a_acc"] = float(acc_qa)
+                    rec["a_to_q_acc"] = float(acc_aq)
                 if SUDOKU_EVAL:
                     res = sudoku_eval(m, trials=SUDOKU_TRIALS, holes=SUDOKU_HOLES_TEST)
                     if res is not None:
                         va, ex = res
                         print(f"sudoku holes {SUDOKU_HOLES_TEST} solve {va:.4f}, exact {ex:.4f}")
+                        rec["sudoku_holes"] = int(SUDOKU_HOLES_TEST)
+                        rec["sudoku_solve"] = float(va)
+                        rec["sudoku_exact"] = float(ex)
                 if KVSORT_EVAL:
                     ex, kv, ko, pa = kvsort_eval(m, mode="train")
                     ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
                     print(f"kvsort_id exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
                     print(f"kvsort_ood exact {ex2:.4f}, key_valid {kv2:.4f}, key_order {ko2:.4f}, pair_acc {pa2:.4f}")
+                    rec["kvsort_id_exact"] = float(ex)
+                    rec["kvsort_id_key_valid"] = float(kv)
+                    rec["kvsort_id_key_order"] = float(ko)
+                    rec["kvsort_ood_exact"] = float(ex2)
+                    rec["kvsort_ood_key_valid"] = float(kv2)
+                    rec["kvsort_ood_key_order"] = float(ko2)
                 if PERMFILL_EVAL:
                     ex, va, an = permfill_eval(m, mode="train")
                     ex2, va2, an2 = permfill_eval(m, mode="test")
                     print(f"permfill_id exact {ex:.4f}, valid {va:.4f}, anchor {an:.4f}")
                     print(f"permfill_ood exact {ex2:.4f}, valid {va2:.4f}, anchor {an2:.4f}")
+                    rec["permfill_id_exact"] = float(ex)
+                    rec["permfill_id_valid"] = float(va)
+                    rec["permfill_ood_exact"] = float(ex2)
+                    rec["permfill_ood_valid"] = float(va2)
+                    rec["permfill_anchor_ok"] = float(an2)
                 if LOG_SAMPLE:
                     log_eval_sample(m, "val")
+                _jsonl_append(LOG_JSONL, {**run_meta, **rec})
 
             m.train()
             m.zero_grad(set_to_none=True)
@@ -2737,13 +3120,15 @@ if __name__ == "__main__":
 
             if not FS_MASK_ONLY:
                 frac = min(iter / 500, 1)
-                optimizer3.param_groups[0]["momentum"] = (1 - frac) * 0.85 + frac * 0.95
+                if MODEL == "rwkv":
+                    optimizer3.param_groups[0]["momentum"] = (1 - frac) * 0.85 + frac * 0.95
 
             for opt, sched in zip(optimizers, schedulers):
                 opt.step()
                 sched.step()
 
         print(f"Total training time: {time.time() - start:.2f} seconds")
+        _jsonl_append(LOG_JSONL, {"event": "end", **run_meta, "time_sec": float(time.time() - start)})
         torch.save(m.state_dict(), WEIGHTS_PATH)
     elif not os.path.exists(WEIGHTS_PATH):
         raise FileNotFoundError(f"WEIGHTS_PATH not found and TRAIN=0: {WEIGHTS_PATH}")
@@ -2763,6 +3148,9 @@ if __name__ == "__main__":
         ex2, va2, an2 = permfill_eval(m, mode="test")
         print(f"permfill_id exact {ex:.4f}, valid {va:.4f}, anchor {an:.4f}")
         print(f"permfill_ood exact {ex2:.4f}, valid {va2:.4f}, anchor {an2:.4f}")
+    if (not TRAIN) and MASKACC_EVAL:
+        acc = maskacc_eval(m, split=MASKACC_SPLIT, iters=MASKACC_ITERS)
+        print(f"maskacc_{MASKACC_SPLIT} {acc:.4f}")
 
     if MEM_CHECK:
         mem_check(m, prompt_len=PROMPT_LEN)
