@@ -17,6 +17,7 @@ if [[ -z "${PY}" ]]; then
     PY="python3"
   fi
 fi
+export PATH="$(cd "$(dirname "${PY}")" && pwd):$PATH"
 
 COMMON=(
   PYTHONUNBUFFERED=1
