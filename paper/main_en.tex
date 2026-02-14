@@ -1,0 +1,147 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{graphicx}
+
+\title{Future-Seed: Cross-Layer State Feedback for In-Place Constraint Repair\\(RWKV7-CUDA Technical Report)}
+\author{yanghu819}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Fixed-memory recurrent language models often struggle with \emph{in-place constraint repair}: filling masked spans without rewriting the whole sequence while maintaining global consistency (e.g., permutation validity, structural constraints, or Sudoku rules). A key difficulty is that early positions must depend on information that appears on the right (``future'') side of the sequence, while naive parallel infill can easily create conflicts (duplicates, omissions, invalid structures). This report studies a minimal mechanism, \textbf{Future-Seed}, which initializes each layer with the previous layer's final state (cross-layer state feedback), creating a ``re-read across depth'' information pathway. On a single RTX 4090 using an RWKV7 \texttt{cuda\_wind} kernel, we evaluate a small suite of hard synthetic tasks: \textbf{RIGHTCOPY/CONSTR} (future-aware sanity checks), \textbf{KVSORT} (in-place key--value permutation repair), \textbf{PERMFILL} (permutation filling with length extrapolation), and \textbf{4$\times$4 Sudoku} (2D constraint repair). We observe consistent gains on sanity tasks; a sharp failure-to-success transition on KVSORT (FS=0 exact=0 vs.\ FS=1 exact=1 for keys36, $n=20$); strong length extrapolation improvements on PERMFILL via a tiny \textbf{anchor} (keeping $k=2$ ground-truth tokens inside the masked span); and a clear phase shift on Sudoku. These results support the interpretation of Future-Seed as a lightweight global ``bookkeeping/constraint propagation'' channel for in-place repair.
+\end{abstract}
+
+\section{Problem Setting: In-Place Constraint Repair}
+We focus on tasks where the model must repair a fixed-length sequence \emph{in-place}, rather than generating a new output sequence. A typical input format is:
+\[
+\texttt{P=\ldots \;|\; M=\_\_\_\ldots \;|\; R=\ldots}
+\]
+where $R$ (right context) contains information needed to fill the masked span $M$, and training loss is computed only on masked positions. This setup stresses:
+\begin{itemize}
+  \item \textbf{Future dependency}: correct predictions in $M$ require information located in $R$.
+  \item \textbf{Global consistency}: outputs must satisfy hard constraints (e.g., permutation validity, Sudoku rules).
+\end{itemize}
+
+\section{Method: Future-Seed}
+Consider a model with $L$ stacked recurrent layers. Let $s_T^{(l)}$ be the final recurrent state of layer $l$ after processing a length-$T$ sequence. \textbf{Future-Seed} sets the initial state of layer $l$ to the previous layer's final state:
+\[
+s_0^{(l)} \leftarrow s_T^{(l-1)}.
+\]
+Intuitively, this allows the network to ``re-read'' the same sequence across depth, so later layers can condition early-token computation on information summarized from the whole sequence.
+
+\section{Tasks and Metrics}
+All tasks use the same in-place masked objective (loss on $M$ only).
+
+\paragraph{RIGHTCOPY / CONSTR (sanity).}
+Minimal future-aware probes. Metric: masked token accuracy (acc).
+
+\paragraph{KVSORT (key--value permutation repair).}
+The right context provides a shuffled key--value listing; the masked span must output the sequence sorted by key. Metric: exact match (\texttt{exact}) on in-distribution (id) and out-of-distribution (ood) variants produced by the task generator.
+
+\paragraph{PERMFILL (permutation fill with anchors).}
+The model must reconstruct a permutation in the masked span from right-context information. We optionally add an \textbf{anchor}: keep $k$ ground-truth tokens visible inside the masked span (here $k=2$) to reduce alignment instability when everything is masked. Metric: exact/valid rate (identical in our implementation).
+
+\paragraph{4$\times$4 Sudoku (2D constraint repair).}
+We generate valid 4$\times$4 Sudoku solutions (digits 1--4; 2$\times$2 blocks), then mask $h$ cells. Metrics:
+\begin{itemize}
+  \item \textbf{solve-rate}: predicted grid satisfies row/column/block constraints.
+  \item \textbf{exact}: matches the hidden generated solution exactly.
+\end{itemize}
+
+\section{Experimental Setup}
+We run all experiments on a single NVIDIA RTX 4090, using an RWKV7 \texttt{cuda\_wind} kernel. The main entry point is \path{rwkv_diff_future_seed.py}. Tasks are toggled via environment variables (e.g., \texttt{KVSORT\_TASK=1}) and the Future-Seed switch \texttt{FUTURE\_SEED} (set to \texttt{0} or \texttt{1}).
+
+\section{Results}
+\subsection{RIGHTCOPY / CONSTR: consistent gains}
+Across 3 random seeds, Future-Seed improves final masked-token accuracy (mean $\pm$ sd):
+
+\begin{table}[h]
+\centering
+\caption{RIGHTCOPY/CONSTR final accuracy (3 seeds, mean$\pm$sd).}
+\label{tab:sanity_en}
+\begin{tabular}{lcc}
+\toprule
+task & FS=0 & FS=1 \\
+\midrule
+rightcopy acc & 0.1046 $\pm$ 0.0074 & 0.1550 $\pm$ 0.0176 \\
+constr acc    & 0.0977 $\pm$ 0.0028 & 0.2114 $\pm$ 0.0179 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{KVSORT: a failure-to-success transition}
+For keys36, $n=20$, no-separator encoding, $L=8$, and $\mathrm{SEQ\_LEN}=256$, we observe:
+
+\begin{table}[h]
+\centering
+\caption{KVSORT exact match (keys36, $n=20$, nosep, L8, SEQ\_LEN=256).}
+\label{tab:kvsort_en}
+\begin{tabular}{lcc}
+\toprule
+metric & FS=0 & FS=1 \\
+\midrule
+kvsort\_id exact  & 0.0 & 1.0 \\
+kvsort\_ood exact & 0.0 & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{PERMFILL: anchors improve length extrapolation}
+Evaluating saved weights under length extrapolation ($n_{\text{test}}$ sweep) shows that a tiny anchor plus higher training max length can substantially improve OOD generalization:
+
+\begin{table}[h]
+\centering
+\caption{PERMFILL length extrapolation (exact/valid). Anchor keeps $k$ ground-truth tokens visible inside the masked span.}
+\label{tab:permfill_en}
+\begin{tabular}{lccccc}
+\toprule
+weights & anchor & $n{=}24$ & $n{=}28$ & $n{=}32$ & $n{=}36$ \\
+\midrule
+permfill\_n24\_fs1\_L12\_seq256 & off & 1.000 & 0.000 & 0.000 & 0.000 \\
+permfill\_anchor2\_n24\_fs1\_L12\_seq256 & $k{=}2$ & 0.990 & 0.830 & 0.120 & 0.000 \\
+permfill\_anchor2\_n32\_fs1\_L12\_seq256 & $k{=}2$ & 1.000 & 1.000 & 1.000 & 0.935 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{4$\times$4 Sudoku: a phase shift}
+Future-Seed significantly shifts the solve-rate phase transition to harder puzzles:
+
+\begin{table}[h]
+\centering
+\caption{4$\times$4 Sudoku in-place fill: solve-rate phase curve (trials=2000). FS=0 uses L4/e128; FS=1 uses L12/e128.}
+\label{tab:sudoku_phase_en}
+\begin{tabular}{rcc}
+\toprule
+holes & FS=0 solve & FS=1 solve \\
+\midrule
+4  & 0.3530 & 1.0000 \\
+6  & 0.1665 & 1.0000 \\
+8  & 0.0520 & 1.0000 \\
+10 & 0.0095 & 0.9510 \\
+12 & 0.0000 & 0.5510 \\
+14 & 0.0000 & 0.0000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We also tested a minimal soft constraint regularizer (row/col/block digit-count consistency), which improves holes=12 solve-rate (0.4795 $\rightarrow$ 0.5855) but does not solve the hardest setting (holes=14).
+
+\section{Limitations and Next Steps}
+This report is intentionally minimal and synthetic. Key next steps:
+\begin{itemize}
+  \item \textbf{Inference protocol}: compare one-shot argmax fill vs.\ iterative refinement (mask-predict) under equal compute.
+  \item \textbf{Stronger baselines}: add structured decoders (e.g., assignment/matching) for permutation tasks to isolate modeling vs.\ decoding effects.
+  \item \textbf{More realistic repairs}: extend to hard-constraint structured text (JSON/brackets) and consistency editing tasks.
+\end{itemize}
+
+\section*{Reproducibility}
+Repository: \url{git@github.com:yanghu819/future-seed.git}. Main script: \path{rwkv_diff_future_seed.py}. Sudoku script: \path{rwkv-diff-future-seed/run_sudoku.sh}.
+
+\end{document}
