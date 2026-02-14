@@ -4,7 +4,7 @@
 \usepackage{hyperref}
 \usepackage{amsmath}
 
-\title{Future-Seed：一种基于跨层状态回灌的原地约束修复机制\\（以 RWKV7-CUDA 上的 4$\times$4 数独填空为例）}
+\title{Future-Seed：一种基于跨层状态回灌的原地约束修复机制\\（RWKV7-CUDA 技术报告：从 Future-Aware Copy 到置换修复与数独）}
 \author{yanghu819}
 \date{\today}
 
@@ -12,53 +12,102 @@
 \maketitle
 
 \begin{abstract}
-固定记忆的递归语言模型（RNN/SSM 系）在长上下文与全局一致性任务上常出现脆弱性：早期位置的决策无法有效利用序列右侧信息，从而在需要全局约束传播的任务中产生冲突解。本文基于 \texttt{future-seed} 的核心思想：将上一层扫描完整段序列后的终止状态作为下一层的初始状态（跨层回灌），从而在深度方向形成“再读一遍序列”的信息通路。我们在单卡 RTX 4090 上，使用 RWKV7 \texttt{cuda\_wind} 核心实现了一个可复现的 \textbf{in-place 数独填空}基准（4$\times$4，2$\times$2 宫），对比 \textbf{FUTURE\_SEED=0} 与 \textbf{FUTURE\_SEED=1} 的解题率随挖空数（holes）变化的相变曲线，并探索一个极简的软约束正则项。结果表明：在相同算力与规模下，Future-Seed 能显著推迟相变点，在 holes=12 时将 solve-rate 从 0 提升至约 0.55；加入简单的行/列/宫计数一致性正则可进一步提升 holes=12 的 solve-rate（约 0.48 $\rightarrow$ 0.59）。这些结果支持了 Future-Seed 作为“全局约束记账/传播通道”的机制解释，并为后续扩展到更真实的原地编辑与结构修复任务提供了明确的实验信号。
+固定记忆的递归语言模型（RNN/SSM 系）在“原地（in-place）约束修复”任务上常出现结构性脆弱：早期位置的决策难以有效利用序列右侧信息，且并行填空容易产生全局一致性冲突（重复/遗漏/违约束）。本文基于 \texttt{future-seed} 的核心思想：将上一层扫描完整段序列后的终止状态作为下一层的初始状态（跨层回灌），从而在深度方向形成“再读一遍序列”的信息通路。我们在单卡 RTX 4090 上，使用 RWKV7 \texttt{cuda\_wind} 实现并评测一组可复现的 toy 任务族：\textbf{RIGHTCOPY/CONSTR}（future-aware sanity）、\textbf{KVSORT}（key-value 置换修复）、\textbf{PERMFILL}（置换填空与长度外推）、以及 \textbf{4$\times$4 数独}（二维约束）。结果显示：Future-Seed 在 sanity 任务上稳定提升；在 KVSORT 设定（keys36, $n=20$）中，\textbf{FS=0 完全失败（exact=0）而 FS=1 达到 exact=1}；在 PERMFILL 中，引入极小的 \textbf{anchor}（masked span 内保留 $k=2$ 个真值 token）可显著改善长度外推（例如训练 $n_{\max}=32$ 时对 $n=36$ 仍保持 $\approx 0.935$ 的 exact/valid）；在 4$\times$4 数独中 Future-Seed 明显推迟相变点，并可与一个极简软约束正则协同提升（holes=12：$\approx 0.48\rightarrow 0.59$）。这些结果支持 Future-Seed 作为“全局约束记账/传播通道”的机制解释，并为后续扩展到更真实的原地编辑与结构修复任务提供了可操作的实验信号。
 \end{abstract}
 
 \section{引言}
-我们关心的一类任务并非“从头生成文本”，而是\textbf{原地（in-place）修复}：在不重写整体结构的前提下，局部填补缺失并满足全局一致性约束。典型例子包括：置换一致性（不重不漏）、括号/JSON 结构合法性、实体/变量命名一致性、以及约束满足问题（如数独）。
+我们关注的一类任务并非“从头生成文本”，而是\textbf{原地（in-place）修复}：在不重写整体结构的前提下，局部填补缺失并满足全局一致性约束。其困难点通常不是局部 token 分类，而是全局一致性：置换一致性（不重不漏）、括号/JSON 结构合法性、实体/变量命名一致性、以及约束满足问题（如数独）。
 
-对固定记忆的递归模型而言，困难来自强因果扫描：序列左侧的预测很难利用右侧信息，导致在并行填空或一次性解码时出现结构性冲突。Future-Seed 通过跨层状态回灌，在深度方向提供额外的信息通路，使早期位置能间接依赖“未来”上下文。本工作将该直觉落地为一个极小但硬的基准：4$\times$4 数独 in-place 填空，并用 solve-rate/相变曲线给出可复现的对照证据。
+对固定记忆的递归模型而言，困难来自强因果扫描：序列左侧的预测很难利用右侧信息；而并行填空（一次性给出所有 mask 的预测）又容易产生冲突解。Future-Seed 通过跨层状态回灌，在深度方向提供额外的信息通路，使早期位置能间接依赖“未来”上下文。本文将该直觉落地为一组\textbf{极小但硬}的任务族，并给出可复现的对照证据。
 
 \section{方法：Future-Seed}
-设模型由 $L$ 层堆叠而成。对第 $l$ 层（$l\ge 1$），Future-Seed 将上一层在读完整段长度 $T$ 后的终止状态 $s_T^{(l-1)}$，作为本层的初始状态 $s_0^{(l)}$（或其门控版本），从而形成跨层回灌：
+设模型由 $L$ 层堆叠而成。对第 $l$ 层（$l\ge 1$），Future-Seed 将上一层在读完整段长度 $T$ 后的终止状态 $s_T^{(l-1)}$，作为本层的初始状态 $s_0^{(l)}$（或其门控版本）：
 \[
 s_0^{(l)} \leftarrow s_T^{(l-1)}.
 \]
-直观上，这等价于在深度方向对同一序列进行“多次线性扫描”，使得后层在处理早期 token 时，能携带更多来自整段序列的信息摘要。本文实验使用 RWKV7 的 \texttt{cuda\_wind} 实现以保证吞吐与可复现性。
+直观上，这等价于在深度方向对同一序列进行“多次线性扫描”，使后层在处理早期 token 时携带更多来自整段序列的信息摘要。本文实验使用 RWKV7 的 \texttt{cuda\_wind} 实现以保证吞吐与可复现性。
 
-\section{任务：4$\times$4 数独 in-place 填空}
-\subsection{数据生成}
-我们合成生成合法 4$\times$4 数独解盘（数字 1--4，2$\times$2 宫），并随机挖空 $h$ 个位置作为输入。输入与输出在同一固定长度序列中编码（字符级词表），空位用 mask token 表示，训练损失仅在 mask 位置计算。
+\section{任务族与指标}
+所有任务均采用统一的 in-place 编码骨架：\texttt{P=\ldots|M=\_\_\_\ldots|R=\ldots}，其中 $R$（右侧）提供信息，$M$（中间）为需要填补/修复的 mask 段；训练损失仅在 mask 位置计算。
 
-\subsection{指标}
-我们报告两类指标：
+\subsection{RIGHTCOPY / CONSTR（future-aware sanity）}
+RIGHTCOPY/CONSTR 是最小化的 future-aware 探针任务，用于检验“右侧信息能否有效影响左侧 mask 的预测”。指标为 mask token 的准确率（acc）。
+
+\subsection{KVSORT（Key-Value Sort, in-place 置换修复）}
+KVSORT 将右侧 $R$ 设为乱序的 key-value 信息，要求在中间 $M$ 输出按 key 排序后的序列（置换修复）。我们报告 \texttt{kvsort\_id exact} 与 \texttt{kvsort\_ood exact}（exact-match）。
+
+\subsection{PERMFILL（Permutation Fill, 长度外推）}
+PERMFILL 是更直接的置换填空任务。我们额外引入一个极简设定：在 masked span 内保留极少量真值 token 作为 \textbf{anchor}（例如 $k=2$），以减少“全是 mask”带来的对齐与收敛不稳定。指标为 exact/valid（两者在该实现中一致）。
+
+\subsection{4$\times$4 数独（二维约束修复）}
+我们合成生成合法 4$\times$4 数独解盘（数字 1--4，2$\times$2 宫），并随机挖空 $h$ 个位置作为输入。报告：
 \begin{itemize}
-  \item \textbf{solve-rate}：模型填出的 16 个格子满足行/列/宫约束（每组恰好包含 \{1,2,3,4\}）。
-  \item \textbf{exact}：预测解与合成的隐藏解完全一致的比例（更苛刻，且在存在多解时可能偏低）。
+  \item \textbf{solve-rate}：预测盘满足行/列/宫约束（每组恰好包含 \{1,2,3,4\}）。
+  \item \textbf{exact}：预测盘与隐藏合成解完全一致的比例。
 \end{itemize}
 
 \section{实验设置}
-\subsection{实现与硬件}
-实验在单卡 NVIDIA RTX 4090 上运行，采用 RWKV7 \texttt{cuda\_wind} 内核。我们使用同一训练脚本，通过环境变量切换任务与超参。
-
-\subsection{模型与训练}
-主要对比为：
+实验在单卡 NVIDIA RTX 4090 上运行，采用 RWKV7 \texttt{cuda\_wind} 内核。我们使用同一训练脚本 \texttt{rwkv\_diff\_future\_seed.py}，通过环境变量切换任务与超参。对比为：
 \begin{itemize}
   \item \textbf{FS=0}：不启用 Future-Seed。
   \item \textbf{FS=1}：启用 Future-Seed（跨层回灌）。
 \end{itemize}
-我们使用 holes 课程学习（训练时 $h\sim U[4,12]$），并在固定 holes 下进行大样本评估（每点评估 trials=2000）。
-
-\subsection{极简软约束正则}
-为缓解冲突解，我们加入一个简单的软约束：对每行/列/宫，要求“每个数字的概率计数之和接近 1”。实现上对 mask 位置使用模型 softmax 概率，对非 mask（clue）位置使用真值 one-hot，并对 12 个约束组做平方误差平均：
-\[
-\mathcal{L}=\mathcal{L}_{CE}+\lambda \cdot \mathcal{L}_{cons}.
-\]
 
 \section{结果}
-\subsection{相变曲线：Future-Seed 显著推迟失效点}
-表~\ref{tab:phase} 给出相同基准下 solve-rate 随 holes 增长的变化。Future-Seed 在 holes=10 与 holes=12 仍保持较高 solve-rate，而 FS=0 很快塌陷至接近 0。
+\subsection{RIGHTCOPY / CONSTR：sanity 上的稳定提升}
+表~\ref{tab:sanity} 汇总了 3 个随机种子在训练末端的准确率（均值$\pm$标准差）。
+
+\begin{table}[h]
+\centering
+\caption{RIGHTCOPY/CONSTR 的最终准确率（3 seeds, mean$\pm$sd）。}
+\label{tab:sanity}
+\begin{tabular}{lcc}
+\toprule
+task & FS=0 & FS=1 \\
+\midrule
+rightcopy acc & 0.1046 $\pm$ 0.0074 & 0.1550 $\pm$ 0.0176 \\
+constr acc    & 0.0977 $\pm$ 0.0028 & 0.2114 $\pm$ 0.0179 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{KVSORT：FS=0 与 FS=1 的分水岭}
+在 keys36、$n=20$、nosep、$L=8$、$\mathrm{SEQ\_LEN}=256$ 的设定下，FS=0 完全失败，而 FS=1 达到完美 exact-match（表~\ref{tab:kvsort}）。
+
+\begin{table}[h]
+\centering
+\caption{KVSORT（keys36, $n=20$, nosep, L8, SEQ\_LEN=256）的 exact 指标。}
+\label{tab:kvsort}
+\begin{tabular}{lcc}
+\toprule
+metric & FS=0 & FS=1 \\
+\midrule
+kvsort\_id exact  & 0.0 & 1.0 \\
+kvsort\_ood exact & 0.0 & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{PERMFILL：极小 anchor 改善长度外推}
+表~\ref{tab:permfill} 给出加载不同权重并在不同 $n_{\text{test}}$ 下的 exact/valid（同值）结果摘要。
+
+\begin{table}[h]
+\centering
+\caption{PERMFILL 的长度外推（exact/valid）。anchor 表示 masked span 内保留 $k$ 个真值 token。}
+\label{tab:permfill}
+\begin{tabular}{lccccc}
+\toprule
+weights & anchor & $n{=}24$ & $n{=}28$ & $n{=}32$ & $n{=}36$ \\
+\midrule
+permfill\_n24\_fs1\_L12\_seq256 & off & 1.000 & 0.000 & 0.000 & 0.000 \\
+permfill\_anchor2\_n24\_fs1\_L12\_seq256 & $k{=}2$ & 0.990 & 0.830 & 0.120 & 0.000 \\
+permfill\_anchor2\_n32\_fs1\_L12\_seq256 & $k{=}2$ & 1.000 & 1.000 & 1.000 & 0.935 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{4$\times$4 数独：Future-Seed 推迟相变点}
+表~\ref{tab:phase} 给出 solve-rate 随 holes 增长的变化。Future-Seed 在 holes=10 与 holes=12 仍保持较高 solve-rate，而 FS=0 很快塌陷至接近 0。
 
 \begin{table}[h]
 \centering
@@ -78,8 +127,8 @@ holes & FS=0 solve & FS=1 solve \\
 \end{tabular}
 \end{table}
 
-\subsection{软约束正则：提升 holes=12，但 holes=14 仍困难}
-表~\ref{tab:cons} 显示：在 holes $\in[4,14]$ 的课程训练下，加入 $\lambda=0.1$ 的一致性正则能显著提升 holes=12 的 solve-rate（约 0.48$\rightarrow$0.59），但 holes=14 仍然难以解出（solve-rate 约为 0）。
+\subsection{数独软约束正则：提升 holes=12，但 holes=14 仍困难}
+为缓解冲突解，我们加入一个简单的软约束：对每行/列/宫，要求“每个数字的概率计数之和接近 1”。在 holes $\in[4,14]$ 的课程训练下，加入 $\lambda=0.1$ 的一致性正则能显著提升 holes=12 的 solve-rate（约 0.48$\rightarrow$0.59），但 holes=14 仍然难以解出（表~\ref{tab:cons}）。
 
 \begin{table}[h]
 \centering
@@ -98,19 +147,25 @@ $\lambda=0.1$ & 0.9515 & 0.5855 & 0.0000 \\
 \subsection{负结果}
 我们观察到：
 \begin{itemize}
-  \item 仅训练极少参数（\texttt{FS\_MASK\_ONLY=1}）无法学习该任务（solve-rate $\approx 0$）。
-  \item 将 mask 固定为 prefix（更强“用未来”压力）在当前设定下训练不稳定，效果很差（solve-rate $\approx 0$）。这提示仅靠单次前向的 argmax 填充可能不足，可能需要迭代式推理协议。
+  \item 仅训练极少参数（\texttt{FS\_MASK\_ONLY=1}）无法学习数独任务（solve-rate $\approx 0$）。
+  \item 将数独 mask 固定为 prefix（更强“用未来”压力）在当前设定下训练不稳定（solve-rate $\approx 0$）。这提示仅靠单次前向的 argmax 填充可能不足，可能需要迭代式推理协议。
 \end{itemize}
 
 \section{讨论与后续工作}
-本工作给出了一个干净、硬指标的证据：Future-Seed 能在 in-place 约束修复任务上显著提升 solve-rate，并推迟相变点。我们认为其核心贡献是提供了一个跨层的“全局记账/约束传播通道”。后续可沿两条路径推进：
+本文结果跨任务一致指向同一解释：Future-Seed 通过跨层回灌提供了一个额外的“全局约束记账/传播通道”，使得左侧 mask 的预测能够更稳定地依赖右侧信息与全局一致性。在置换类任务（KVSORT/PERM-FILL）中，anchor 进一步提供了极轻量的对齐锚点，从而显著改善长度外推。
+
+后续可沿两条路径推进：
 \begin{itemize}
-  \item \textbf{推理协议}：引入迭代填充（mask-predict / refinement）以进一步提升 holes=14 的成功率。
-  \item \textbf{任务扩展}：扩展到 9$\times$9 数独、以及更真实的结构修复（JSON/括号/一致性编辑）与 in-place 置换修复（key-value 排序 + mask）。
+  \item \textbf{推理协议}：引入迭代填充（mask-predict / refinement）以进一步提升 holes=14 的数独成功率，并系统比较“并行一次性填空”与“迭代修复”的 trade-off。
+  \item \textbf{任务扩展}：扩展到更真实的结构修复（JSON/括号/一致性编辑）与更大规模的置换修复（key-value 排序 + mask + 外推）。
 \end{itemize}
 
 \section*{复现说明}
-代码与脚本基于 \texttt{git@github.com:yanghu819/future-seed.git}。主要入口为 \texttt{rwkv\_diff\_future\_seed.py}，通过环境变量启用 \texttt{SUDOKU\_TASK=1} 并设置 \texttt{FUTURE\_SEED}、holes 课程与评估 trials。
+代码与脚本基于 \url{git@github.com:yanghu819/future-seed.git}。主要入口为 \path{rwkv_diff_future_seed.py}。\\
+通过环境变量启用：\\
+\texttt{RIGHTCOPY\_TASK} / \texttt{CONSTR\_TASK} / \texttt{KVSORT\_TASK}\\
+\texttt{PERMFILL\_TASK} / \texttt{SUDOKU\_TASK}\\
+并设置 \texttt{FUTURE\_SEED}。\\
+数独复现脚本见 \path{rwkv-diff-future-seed/run_sudoku.sh}。
 
 \end{document}
-

@@ -5,22 +5,16 @@ A minimal, reproducible prototype that shows Future‑Seed (vertical state non�
 ## Why it matters
 Future‑Seed passes the previous layer’s final state `s_T` as the next layer’s initial state. In diffusion LM (non‑causal), this behaves like “re‑reading” the sequence across depth, strengthening future context instead of one‑pass online updates.
 
-## Results (1000 steps, tiny model)
-| task | FUTURE_SEED=0 acc | FUTURE_SEED=1 acc |
+## Results
+See `RESULTS.md` and `paper/future-seed-report.pdf`.
+
+Quick highlights (single GPU 4090, RWKV7 `cuda_wind`):
+| task | FUTURE_SEED=0 | FUTURE_SEED=1 |
 |---|---:|---:|
-| rightcopy (LEN=16) | 0.1075 | 0.6341 |
-| constr (LEN=16) | 0.1628 | 0.7384 |
-
-## New: In-place Sudoku (4x4) Constraint Repair
-We add a hard in-place constraint repair benchmark: 4x4 Sudoku masked infill (`SUDOKU_TASK=1`), with `solve` defined as satisfying row/col/2x2-block constraints.
-
-Phase curve (curriculum holes∈[4,12], trials=2000):
-| holes | FS=0 solve | FS=1 solve |
-|---:|---:|---:|
-| 10 | 0.0095 | 0.9510 |
-| 12 | 0.0000 | 0.5510 |
-
-See `RESULTS.md` and `paper/future-seed-sudoku.pdf`.
+| rightcopy acc (3 seeds, mean) | 0.1046 | 0.1550 |
+| constr acc (3 seeds, mean) | 0.0977 | 0.2114 |
+| kvsort exact (keys36, n=20) | 0.0 | 1.0 |
+| sudoku solve (holes=12) | 0.0 | 0.5510 |
 
 Logs:
 - `rwkv-diff-future-seed/logs/rightcopy_base_big.log`
