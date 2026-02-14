@@ -11,6 +11,17 @@ Future‑Seed passes the previous layer’s final state `s_T` as the next layer�
 | rightcopy (LEN=16) | 0.1075 | 0.6341 |
 | constr (LEN=16) | 0.1628 | 0.7384 |
 
+## New: In-place Sudoku (4x4) Constraint Repair
+We add a hard in-place constraint repair benchmark: 4x4 Sudoku masked infill (`SUDOKU_TASK=1`), with `solve` defined as satisfying row/col/2x2-block constraints.
+
+Phase curve (curriculum holes∈[4,12], trials=2000):
+| holes | FS=0 solve | FS=1 solve |
+|---:|---:|---:|
+| 10 | 0.0095 | 0.9510 |
+| 12 | 0.0000 | 0.5510 |
+
+See `RESULTS.md` and `paper/future-seed-sudoku.pdf`.
+
 Logs:
 - `rwkv-diff-future-seed/logs/rightcopy_base_big.log`
 - `rwkv-diff-future-seed/logs/rightcopy_future_seed_big.log`
