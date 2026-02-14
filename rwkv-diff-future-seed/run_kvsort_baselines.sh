@@ -9,6 +9,17 @@ set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p exp weights
 
+PY="${PYTHON:-}"
+if [[ -z "${PY}" ]]; then
+  if [[ -x "../.venv/bin/python" ]]; then
+    PY="../.venv/bin/python"
+  elif [[ -x ".venv/bin/python" ]]; then
+    PY=".venv/bin/python"
+  else
+    PY="python3"
+  fi
+fi
+
 COMMON=(
   PYTHONUNBUFFERED=1
   RWKV7_KERNEL=cuda_wind
@@ -39,20 +50,19 @@ echo "[1/3] RWKV FS=0"
 env "${COMMON[@]}" \
   MODEL=rwkv FUTURE_SEED=0 TRAIN=1 \
   WEIGHTS_PATH=weights/kvsort_keys36_n20_fs0_rwkv.pt \
-  python rwkv_diff_future_seed.py | tee exp/kvsort_keys36_n20_fs0_rwkv.log
+  "${PY}" rwkv_diff_future_seed.py | tee exp/kvsort_keys36_n20_fs0_rwkv.log
 
 echo "[2/3] RWKV FS=1"
 env "${COMMON[@]}" \
   MODEL=rwkv FUTURE_SEED=1 FUTURE_SEED_ALPHA_INIT=-2 TRAIN=1 \
   WEIGHTS_PATH=weights/kvsort_keys36_n20_fs1_rwkv.pt \
-  python rwkv_diff_future_seed.py | tee exp/kvsort_keys36_n20_fs1_rwkv.log
+  "${PY}" rwkv_diff_future_seed.py | tee exp/kvsort_keys36_n20_fs1_rwkv.log
 
 echo "[3/3] Transformer MLM"
 env "${COMMON[@]}" \
   MODEL=transformer TRAIN=1 TRANS_N_HEAD=8 \
   WEIGHTS_PATH=weights/kvsort_keys36_n20_tfmlm.pt \
-  python rwkv_diff_future_seed.py | tee exp/kvsort_keys36_n20_tfmlm.log
+  "${PY}" rwkv_diff_future_seed.py | tee exp/kvsort_keys36_n20_tfmlm.log
 
 echo "Done. For Hungarian decoding, run eval-only like:"
 echo "  DECODE=hungarian TRAIN=0 KVSORT_EVAL=1 WEIGHTS_PATH=... python rwkv_diff_future_seed.py"
-

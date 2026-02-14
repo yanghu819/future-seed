@@ -7,6 +7,17 @@ set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p exp weights
 
+PY="${PYTHON:-}"
+if [[ -z "${PY}" ]]; then
+  if [[ -x "../.venv/bin/python" ]]; then
+    PY="../.venv/bin/python"
+  elif [[ -x ".venv/bin/python" ]]; then
+    PY=".venv/bin/python"
+  else
+    PY="python3"
+  fi
+fi
+
 COMMON=(
   PYTHONUNBUFFERED=1
   RWKV7_KERNEL=cuda_wind
@@ -33,7 +44,7 @@ train_one () {
     MODEL=rwkv FUTURE_SEED=1 FUTURE_SEED_ALPHA_INIT=-2 TRAIN=1 \
     WEIGHTS_PATH="weights/${tag}.pt" \
     "$@" \
-    python rwkv_diff_future_seed.py | tee "exp/${tag}.log"
+    "${PY}" rwkv_diff_future_seed.py | tee "exp/${tag}.log"
 }
 
 eval_sweep () {
@@ -46,7 +57,7 @@ eval_sweep () {
       PERMFILL_N_TEST="${n}" \
       WEIGHTS_PATH="weights/${tag}.pt" \
       "$@" \
-      python rwkv_diff_future_seed.py | tee "exp/${tag}_eval_n${n}.log"
+      "${PY}" rwkv_diff_future_seed.py | tee "exp/${tag}_eval_n${n}.log"
   done
 }
 
@@ -69,4 +80,3 @@ eval_sweep permfill_anchor2_n32_fs1_L12_seq256 \
   PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
 
 echo "Done."
-

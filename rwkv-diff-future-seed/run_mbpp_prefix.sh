@@ -18,6 +18,17 @@ fi
 
 mkdir -p exp weights
 
+PY="${PYTHON:-}"
+if [[ -z "${PY}" ]]; then
+  if [[ -x "../.venv/bin/python" ]]; then
+    PY="../.venv/bin/python"
+  elif [[ -x ".venv/bin/python" ]]; then
+    PY=".venv/bin/python"
+  else
+    PY="python3"
+  fi
+fi
+
 COMMON=(
   PYTHONUNBUFFERED=1
   RWKV7_KERNEL=cuda_wind
@@ -44,17 +55,16 @@ COMMON=(
 echo "[1/3] RWKV FS=0"
 env "${COMMON[@]}" MODEL=rwkv FUTURE_SEED=0 TRAIN=1 \
   WEIGHTS_PATH=weights/mbpp_prefix_fs0_rwkv.pt \
-  python rwkv_diff_future_seed.py | tee exp/mbpp_prefix_fs0_rwkv.log
+  "${PY}" rwkv_diff_future_seed.py | tee exp/mbpp_prefix_fs0_rwkv.log
 
 echo "[2/3] RWKV FS=1"
 env "${COMMON[@]}" MODEL=rwkv FUTURE_SEED=1 FUTURE_SEED_ALPHA_INIT=-2 TRAIN=1 \
   WEIGHTS_PATH=weights/mbpp_prefix_fs1_rwkv.pt \
-  python rwkv_diff_future_seed.py | tee exp/mbpp_prefix_fs1_rwkv.log
+  "${PY}" rwkv_diff_future_seed.py | tee exp/mbpp_prefix_fs1_rwkv.log
 
 echo "[3/3] Transformer MLM"
 env "${COMMON[@]}" MODEL=transformer TRAIN=1 TRANS_N_HEAD=8 \
   WEIGHTS_PATH=weights/mbpp_prefix_tfmlm.pt \
-  python rwkv_diff_future_seed.py | tee exp/mbpp_prefix_tfmlm.log
+  "${PY}" rwkv_diff_future_seed.py | tee exp/mbpp_prefix_tfmlm.log
 
 echo "Done."
-
