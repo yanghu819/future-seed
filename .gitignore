@@ -3,5 +3,8 @@ __pycache__/
 *.pyc
 .venv/
 rwkv-diff-future-seed/weights/
+rwkv-diff-future-seed/exp/
+rwkv-diff-future-seed/logs/
 modded-nanogpt-rwkv/
 tiny-diffusion/
+paper/build/

@@ -134,6 +134,15 @@ QA_MODE = os.getenv("QA_MODE", "both")
 QA_FILE = os.getenv("QA_FILE", "")
 QA_SYNTH_A_MAX = env_int("QA_SYNTH_A_MAX", 99)
 QA_SYNTH_B_MAX = env_int("QA_SYNTH_B_MAX", 99)
+SUDOKU_TASK = env_int("SUDOKU_TASK", 0) == 1
+SUDOKU_EVAL = env_int("SUDOKU_EVAL", 0) == 1
+SUDOKU_PAD = env_int("SUDOKU_PAD", 8)
+SUDOKU_HOLES_MIN = env_int("SUDOKU_HOLES_MIN", 4)
+SUDOKU_HOLES_MAX = env_int("SUDOKU_HOLES_MAX", 8)
+SUDOKU_HOLES_TEST = env_int("SUDOKU_HOLES_TEST", 8)
+SUDOKU_MASK_MODE = os.getenv("SUDOKU_MASK_MODE", "random")  # random|prefix
+SUDOKU_TRIALS = env_int("SUDOKU_TRIALS", 200)
+SUDOKU_CONS_LAMBDA = env_float("SUDOKU_CONS_LAMBDA", 0.0)
 FS_MASK_ONLY = env_int("FS_MASK_ONLY", 0) == 1
 FS_ENCDEC = env_int("FS_ENCDEC", 0) == 1
 FS_ENCDEC_AUX = env_int("FS_ENCDEC_AUX", 1) == 1
@@ -159,7 +168,16 @@ device = (
 )
 muon_dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
-use_bin = len(DATA_BIN) > 0 and not REVERSE_TASK and not BIDIR_TASK and not STRUCT_TASK and not RETR_TASK and not SENT_TASK and not QA_TASK
+use_bin = (
+    len(DATA_BIN) > 0
+    and not REVERSE_TASK
+    and not BIDIR_TASK
+    and not STRUCT_TASK
+    and not RETR_TASK
+    and not SENT_TASK
+    and not QA_TASK
+    and not SUDOKU_TASK
+)
 use_bin = (
     use_bin
     and not ADD_TASK
@@ -853,6 +871,86 @@ elif QA_TASK:
         y = x.clone()
         x[mask] = mask_token_id
         return x.to(device), y.to(device), mask.to(device)
+elif SUDOKU_TASK:
+    digits = ["1", "2", "3", "4"]
+    vocab_base = digits + ["P", "M", "=", "|", "#"]
+    vocab_size = len(vocab_base) + 1
+    mask_token_id = len(vocab_base)
+    stoi = {ch: i for i, ch in enumerate(vocab_base)}
+    itos = {i: ch for i, ch in enumerate(vocab_base)}
+    itos[mask_token_id] = "_"
+
+    def encode(s):
+        return [stoi[ch] for ch in s]
+
+    def decode(l):
+        return "".join([itos[n] for n in l])
+
+    def _sudoku_sol_4x4():
+        # Base valid 4x4 (2x2 subgrid) solution, then apply random symmetries.
+        base = [
+            [1, 2, 3, 4],
+            [3, 4, 1, 2],
+            [2, 1, 4, 3],
+            [4, 3, 2, 1],
+        ]
+
+        perm = random.sample([1, 2, 3, 4], 4)
+        mp = {i + 1: perm[i] for i in range(4)}
+        g = [[mp[v] for v in row] for row in base]
+
+        bands = [[0, 1], [2, 3]]
+        random.shuffle(bands)
+        rows = []
+        for b in bands:
+            bb = b[:]
+            random.shuffle(bb)
+            rows += bb
+
+        stacks = [[0, 1], [2, 3]]
+        random.shuffle(stacks)
+        cols = []
+        for s in stacks:
+            ss = s[:]
+            random.shuffle(ss)
+            cols += ss
+
+        out = []
+        for r in rows:
+            for c in cols:
+                out.append(str(g[r][c]))
+        return "".join(out)  # len=16
+
+    def _sudoku_pack_4x4(holes):
+        sol = _sudoku_sol_4x4()
+        p = "#" * SUDOKU_PAD
+        s = "P=" + p + "|M=" + sol
+        s = s[:SEQ_LEN]
+        s = s + "#" * (SEQ_LEN - len(s))
+        m0 = s.find("|M=") + 3
+        m1 = m0 + 16
+        holes = max(1, min(16, int(holes)))
+        if SUDOKU_MASK_MODE == "prefix":
+            idx = list(range(holes))
+        else:
+            idx = random.sample(list(range(16)), holes)
+        return s, sol, m0, m1, idx
+
+    def get_batch(split):
+        x = torch.empty(DEVICE_BSZ, SEQ_LEN, dtype=torch.long)
+        mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+        for i in range(DEVICE_BSZ):
+            if split == "train":
+                holes = random.randint(SUDOKU_HOLES_MIN, SUDOKU_HOLES_MAX)
+            else:
+                holes = SUDOKU_HOLES_TEST
+            s, _sol, m0, _m1, idx = _sudoku_pack_4x4(holes)
+            x[i] = torch.tensor(encode(s), dtype=torch.long)
+            for j in idx:
+                mask[i, m0 + j] = True
+        y = x.clone()
+        x[mask] = mask_token_id
+        return x.to(device), y.to(device), mask.to(device)
 elif KVSORT_TASK:
     digits = [str(i) for i in range(10)]
     letters = [chr(ord("a") + i) for i in range(26)]
@@ -1509,7 +1607,49 @@ def zeropower_via_newtonschulz5(G, steps=10, eps=1e-7):
 
 
 def batch_loss(model, X, Y, M):
-    _, loss_main = model(X, Y, M)
+    logits, loss_main = model(X, Y, M)
+    if SUDOKU_TASK and SUDOKU_CONS_LAMBDA > 0:
+        # 4x4 sudoku: penalize row/col/block digit-count deviation from 1.
+        # Use ground-truth one-hot for unmasked clue positions to avoid double-counting uncertainty.
+        m0 = SUDOKU_PAD + 5  # "P=" (2) + pad + "|M=" (3)
+        seg_logits = logits[:, m0 : m0 + 16, :]  # [B,16,V]
+        seg_mask = M[:, m0 : m0 + 16]  # [B,16] (True where we need to predict)
+        seg_y = Y[:, m0 : m0 + 16]  # [B,16]
+
+        digit_ids = torch.tensor([stoi[d] for d in ["1", "2", "3", "4"]], device=seg_logits.device, dtype=torch.long)
+        p_model = torch.softmax(seg_logits[..., digit_ids], dim=-1)  # [B,16,4]
+
+        # Map seg_y token ids -> digit index 0..3 for one-hot
+        y_idx = torch.zeros_like(seg_y)
+        for di in range(4):
+            y_idx = torch.where(seg_y == digit_ids[di], torch.full_like(y_idx, di), y_idx)
+        p_true = F.one_hot(y_idx, num_classes=4).to(p_model.dtype)  # [B,16,4]
+
+        p = torch.where(seg_mask.unsqueeze(-1), p_model, p_true)
+
+        groups = [
+            # rows
+            [0, 1, 2, 3],
+            [4, 5, 6, 7],
+            [8, 9, 10, 11],
+            [12, 13, 14, 15],
+            # cols
+            [0, 4, 8, 12],
+            [1, 5, 9, 13],
+            [2, 6, 10, 14],
+            [3, 7, 11, 15],
+            # 2x2 blocks
+            [0, 1, 4, 5],
+            [2, 3, 6, 7],
+            [8, 9, 12, 13],
+            [10, 11, 14, 15],
+        ]
+        cons = 0.0
+        for g in groups:
+            cnt = p[:, g, :].sum(dim=1)  # [B,4]
+            cons = cons + (cnt - 1.0).pow(2).mean()
+        cons = cons / len(groups)
+        loss_main = loss_main + SUDOKU_CONS_LAMBDA * cons
     if not FS_ENCDEC:
         return loss_main
     r = torch.rand_like(X.float())
@@ -1631,6 +1771,63 @@ def qa_eval(model, trials=200, mode="qa"):
     acc = correct / total if total > 0 else 0.0
     model.train()
     return acc
+
+
+@torch.no_grad()
+def sudoku_eval(model, trials=200, holes=8):
+    if not SUDOKU_TASK:
+        return None
+
+    def valid_4x4(seg):
+        if len(seg) != 16:
+            return False
+        if any(ch not in "1234" for ch in seg):
+            return False
+        g = [int(ch) for ch in seg]
+        need = {1, 2, 3, 4}
+        # rows
+        for r in range(4):
+            if set(g[r * 4 : r * 4 + 4]) != need:
+                return False
+        # cols
+        for c in range(4):
+            if set(g[c + 4 * r] for r in range(4)) != need:
+                return False
+        # 2x2 blocks
+        for br in [0, 2]:
+            for bc in [0, 2]:
+                blk = []
+                for r in range(br, br + 2):
+                    for c in range(bc, bc + 2):
+                        blk.append(g[r * 4 + c])
+                if set(blk) != need:
+                    return False
+        return True
+
+    model.eval()
+    ok_valid = 0
+    ok_exact = 0
+    for _ in range(trials):
+        s, sol, m0, m1, idx = _sudoku_pack_4x4(holes)
+        y = torch.tensor(encode(s), dtype=torch.long, device=device).unsqueeze(0)
+        x = y.clone()
+        mask = torch.zeros_like(x, dtype=torch.bool)
+        for j in idx:
+            mask[:, m0 + j] = True
+        x[mask] = mask_token_id
+        logits, _ = model(x)
+        pred = logits.argmax(dim=-1)
+        out = torch.where(mask, pred, x)
+        out_s = decode(out[0].tolist())
+        out_m = out_s[m0:m1]
+        if out_m == sol:
+            ok_exact += 1
+        if valid_4x4(out_m):
+            ok_valid += 1
+    valid_rate = ok_valid / trials if trials > 0 else 0.0
+    exact_rate = ok_exact / trials if trials > 0 else 0.0
+    model.train()
+    return valid_rate, exact_rate
 
 
 @torch.no_grad()
@@ -2412,9 +2609,10 @@ if __name__ == "__main__":
     print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")
     print(sum(p.numel() for p in m.parameters() if p.requires_grad) / 1e6, "M trainable")
 
-    if os.path.exists(WEIGHTS_PATH) and not TRAIN:
+    if os.path.exists(WEIGHTS_PATH):
         m.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device))
-    else:
+
+    if TRAIN:
         fused_ok = device == "cuda"
         if FS_MASK_ONLY:
             trainable = [p for p in m.parameters() if p.requires_grad]
@@ -2511,6 +2709,11 @@ if __name__ == "__main__":
                     acc_qa = qa_eval(m, mode="qa")
                     acc_aq = qa_eval(m, mode="aq")
                     print(f"qa->a acc {acc_qa:.4f}, a->q acc {acc_aq:.4f}")
+                if SUDOKU_EVAL:
+                    res = sudoku_eval(m, trials=SUDOKU_TRIALS, holes=SUDOKU_HOLES_TEST)
+                    if res is not None:
+                        va, ex = res
+                        print(f"sudoku holes {SUDOKU_HOLES_TEST} solve {va:.4f}, exact {ex:.4f}")
                 if KVSORT_EVAL:
                     ex, kv, ko, pa = kvsort_eval(m, mode="train")
                     ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
@@ -2542,12 +2745,19 @@ if __name__ == "__main__":
 
         print(f"Total training time: {time.time() - start:.2f} seconds")
         torch.save(m.state_dict(), WEIGHTS_PATH)
+    elif not os.path.exists(WEIGHTS_PATH):
+        raise FileNotFoundError(f"WEIGHTS_PATH not found and TRAIN=0: {WEIGHTS_PATH}")
 
     if (not TRAIN) and KVSORT_EVAL:
         ex, kv, ko, pa = kvsort_eval(m, mode="train")
         ex2, kv2, ko2, pa2 = kvsort_eval(m, mode="test")
         print(f"kvsort_id exact {ex:.4f}, key_valid {kv:.4f}, key_order {ko:.4f}, pair_acc {pa:.4f}")
         print(f"kvsort_ood exact {ex2:.4f}, key_valid {kv2:.4f}, key_order {ko2:.4f}, pair_acc {pa2:.4f}")
+    if (not TRAIN) and SUDOKU_EVAL:
+        res = sudoku_eval(m, trials=SUDOKU_TRIALS, holes=SUDOKU_HOLES_TEST)
+        if res is not None:
+            va, ex = res
+            print(f"sudoku holes {SUDOKU_HOLES_TEST} solve {va:.4f}, exact {ex:.4f}")
     if (not TRAIN) and PERMFILL_EVAL:
         ex, va, an = permfill_eval(m, mode="train")
         ex2, va2, an2 = permfill_eval(m, mode="test")
