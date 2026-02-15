@@ -92,6 +92,32 @@ kvsort\_ood exact & 0.0 & 1.0 \\
 \end{tabular}
 \end{table}
 
+\subsection{Transformer attention baselines (negative)}
+To isolate whether KVSORT is simply an attention-visibility issue, we implemented several Transformer baselines in the same codebase:
+(i) bidirectional Transformer-MLM (\texttt{MODEL=transformer}),
+(ii) decoder-only causal Transformer (\texttt{MODEL=transformer\_causal}),
+and (iii) an ``attention-side Future-Seed'' variant that passes a cross-layer global token summary (\texttt{ATTN\_FS=1}, $K{=}32$).
+On KVSORT (keys36, $n{=}20$, nosep), all Transformer variants fail to recover the correct ordering (exact=0.0).
+Hungarian decoding can enforce permutation \emph{validity} (no duplicates) but does not fix ordering.
+We also tested iterative refinement (\texttt{REFINE\_STEPS=8}) and a structured Sinkhorn assignment loss (\texttt{PERM\_SINKHORN=1}); neither resolves the failure.
+
+\begin{table}[h]
+\centering
+\caption{KVSORT Transformer baselines (keys36, $n=20$, nosep). Hungarian decoding enforces validity but ordering remains 0.}
+\label{tab:kvsort_tf_en}
+\begin{tabular}{lcccc}
+\toprule
+model & decode & exact & key\_valid & key\_order \\
+\midrule
+Transformer-MLM & argmax & 0.0 & 0.0 & 0.0 \\
+Transformer-MLM & hungarian & 0.0 & 1.0 & 0.0 \\
+Transformer-Causal & hungarian & 0.0 & 1.0 & 0.0 \\
+Transformer-Causal + ATTN\_FS ($K{=}32$) & hungarian & 0.0 & 1.0 & 0.0 \\
+Transformer-MLM + Sinkhorn loss & hungarian & 0.0 & 1.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{PERMFILL: anchors improve length extrapolation}
 Evaluating saved weights under length extrapolation ($n_{\text{test}}$ sweep) shows that a tiny anchor plus higher training max length can substantially improve OOD generalization:
 
@@ -136,8 +162,8 @@ We also tested a minimal soft constraint regularizer (row/col/block digit-count 
 \section{Limitations and Next Steps}
 This report is intentionally minimal and synthetic. Key next steps:
 \begin{itemize}
-  \item \textbf{Inference protocol}: compare one-shot argmax fill vs.\ iterative refinement (mask-predict) under equal compute.
-  \item \textbf{Stronger baselines}: add structured decoders (e.g., assignment/matching) for permutation tasks to isolate modeling vs.\ decoding effects.
+  \item \textbf{Inference protocol}: beyond one-shot fill, study iterative refinement under equal compute on harder constraints (e.g., larger Sudoku / structured text repairs).
+  \item \textbf{Stronger baselines}: we tested Hungarian decoding and Sinkhorn permutation loss; future work includes pointer/ILP-style structured models and richer permutation tasks (with duplicates / instance-level matching).
   \item \textbf{More realistic repairs}: extend to hard-constraint structured text (JSON/brackets) and consistency editing tasks.
 \end{itemize}
 

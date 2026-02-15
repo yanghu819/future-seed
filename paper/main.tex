@@ -88,6 +88,32 @@ kvsort\_ood exact & 0.0 & 1.0 \\
 \end{tabular}
 \end{table}
 
+\subsection{Transformer 注意力基线（负结果）}
+为排除“KVSORT 只是因为看不见右侧信息才失败”的解释，我们在同一代码中实现了多种 Transformer 基线：
+(i) 双向 Transformer-MLM（\texttt{MODEL=transformer}），
+(ii) 因果 decoder-only Transformer（\texttt{MODEL=transformer\_causal}），
+以及 (iii) attention-side Future-Seed：跨层用全局 token 回传右侧摘要（\texttt{ATTN\_FS=1}, $K{=}32$）。
+在 KVSORT（keys36, $n{=}20$, nosep）上，这些 Transformer 基线均无法恢复正确排序（exact=0.0）。
+Hungarian 解码可以强制置换合法性（\texttt{key\_valid=1.0}）但排序仍为 0。
+我们也测试了迭代式 refinement（\texttt{REFINE\_STEPS=8}）与 Sinkhorn 置换损失（\texttt{PERM\_SINKHORN=1}），同样未能解决该失败模式。
+
+\begin{table}[h]
+\centering
+\caption{KVSORT 的 Transformer 基线（keys36, $n=20$, nosep）。Hungarian 可保证合法性，但排序仍失败。}
+\label{tab:kvsort_tf}
+\begin{tabular}{lcccc}
+\toprule
+model & decode & exact & key\_valid & key\_order \\
+\midrule
+Transformer-MLM & argmax & 0.0 & 0.0 & 0.0 \\
+Transformer-MLM & hungarian & 0.0 & 1.0 & 0.0 \\
+Transformer-Causal & hungarian & 0.0 & 1.0 & 0.0 \\
+Transformer-Causal + ATTN\_FS ($K{=}32$) & hungarian & 0.0 & 1.0 & 0.0 \\
+Transformer-MLM + Sinkhorn loss & hungarian & 0.0 & 1.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{PERMFILL：极小 anchor 改善长度外推}
 表~\ref{tab:permfill} 给出加载不同权重并在不同 $n_{\text{test}}$ 下的 exact/valid（同值）结果摘要。
 
@@ -156,7 +182,8 @@ $\lambda=0.1$ & 0.9515 & 0.5855 & 0.0000 \\
 
 后续可沿两条路径推进：
 \begin{itemize}
-  \item \textbf{推理协议}：引入迭代填充（mask-predict / refinement）以进一步提升 holes=14 的数独成功率，并系统比较“并行一次性填空”与“迭代修复”的 trade-off。
+  \item \textbf{推理协议}：迭代填充（mask-predict / refinement）在 KVSORT 上不足以修复排序失败；后续可在更强约束（更大数独/结构文本）下系统比较“并行一次性填空”与“迭代修复”的 trade-off。
+  \item \textbf{更强基线}：我们已测试 Hungarian 解码与 Sinkhorn 置换损失；后续可补充 pointer/ILP 等结构化模型以进一步区分“建模”与“解码”因素。
   \item \textbf{任务扩展}：扩展到更真实的结构修复（JSON/括号/一致性编辑）与更大规模的置换修复（key-value 排序 + mask + 外推）。
 \end{itemize}
 
