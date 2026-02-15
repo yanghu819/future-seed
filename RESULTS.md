@@ -41,6 +41,27 @@ Logs:
 - `_autodl_logs/kvsort_keys36_n20_nosep_fs0_L8_seq256.log`
 - `_autodl_logs/kvsort_keys36_n20_nosep_fs1_L8_seq256.log`
 
+## Attention Baselines (Transformer)
+Run date: **2026-02-15** (AutoDL 4090).
+
+We tested:
+- `MODEL=transformer` (Transformer-MLM, bidirectional)
+- `MODEL=transformer_causal` (decoder-only causal)
+- `MODEL=transformer_causal ATTN_FS=1` (attention-side Future-Seed via cross-layer global tokens; `ATTN_FS_K=32`)
+
+**KVSORT (n=20, keys-only, no-sep)**:
+- Transformer-MLM: `DECODE=hungarian` enforces uniqueness (`key_valid=1.0`) but **fails ordering** (`key_order=0.0`, `exact=0.0`).
+- Transformer-Causal (no future): `exact=0.0` (as expected); Hungarian can't fix ordering.
+- Transformer-Causal + ATTN_FS (K=32): **no improvement** over causal baseline (`exact=0.0`, Hungarian still `key_order=0.0`).
+
+**PERMFILL (train n=24, anchor k=2; eval n_test=24/28/32/36)**:
+- Transformer-Causal + Hungarian: `valid=1.0` but **OOD exact=0.0** for all `n_test`.
+- Transformer-Causal + ATTN_FS (K=32): **OOD exact=0.0** for all `n_test` (Hungarian or argmax).
+
+Logs:
+- `_autodl_logs/attnfs/kvsort_keys36_n20_tfc_{fs0,attnfs}.jsonl`
+- `_autodl_logs/attnfs/permfill_anchor2_n24_tfc_{fs0,attnfs}.jsonl`
+
 ## PERMFILL (Permutation Fill, In-Place)
 We evaluate exact/valid rates under **length extrapolation** by loading saved weights and running `TRAIN=0 PERMFILL_EVAL=1` with different `PERMFILL_N_TEST`.
 
