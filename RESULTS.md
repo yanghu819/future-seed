@@ -54,6 +54,7 @@ We tested:
 - Transformer-Causal (no future): `exact=0.0` (as expected); Hungarian can't fix ordering.
 - Transformer-Causal + ATTN_FS (K=32): **no improvement** over causal baseline (`exact=0.0`, Hungarian still `key_order=0.0`).
 - Iterative refinement (`REFINE_STEPS=8`, Mask-Predict style) does **not** fix ordering for Transformer-MLM (`exact=0.0`).
+- Transformer-MLM + structured permutation loss (`PERM_SINKHORN=1`, 800 iters) still fails (`exact=0.0`; Hungarian only gives `key_valid=1.0`).
 
 **PERMFILL (train n=24, anchor k=2; eval n_test=24/28/32/36)**:
 - Transformer-Causal + Hungarian: `valid=1.0` but **OOD exact=0.0** for all `n_test`.
@@ -62,6 +63,7 @@ We tested:
 Logs:
 - `_autodl_logs/attnfs/kvsort_keys36_n20_tfc_{fs0,attnfs}.jsonl`
 - `_autodl_logs/attnfs/permfill_anchor2_n24_tfc_{fs0,attnfs}.jsonl`
+- `_autodl_logs/sinkhorn/kvsort_keys36_n20_tfmlm_sinkhorn_it800.jsonl`
 
 ## PERMFILL (Permutation Fill, In-Place)
 We evaluate exact/valid rates under **length extrapolation** by loading saved weights and running `TRAIN=0 PERMFILL_EVAL=1` with different `PERMFILL_N_TEST`.
