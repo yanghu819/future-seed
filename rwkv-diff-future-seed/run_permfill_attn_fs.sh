@@ -78,12 +78,12 @@ eval_sweep permfill_anchor2_n24_tfc_fs0 hungarian \
 
 # (B) causal transformer + attention future-seed (global token)
 train_one permfill_anchor2_n24_tfc_attnfs \
-  ATTN_FS=1 ATTN_FS_COLLECTOR=learned \
+  ATTN_FS=1 ATTN_FS_COLLECTOR=learned ATTN_FS_K=32 \
   PERMFILL_N_MIN=24 PERMFILL_N_MAX=24 \
   PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
 eval_sweep permfill_anchor2_n24_tfc_attnfs argmax \
-  ATTN_FS=1 ATTN_FS_COLLECTOR=learned PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
+  ATTN_FS=1 ATTN_FS_COLLECTOR=learned ATTN_FS_K=32 PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
 eval_sweep permfill_anchor2_n24_tfc_attnfs hungarian \
-  ATTN_FS=1 ATTN_FS_COLLECTOR=learned PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
+  ATTN_FS=1 ATTN_FS_COLLECTOR=learned ATTN_FS_K=32 PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
 
 echo "Done."

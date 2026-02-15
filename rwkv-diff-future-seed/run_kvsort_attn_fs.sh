@@ -87,10 +87,10 @@ eval_hungarian kvsort_keys36_n20_tfc_fs0 \
 
 # (B) causal transformer + attention future-seed (global token)
 train_one kvsort_keys36_n20_tfc_attnfs \
-  ATTN_FS=1 ATTN_FS_COLLECTOR=learned
+  ATTN_FS=1 ATTN_FS_COLLECTOR=learned ATTN_FS_K=32
 eval_one kvsort_keys36_n20_tfc_attnfs \
-  ATTN_FS=1 ATTN_FS_COLLECTOR=learned
+  ATTN_FS=1 ATTN_FS_COLLECTOR=learned ATTN_FS_K=32
 eval_hungarian kvsort_keys36_n20_tfc_attnfs \
-  ATTN_FS=1 ATTN_FS_COLLECTOR=learned
+  ATTN_FS=1 ATTN_FS_COLLECTOR=learned ATTN_FS_K=32
 
 echo "Done."

@@ -28,6 +28,7 @@ ATTN_FS = env_int("ATTN_FS", 0) == 1
 ATTN_FS_COLLECTOR = os.getenv("ATTN_FS_COLLECTOR", "zero")  # zero|learned
 ATTN_FS_GATING = env_int("ATTN_FS_GATING", 0) == 1
 ATTN_FS_ALPHA_INIT = env_float("ATTN_FS_ALPHA_INIT", 0.0)
+ATTN_FS_K = env_int("ATTN_FS_K", 1)
 
 HEAD_SIZE = env_int("HEAD_SIZE", 64)
 SEQ_LEN = env_int("SEQ_LEN", 1024)
@@ -1717,6 +1718,7 @@ class TransformerCausal(nn.Module):
         attn_fs_collector="zero",
         attn_fs_gating=False,
         attn_fs_alpha_init=0.0,
+        attn_fs_k=1,
     ):
         super().__init__()
         self.vocab_size = int(vocab_size)
@@ -1725,6 +1727,9 @@ class TransformerCausal(nn.Module):
         self.attn_fs = bool(attn_fs)
         self.attn_fs_collector = str(attn_fs_collector)
         self.attn_fs_gating = bool(attn_fs_gating)
+        self.attn_fs_k = int(attn_fs_k)
+        if self.attn_fs_k < 1:
+            raise ValueError(f"ATTN_FS_K must be >= 1, got {self.attn_fs_k}")
 
         if self.attn_fs_collector not in ("zero", "learned"):
             raise ValueError(f"ATTN_FS_COLLECTOR must be zero|learned, got {self.attn_fs_collector}")
@@ -1733,8 +1738,8 @@ class TransformerCausal(nn.Module):
             raise ValueError(f"TRANS_N_HEAD must divide N_EMBD: {n_head} | {n_embd}")
 
         self.wte = nn.Embedding(vocab_size, n_embd)
-        # +2 for optional prefix/suffix tokens when ATTN_FS=1.
-        self.wpe = nn.Embedding(SEQ_LEN + 2, n_embd)
+        # +2*K for optional prefix/suffix memory tokens when ATTN_FS=1.
+        self.wpe = nn.Embedding(SEQ_LEN + 2 * self.attn_fs_k, n_embd)
         self.mask_emb = nn.Parameter(torch.zeros(1, 1, n_embd))
 
         self.blocks = nn.ModuleList(
@@ -1749,7 +1754,7 @@ class TransformerCausal(nn.Module):
         self.lm_head = nn.Linear(n_embd, vocab_size, bias=False)
 
         if self.attn_fs_collector == "learned":
-            self.collector_token = nn.Parameter(torch.zeros(1, 1, n_embd))
+            self.collector_token = nn.Parameter(torch.zeros(1, self.attn_fs_k, n_embd))
         else:
             self.collector_token = None
 
@@ -1762,8 +1767,9 @@ class TransformerCausal(nn.Module):
     def forward(self, idx, targets=None, mask=None, **_ignored):
         B, T = idx.shape
         if self.attn_fs:
-            # Tokens are shifted right by 1 due to the prefix memory token.
-            pos = torch.arange(1, T + 1, device=idx.device).unsqueeze(0).expand(B, T)
+            # Tokens are shifted right by K due to the prefix memory tokens.
+            k = self.attn_fs_k
+            pos = torch.arange(k, k + T, device=idx.device).unsqueeze(0).expand(B, T)
         else:
             pos = torch.arange(T, device=idx.device).unsqueeze(0).expand(B, T)
 
@@ -1775,25 +1781,30 @@ class TransformerCausal(nn.Module):
                 x = block(x)
         else:
             # z carries a summary of the full sequence from the previous layer (via suffix token output).
-            z = torch.zeros(B, self.n_embd, device=idx.device, dtype=x.dtype)
-            pe_prefix = self.wpe(torch.zeros(1, 1, device=idx.device, dtype=torch.long)).to(x.dtype)
-            pe_suffix = self.wpe(torch.full((1, 1), T + 1, device=idx.device, dtype=torch.long)).to(x.dtype)
+            k = self.attn_fs_k
+            z = torch.zeros(B, k, self.n_embd, device=idx.device, dtype=x.dtype)
+            pe_prefix = self.wpe(torch.arange(k, device=idx.device, dtype=torch.long)).unsqueeze(0).to(x.dtype)
+            pe_suffix = (
+                self.wpe(torch.arange(k + T, k + T + k, device=idx.device, dtype=torch.long))
+                .unsqueeze(0)
+                .to(x.dtype)
+            )
             if self.collector_token is None:
-                collector_in = torch.zeros(B, 1, self.n_embd, device=idx.device, dtype=x.dtype)
+                collector_in = torch.zeros(B, k, self.n_embd, device=idx.device, dtype=x.dtype)
             else:
-                collector_in = self.collector_token.expand(B, 1, -1).to(x.dtype)
+                collector_in = self.collector_token.expand(B, -1, -1).to(x.dtype)
 
             for li, block in enumerate(self.blocks):
-                p = z.unsqueeze(1)
+                p = z
                 if self.attn_fs_alpha is not None:
                     gate = torch.sigmoid(self.attn_fs_alpha[li]).to(x.dtype)
                     p = p * gate
                 p = p + pe_prefix
                 c = collector_in + pe_suffix
-                ext = torch.cat([p, x, c], dim=1)  # [B, T+2, C]
+                ext = torch.cat([p, x, c], dim=1)  # [B, k+T+k, C]
                 ext = block(ext)
-                x = ext[:, 1 : 1 + T, :]
-                z = ext[:, -1, :]
+                x = ext[:, k : k + T, :]
+                z = ext[:, k + T : k + T + k, :]
 
         x = self.ln_f(x)
         logits = self.lm_head(x)
@@ -3098,6 +3109,7 @@ if __name__ == "__main__":
             attn_fs_collector=ATTN_FS_COLLECTOR,
             attn_fs_gating=ATTN_FS_GATING,
             attn_fs_alpha_init=ATTN_FS_ALPHA_INIT,
+            attn_fs_k=ATTN_FS_K,
         )
     else:
         model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), future_seed=FUTURE_SEED)
@@ -3123,6 +3135,7 @@ if __name__ == "__main__":
         attn_fs_collector=str(ATTN_FS_COLLECTOR),
         attn_fs_gating=int(bool(ATTN_FS_GATING)),
         attn_fs_alpha_init=float(ATTN_FS_ALPHA_INIT),
+        attn_fs_k=int(ATTN_FS_K),
         decode=DECODE,
         refine_steps=int(REFINE_STEPS),
         refine_conf=float(REFINE_CONF),
