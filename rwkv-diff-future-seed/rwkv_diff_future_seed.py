@@ -14,7 +14,7 @@ def env_float(name, default):
     return float(os.getenv(name, default))
 
 
-MODEL = os.getenv("MODEL", "rwkv")  # rwkv|transformer
+MODEL = os.getenv("MODEL", "rwkv")  # rwkv|transformer|transformer_causal
 DECODE = os.getenv("DECODE", "argmax")  # argmax|hungarian
 REFINE_STEPS = env_int("REFINE_STEPS", 0)
 REFINE_CONF = env_float("REFINE_CONF", 0.90)
@@ -24,6 +24,10 @@ BIN_SPAN_LEN = env_int("BIN_SPAN_LEN", 128)
 TRANS_N_HEAD = env_int("TRANS_N_HEAD", 8)
 TRANS_DROPOUT = env_float("TRANS_DROPOUT", 0.0)
 TRANS_FF_MULT = env_int("TRANS_FF_MULT", 4)
+ATTN_FS = env_int("ATTN_FS", 0) == 1
+ATTN_FS_COLLECTOR = os.getenv("ATTN_FS_COLLECTOR", "zero")  # zero|learned
+ATTN_FS_GATING = env_int("ATTN_FS_GATING", 0) == 1
+ATTN_FS_ALPHA_INIT = env_float("ATTN_FS_ALPHA_INIT", 0.0)
 
 HEAD_SIZE = env_int("HEAD_SIZE", 64)
 SEQ_LEN = env_int("SEQ_LEN", 1024)
@@ -1632,6 +1636,185 @@ class TransformerMLM(nn.Module):
         return logits, loss
 
 
+class CausalSelfAttention(nn.Module):
+    def __init__(self, n_embd, n_head, dropout=0.0):
+        super().__init__()
+        if n_embd % n_head != 0:
+            raise ValueError(f"TRANS_N_HEAD must divide N_EMBD: {n_head} | {n_embd}")
+        self.n_head = n_head
+        self.head_dim = n_embd // n_head
+        self.qkv = nn.Linear(n_embd, 3 * n_embd, bias=False)
+        self.proj = nn.Linear(n_embd, n_embd, bias=False)
+        self.dropout = float(dropout)
+
+    def forward(self, x):
+        B, T, C = x.shape
+        qkv = self.qkv(x)
+        q, k, v = qkv.split(C, dim=-1)
+        q = q.view(B, T, self.n_head, self.head_dim).transpose(1, 2)  # [B,nh,T,hd]
+        k = k.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+        v = v.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
+        y = F.scaled_dot_product_attention(
+            q,
+            k,
+            v,
+            dropout_p=(self.dropout if self.training else 0.0),
+            is_causal=True,
+        )
+        y = y.transpose(1, 2).contiguous().view(B, T, C)
+        y = self.proj(y)
+        return y
+
+
+class CausalMLP(nn.Module):
+    def __init__(self, n_embd, dropout=0.0, ff_mult=4):
+        super().__init__()
+        hidden = int(ff_mult) * n_embd
+        self.fc1 = nn.Linear(n_embd, hidden, bias=False)
+        self.fc2 = nn.Linear(hidden, n_embd, bias=False)
+        self.dropout = nn.Dropout(float(dropout))
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = F.gelu(x, approximate="tanh")
+        x = self.fc2(x)
+        x = self.dropout(x)
+        return x
+
+
+class TransformerCausalBlock(nn.Module):
+    def __init__(self, n_embd, n_head, dropout=0.0, ff_mult=4):
+        super().__init__()
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.attn = CausalSelfAttention(n_embd, n_head, dropout=dropout)
+        self.ln2 = nn.LayerNorm(n_embd)
+        self.mlp = CausalMLP(n_embd, dropout=dropout, ff_mult=ff_mult)
+
+    def forward(self, x):
+        x = x + self.attn(self.ln1(x))
+        x = x + self.mlp(self.ln2(x))
+        return x
+
+
+class TransformerCausal(nn.Module):
+    """
+    Decoder-only causal Transformer.
+
+    If ATTN_FS=1, we add a cross-layer "future-seed" path using two extra tokens per layer:
+      - prefix memory token: carries z_{l-1} to all positions (causal past)
+      - suffix collector token: reads the whole sequence (causal end) and becomes z_l
+    """
+
+    def __init__(
+        self,
+        vocab_size,
+        n_layer,
+        n_embd,
+        n_head,
+        dropout=0.0,
+        ff_mult=4,
+        attn_fs=False,
+        attn_fs_collector="zero",
+        attn_fs_gating=False,
+        attn_fs_alpha_init=0.0,
+    ):
+        super().__init__()
+        self.vocab_size = int(vocab_size)
+        self.n_layer = int(n_layer)
+        self.n_embd = int(n_embd)
+        self.attn_fs = bool(attn_fs)
+        self.attn_fs_collector = str(attn_fs_collector)
+        self.attn_fs_gating = bool(attn_fs_gating)
+
+        if self.attn_fs_collector not in ("zero", "learned"):
+            raise ValueError(f"ATTN_FS_COLLECTOR must be zero|learned, got {self.attn_fs_collector}")
+
+        if n_embd % n_head != 0:
+            raise ValueError(f"TRANS_N_HEAD must divide N_EMBD: {n_head} | {n_embd}")
+
+        self.wte = nn.Embedding(vocab_size, n_embd)
+        # +2 for optional prefix/suffix tokens when ATTN_FS=1.
+        self.wpe = nn.Embedding(SEQ_LEN + 2, n_embd)
+        self.mask_emb = nn.Parameter(torch.zeros(1, 1, n_embd))
+
+        self.blocks = nn.ModuleList(
+            [
+                TransformerCausalBlock(
+                    n_embd=n_embd, n_head=n_head, dropout=dropout, ff_mult=ff_mult
+                )
+                for _ in range(n_layer)
+            ]
+        )
+        self.ln_f = nn.LayerNorm(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size, bias=False)
+
+        if self.attn_fs_collector == "learned":
+            self.collector_token = nn.Parameter(torch.zeros(1, 1, n_embd))
+        else:
+            self.collector_token = None
+
+        if self.attn_fs and self.attn_fs_gating:
+            init = float(attn_fs_alpha_init)
+            self.attn_fs_alpha = nn.Parameter(torch.full((n_layer,), init))
+        else:
+            self.attn_fs_alpha = None
+
+    def forward(self, idx, targets=None, mask=None, **_ignored):
+        B, T = idx.shape
+        if self.attn_fs:
+            # Tokens are shifted right by 1 due to the prefix memory token.
+            pos = torch.arange(1, T + 1, device=idx.device).unsqueeze(0).expand(B, T)
+        else:
+            pos = torch.arange(T, device=idx.device).unsqueeze(0).expand(B, T)
+
+        x = self.wte(idx) + self.wpe(pos)
+        x = x + (idx == mask_token_id).unsqueeze(-1).to(x.dtype) * self.mask_emb
+
+        if not self.attn_fs:
+            for block in self.blocks:
+                x = block(x)
+        else:
+            # z carries a summary of the full sequence from the previous layer (via suffix token output).
+            z = torch.zeros(B, self.n_embd, device=idx.device, dtype=x.dtype)
+            pe_prefix = self.wpe(torch.zeros(1, 1, device=idx.device, dtype=torch.long)).to(x.dtype)
+            pe_suffix = self.wpe(torch.full((1, 1), T + 1, device=idx.device, dtype=torch.long)).to(x.dtype)
+            if self.collector_token is None:
+                collector_in = torch.zeros(B, 1, self.n_embd, device=idx.device, dtype=x.dtype)
+            else:
+                collector_in = self.collector_token.expand(B, 1, -1).to(x.dtype)
+
+            for li, block in enumerate(self.blocks):
+                p = z.unsqueeze(1)
+                if self.attn_fs_alpha is not None:
+                    gate = torch.sigmoid(self.attn_fs_alpha[li]).to(x.dtype)
+                    p = p * gate
+                p = p + pe_prefix
+                c = collector_in + pe_suffix
+                ext = torch.cat([p, x, c], dim=1)  # [B, T+2, C]
+                ext = block(ext)
+                x = ext[:, 1 : 1 + T, :]
+                z = ext[:, -1, :]
+
+        x = self.ln_f(x)
+        logits = self.lm_head(x)
+        logits = 30 * torch.tanh(logits / 30)
+        logits = logits.float()
+
+        loss = None
+        if targets is not None:
+            B, T, C = logits.shape
+            logits_flat = logits.view(B * T, C)
+            targets_flat = targets.view(B * T)
+            if mask is not None:
+                mask_flat = mask.view(B * T).float()
+                loss = F.cross_entropy(logits_flat, targets_flat, reduction="none")
+                loss = (loss * mask_flat).sum() / mask_flat.sum()
+            else:
+                loss = F.cross_entropy(logits_flat, targets_flat)
+
+        return logits, loss
+
+
 class Muon(torch.optim.Optimizer):
     def __init__(self, params, lr=0.02, momentum=0.95, nesterov=True, backend_steps=5):
         defaults = dict(lr=lr, momentum=momentum, nesterov=nesterov, backend_steps=backend_steps)
@@ -2903,6 +3086,19 @@ if __name__ == "__main__":
             dropout=TRANS_DROPOUT,
             ff_mult=TRANS_FF_MULT,
         )
+    elif MODEL == "transformer_causal":
+        model = TransformerCausal(
+            vocab_size=vocab_size,
+            n_layer=N_LAYER,
+            n_embd=N_EMBD,
+            n_head=TRANS_N_HEAD,
+            dropout=TRANS_DROPOUT,
+            ff_mult=TRANS_FF_MULT,
+            attn_fs=ATTN_FS,
+            attn_fs_collector=ATTN_FS_COLLECTOR,
+            attn_fs_gating=ATTN_FS_GATING,
+            attn_fs_alpha_init=ATTN_FS_ALPHA_INIT,
+        )
     else:
         model = GPT(GPTConfig(vocab_size=vocab_size, n_layer=N_LAYER, n_embd=N_EMBD), future_seed=FUTURE_SEED)
     m = model.to(device)
@@ -2923,6 +3119,10 @@ if __name__ == "__main__":
     run_meta = dict(
         model=MODEL,
         future_seed=int(bool(FUTURE_SEED)),
+        attn_fs=int(bool(ATTN_FS)),
+        attn_fs_collector=str(ATTN_FS_COLLECTOR),
+        attn_fs_gating=int(bool(ATTN_FS_GATING)),
+        attn_fs_alpha_init=float(ATTN_FS_ALPHA_INIT),
         decode=DECODE,
         refine_steps=int(REFINE_STEPS),
         refine_conf=float(REFINE_CONF),
@@ -2931,6 +3131,9 @@ if __name__ == "__main__":
         seq_len=int(SEQ_LEN),
         n_layer=int(N_LAYER),
         n_embd=int(N_EMBD),
+        trans_n_head=int(TRANS_N_HEAD),
+        trans_dropout=float(TRANS_DROPOUT),
+        trans_ff_mult=int(TRANS_FF_MULT),
         head_size=int(HEAD_SIZE),
         random_seed=int(random_seed),
         weights_path=str(WEIGHTS_PATH),
@@ -2948,7 +3151,7 @@ if __name__ == "__main__":
 
     if TRAIN:
         fused_ok = device == "cuda"
-        if MODEL == "transformer":
+        if MODEL in ("transformer", "transformer_causal"):
             optimizer = torch.optim.AdamW(
                 [p for p in m.parameters() if p.requires_grad],
                 lr=ADAM_LR,

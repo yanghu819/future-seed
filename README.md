@@ -87,14 +87,20 @@ Each evaluation prints:
 
 ## NeurIPS-Style Baselines (WIP)
 New switches (all optional):
-- `MODEL=rwkv|transformer`: RWKV7 vs Transformer-MLM baseline (same task generator).
+- `MODEL=rwkv|transformer|transformer_causal`: RWKV7 vs Transformer-MLM vs Transformer-Causal (same task generator).
 - `DECODE=argmax|hungarian`: (Permutation tasks) optional Hungarian decoding for uniqueness.
 - `REFINE_STEPS>0`: iterative refinement for in-place fill (helps hard constraints).
 - `BIN_MASK_MODE=prefix`: future-dependent prefix infill for `DATA_BIN` experiments.
+- `ATTN_FS=1`: (Transformer-Causal) attention-side "future-seed" via cross-layer global token.
+- `ATTN_FS_COLLECTOR=zero|learned`: (Transformer-Causal) suffix collector token init.
+- `ATTN_FS_GATING=1`: (Transformer-Causal) learn per-layer gate on the prefix memory token.
+- `ATTN_FS_ALPHA_INIT=...`: (Transformer-Causal) gate init value.
 
 Scripts (CUDA, logs under `rwkv-diff-future-seed/exp/`):
 - `rwkv-diff-future-seed/run_kvsort_baselines.sh`
+- `rwkv-diff-future-seed/run_kvsort_attn_fs.sh`
 - `rwkv-diff-future-seed/run_permfill_anchor_sweep.sh`
+- `rwkv-diff-future-seed/run_permfill_attn_fs.sh`
 - `rwkv-diff-future-seed/run_wikitext_prefix.sh`
 - `rwkv-diff-future-seed/run_mbpp_prefix.sh`
 
