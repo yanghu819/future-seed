@@ -53,6 +53,7 @@ We tested:
 - Transformer-MLM: `DECODE=hungarian` enforces uniqueness (`key_valid=1.0`) but **fails ordering** (`key_order=0.0`, `exact=0.0`).
 - Transformer-Causal (no future): `exact=0.0` (as expected); Hungarian can't fix ordering.
 - Transformer-Causal + ATTN_FS (K=32): **no improvement** over causal baseline (`exact=0.0`, Hungarian still `key_order=0.0`).
+- Iterative refinement (`REFINE_STEPS=8`, Mask-Predict style) does **not** fix ordering for Transformer-MLM (`exact=0.0`).
 
 **PERMFILL (train n=24, anchor k=2; eval n_test=24/28/32/36)**:
 - Transformer-Causal + Hungarian: `valid=1.0` but **OOD exact=0.0** for all `n_test`.
