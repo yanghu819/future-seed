@@ -2306,8 +2306,8 @@ def kvsort_eval(model, trials=200, mode="test"):
         x[mask] = mask_token_id
         gt_s = decode(y[0].tolist())
         gt_m = gt_s[m0:m1]
-        logits, _ = model(x)
         if DECODE == "hungarian" and KVSORT_KEYS_ONLY and (not KVSORT_KEYS_SEP):
+            logits, _ = model(x)
             # Only supports the keys-only / no-sep permutation setting.
             n_pos = m1 - m0
             keys = _kvsort_parse_keys_from_input(s)
@@ -2317,14 +2317,12 @@ def kvsort_eval(model, trials=200, mode="test"):
             allowed = [stoi[k] for k in keys]
             decoded = _decode_perm_hungarian(logits, list(range(m0, m1)), allowed)
             if decoded is None:
-                pred = logits.argmax(dim=-1)
-                out = torch.where(mask, pred, x)
+                out = _infer_fill_refine(model, x, mask)
             else:
                 out = x.clone()
                 out[0, m0:m1] = torch.tensor(decoded, device=out.device, dtype=out.dtype)
         else:
-            pred = logits.argmax(dim=-1)
-            out = torch.where(mask, pred, x)
+            out = _infer_fill_refine(model, x, mask)
         out_s = decode(out[0].tolist())
         out_m = out_s[m0:m1]
         if out_m == gt_m:
@@ -2453,8 +2451,8 @@ def permfill_eval(model, trials=200, mode="test"):
         x[mask] = mask_token_id
         gt_s = decode(y[0].tolist())
         gt_m = gt_s[m0:m1]
-        logits, _ = model(x)
         if DECODE == "hungarian":
+            logits, _ = model(x)
             n_pos = m1 - m0
             items = _permfill_parse_items_from_input(s, n_pos)
             if len(items) != n_pos:
@@ -2468,8 +2466,7 @@ def permfill_eval(model, trials=200, mode="test"):
             allowed_rem = [t for t in allowed if t not in set(fixed_tok)]
             decoded_rem = _decode_perm_hungarian(logits, pos_list, allowed_rem) if len(pos_list) > 0 else []
             if decoded_rem is None and len(pos_list) > 0:
-                pred = logits.argmax(dim=-1)
-                out = torch.where(mask, pred, x)
+                out = _infer_fill_refine(model, x, mask)
             else:
                 out = x.clone()
                 # fill fixed
@@ -2480,8 +2477,7 @@ def permfill_eval(model, trials=200, mode="test"):
                     out_vals = torch.tensor(decoded_rem, device=out.device, dtype=out.dtype)
                     out[0, pos_list] = out_vals
         else:
-            pred = logits.argmax(dim=-1)
-            out = torch.where(mask, pred, x)
+            out = _infer_fill_refine(model, x, mask)
         out_s = decode(out[0].tolist())
         out_m = out_s[m0:m1]
         if out_m == gt_m:

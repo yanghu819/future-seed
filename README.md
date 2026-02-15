@@ -89,7 +89,7 @@ Each evaluation prints:
 New switches (all optional):
 - `MODEL=rwkv|transformer|transformer_causal`: RWKV7 vs Transformer-MLM vs Transformer-Causal (same task generator).
 - `DECODE=argmax|hungarian`: (Permutation tasks) optional Hungarian decoding for uniqueness.
-- `REFINE_STEPS>0`: iterative refinement for in-place fill (helps hard constraints).
+- `REFINE_STEPS>0`: iterative refinement for in-place fill (Mask-Predict style; used by Sudoku/KVSORT/PERMFILL when `DECODE!=hungarian`).
 - `BIN_MASK_MODE=prefix`: future-dependent prefix infill for `DATA_BIN` experiments.
 - `ATTN_FS=1`: (Transformer-Causal) attention-side "future-seed" via cross-layer global token.
 - `ATTN_FS_COLLECTOR=zero|learned`: (Transformer-Causal) suffix collector token init.
