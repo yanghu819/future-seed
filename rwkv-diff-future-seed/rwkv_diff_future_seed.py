@@ -29,6 +29,10 @@ ATTN_FS_COLLECTOR = os.getenv("ATTN_FS_COLLECTOR", "zero")  # zero|learned
 ATTN_FS_GATING = env_int("ATTN_FS_GATING", 0) == 1
 ATTN_FS_ALPHA_INIT = env_float("ATTN_FS_ALPHA_INIT", 0.0)
 ATTN_FS_K = env_int("ATTN_FS_K", 1)
+PERM_SINKHORN = env_int("PERM_SINKHORN", 0) == 1
+PERM_SINKHORN_LAMBDA = env_float("PERM_SINKHORN_LAMBDA", 0.1)
+PERM_SINKHORN_TAU = env_float("PERM_SINKHORN_TAU", 1.0)
+PERM_SINKHORN_ITERS = env_int("PERM_SINKHORN_ITERS", 20)
 
 HEAD_SIZE = env_int("HEAD_SIZE", 64)
 SEQ_LEN = env_int("SEQ_LEN", 1024)
@@ -1919,6 +1923,10 @@ def batch_loss(model, X, Y, M):
             cons = cons + (cnt - 1.0).pow(2).mean()
         cons = cons / len(groups)
         loss_main = loss_main + SUDOKU_CONS_LAMBDA * cons
+    if PERM_SINKHORN:
+        perm_loss = _perm_sinkhorn_loss_from_logits(logits, X, Y, M)
+        if perm_loss is not None:
+            loss_main = loss_main + float(PERM_SINKHORN_LAMBDA) * perm_loss
     if not FS_ENCDEC:
         return loss_main
     r = torch.rand_like(X.float())
@@ -2015,6 +2023,114 @@ def _hungarian_min_cost(cost):
         # For our use (square matrices), this case should not happen.
         raise RuntimeError("hungarian: unexpected rectangular transpose case")
     return assign
+
+
+def _sinkhorn_log(scores, iters=20):
+    """
+    Log-space Sinkhorn normalization.
+    scores: [n,n] (higher is better), treated as unnormalized log-weights.
+    Returns logP where P is approximately doubly-stochastic.
+    """
+    log_p = scores
+    for _ in range(int(iters)):
+        log_p = log_p - torch.logsumexp(log_p, dim=1, keepdim=True)
+        log_p = log_p - torch.logsumexp(log_p, dim=0, keepdim=True)
+    return log_p
+
+
+def _perm_sinkhorn_loss_from_logits(logits, X, Y, M):
+    """
+    Add a permutation-aware loss term for KVSORT (keys-only, no-sep) and PERMFILL.
+
+    Uses Sinkhorn normalization on the [slot x item] score matrix built from token logits restricted
+    to the per-example item set, then NLL of the ground-truth assignment.
+    """
+    if not PERM_SINKHORN:
+        return None
+    if not (KVSORT_TASK or PERMFILL_TASK):
+        return None
+
+    B = logits.size(0)
+    losses = []
+
+    for b in range(B):
+        # Masked positions (slots we predict)
+        pos_all = M[b].nonzero(as_tuple=False).squeeze(-1)
+        if pos_all.numel() == 0:
+            continue
+
+        s = decode(Y[b].tolist())  # ground-truth string (has full right context)
+
+        if KVSORT_TASK:
+            if not (KVSORT_KEYS_ONLY and (not KVSORT_KEYS_SEP)):
+                continue
+            # Items = keys parsed from right context (recommended KVSORT_NOISE=0).
+            m0 = int(pos_all.min().item())
+            m1 = int(pos_all.max().item()) + 1
+            n_pos = m1 - m0
+            keys = _kvsort_parse_keys_from_input(s)
+            if len(keys) != n_pos:
+                gt_m = s[m0:m1]
+                keys = [ch for ch in gt_m if ch in key_pool]
+            if len(keys) != n_pos:
+                continue
+            allowed = [stoi[k] for k in keys]
+            pos_list = list(range(m0, m1))
+            tgt_tok = [int(Y[b, p].item()) for p in pos_list]
+
+        else:
+            # PERMFILL_TASK
+            # Determine full M span (to handle anchors / fixed tokens).
+            p = s.find("|M=")
+            if p < 0:
+                continue
+            m0 = p + 3
+            # n is the length of right item string after ';' up to '#'
+            semi = s.find(";", s.find("|R=O="))
+            if semi < 0:
+                continue
+            right = s[semi + 1 :]
+            sharp = right.find("#")
+            if sharp >= 0:
+                right = right[:sharp]
+            n_pos = len(right)
+            if n_pos <= 0:
+                continue
+            m1 = m0 + n_pos
+            items = list(right[:n_pos])
+            allowed_full = [stoi[k] for k in items]
+
+            # fixed (anchor) tokens: positions inside M span but not masked
+            fixed_pos = [p for p in range(m0, m1) if not bool(M[b, p].item())]
+            fixed_tok = [int(Y[b, p].item()) for p in fixed_pos]
+            allowed = [t for t in allowed_full if t not in set(fixed_tok)]
+            pos_list = [p for p in range(m0, m1) if bool(M[b, p].item())]
+            if len(pos_list) != len(allowed):
+                continue
+            tgt_tok = [int(Y[b, p].item()) for p in pos_list]
+
+        # Build [n,n] score matrix from token logits restricted to allowed items.
+        col = {t: j for j, t in enumerate(allowed)}
+        tgt_cols = []
+        ok = True
+        for t in tgt_tok:
+            if t not in col:
+                ok = False
+                break
+            tgt_cols.append(col[t])
+        if not ok:
+            continue
+
+        scores = logits[b, pos_list, :][:, allowed] / float(PERM_SINKHORN_TAU)  # [n,n]
+        log_p = _sinkhorn_log(scores, iters=PERM_SINKHORN_ITERS)
+        idx = torch.arange(log_p.size(0), device=log_p.device)
+        tgt_cols_t = torch.tensor(tgt_cols, device=log_p.device, dtype=torch.long)
+        loss = -log_p[idx, tgt_cols_t].mean()
+        losses.append(loss)
+
+    if len(losses) == 0:
+        return None
+    return torch.stack(losses).mean()
 
 
 @torch.no_grad()

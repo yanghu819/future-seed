@@ -96,6 +96,7 @@ New switches (all optional):
 - `ATTN_FS_GATING=1`: (Transformer-Causal) learn per-layer gate on the prefix memory token.
 - `ATTN_FS_ALPHA_INIT=...`: (Transformer-Causal) gate init value.
 - `ATTN_FS_K=...`: (Transformer-Causal) number of memory/collector tokens (capacity knob).
+- `PERM_SINKHORN=1`: (Permutation tasks) add Sinkhorn assignment loss (stronger structured baseline).
 
 Scripts (CUDA, logs under `rwkv-diff-future-seed/exp/`):
 - `rwkv-diff-future-seed/run_kvsort_baselines.sh`
