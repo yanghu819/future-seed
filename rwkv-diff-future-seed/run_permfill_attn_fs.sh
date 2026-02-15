@@ -68,6 +68,7 @@ eval_sweep () {
 # (A) causal transformer baseline (no future)
 train_one permfill_anchor2_n24_tfc_fs0 \
   ATTN_FS=0 \
+  MAX_ITERS=200 EVAL_INTERVAL=200 EVAL_ITERS=50 \
   PERMFILL_N_MIN=24 PERMFILL_N_MAX=24 \
   PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
 eval_sweep permfill_anchor2_n24_tfc_fs0 argmax \
@@ -86,4 +87,3 @@ eval_sweep permfill_anchor2_n24_tfc_attnfs hungarian \
   ATTN_FS=1 ATTN_FS_COLLECTOR=learned PERMFILL_ANCHOR=1 PERMFILL_ANCHOR_K=2
 
 echo "Done."
-

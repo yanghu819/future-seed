@@ -79,7 +79,7 @@ eval_hungarian () {
 
 # (A) causal transformer baseline (no future)
 train_one kvsort_keys36_n20_tfc_fs0 \
-  ATTN_FS=0
+  ATTN_FS=0 MAX_ITERS=200 EVAL_INTERVAL=200 EVAL_ITERS=50
 eval_one kvsort_keys36_n20_tfc_fs0 \
   ATTN_FS=0
 eval_hungarian kvsort_keys36_n20_tfc_fs0 \
@@ -94,4 +94,3 @@ eval_hungarian kvsort_keys36_n20_tfc_attnfs \
   ATTN_FS=1 ATTN_FS_COLLECTOR=learned
 
 echo "Done."
-
