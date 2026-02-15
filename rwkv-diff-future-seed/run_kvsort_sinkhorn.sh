@@ -29,9 +29,9 @@ COMMON=(
   TRANS_FF_MULT=4
   BATCH_SIZE=256
   DEVICE_BSZ=16
-  MAX_ITERS=2400
-  EVAL_INTERVAL=400
-  EVAL_ITERS=200
+  MAX_ITERS=800
+  EVAL_INTERVAL=200
+  EVAL_ITERS=50
   LOG_SAMPLE=1
   LOG_WIN=40
   KVSORT_TASK=1
@@ -46,7 +46,7 @@ COMMON=(
   KVSORT_N_TEST=20
 )
 
-TAG=kvsort_keys36_n20_tfmlm_sinkhorn
+TAG=kvsort_keys36_n20_tfmlm_sinkhorn_it800
 
 echo "[train] ${TAG}"
 env "${COMMON[@]}" \
@@ -69,4 +69,3 @@ env "${COMMON[@]}" \
   "${PY}" rwkv_diff_future_seed.py | tee "exp/${TAG}_eval_hungarian.log"
 
 echo "Done."
-
