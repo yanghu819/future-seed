@@ -110,6 +110,26 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
   - make early FS injection weaker, keep deeper layers stronger
   - reduce negative seed outliers without killing positive cases
 
+### R9a Result: ARC options-first (completed)
+
+- Script: `run_arc_optionsfirst_stabilized_round4_sched_linear.sh`
+- Summary: `runs/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`
+- Result:
+  - mean `d_acc = +0.0156`, std `0.0292`
+  - sign pattern: `2+ / 0 / 1-`
+  - mean `d_loss = +0.0295` (worse)
+- Comparison vs R2 baseline recipe:
+  - R2 mean `d_acc = +0.0339`
+  - R9a mean `d_acc = +0.0156`
+- Status: **mixed / not adopted as default**
+
+### R9b Status: Hotpot q-after L=4096 (running)
+
+- Script: `run_hotpot_qafter_stabilized_len4096_round9_sched_linear_s012.sh`
+- Launch mode: queued after ARC via `run_after_arc_start_hotpot_r9.sh`
+- Pending output:
+  - `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+
 ## Current Bottom Line
 
 - FS for post-training is **validated in specific real settings** (ARC options-first).

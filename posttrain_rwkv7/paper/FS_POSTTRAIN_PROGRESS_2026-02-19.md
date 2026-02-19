@@ -70,6 +70,28 @@ Interpretation: simply weakening fixed seed injection (`alpha=-4`) did **not** f
   - `run_hotpot_qafter_stabilized_len4096_round9_sched_linear_s012.sh`
 - Goal: reduce seed variance without losing the causal-unfriendly gains.
 
+### First Round-9 Result (ARC options-first, scheduled FS)
+
+- File: `runs/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`
+- Config delta vs R2:
+  - `fs_alpha_schedule=linear`
+  - `fs_alpha_min=0.25`
+  - `fs_alpha_max=1.0`
+- Result:
+  - mean delta token-acc: **+0.0156** (vs R2 `+0.0339`)
+  - sign pattern: **2 positive / 1 negative**
+  - mean delta loss: **+0.0295** (worse)
+
+Interpretation: this linear depth schedule is not a free win; it reduced ARC gains and worsened loss despite modest acc lift.
+
+### Round-9 Hotpot Status
+
+- Script running: `run_hotpot_qafter_stabilized_len4096_round9_sched_linear_s012.sh`
+- Triggered automatically after ARC via:
+  - `run_after_arc_start_hotpot_r9.sh`
+- Expected summary file:
+  - `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+
 ## Current Conclusion
 
 1. FS is **useful in specific causal-unfriendly prompt orderings** (clear on ARC options-first).
