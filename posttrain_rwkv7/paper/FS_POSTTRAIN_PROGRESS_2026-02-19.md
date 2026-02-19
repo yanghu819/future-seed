@@ -2,6 +2,9 @@
 
 This note summarizes the current status of **Future-Seed (FS)** in post-training on real tasks.
 
+For a full chronological record (including failed runs and diagnostics), see:
+- `DETAILED_EXPERIMENT_LOG.md`
+
 ## Setup
 
 - Base model: `rwkv7-g1d-0.1b-20260129-ctx8192.pth`
@@ -62,4 +65,3 @@ Interpretation: longer context can show larger gains on some seeds, but instabil
 1. FS is **useful in specific causal-unfriendly prompt orderings** (clear on ARC options-first).
 2. FS is **not universally positive** in post-training; on Hotpot it remains high-variance.
 3. The key open problem is **stability across seeds** on long-context QA.
-

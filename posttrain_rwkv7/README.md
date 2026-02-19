@@ -7,6 +7,8 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
 - `scripts/`: training, summarization, and run scripts used in the current iteration.
 - `results/`: exported summary text files from completed runs.
 - `paper/`: current paper/progress note.
+  - `paper/FS_POSTTRAIN_PROGRESS_2026-02-19.md`: short status note.
+  - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
 
 ## Key Findings (current snapshot)
 
@@ -21,4 +23,3 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
 - This snapshot does not include full training logs/checkpoints due size.
 - Full raw logs remain on AutoDL under:
   - `/root/autodl-tmp/future-seed-posttrain/runs/`
-
