@@ -213,6 +213,9 @@ def main() -> None:
     ap.add_argument("--train_gate_only", action="store_true", help="Freeze model weights; train gate params only.")
     ap.add_argument("--seed_scale", type=float, default=1.0)
     ap.add_argument("--fs_layer_start", type=int, default=1)
+    ap.add_argument("--fs_alpha_schedule", choices=["none", "linear", "cosine"], default="none")
+    ap.add_argument("--fs_alpha_min", type=float, default=1.0)
+    ap.add_argument("--fs_alpha_max", type=float, default=1.0)
     ap.add_argument("--fs_norm", action="store_true")
     ap.add_argument("--fs_clip", type=float, default=0.0)
     ap.add_argument("--fs_detach", action="store_true")
@@ -372,6 +375,9 @@ def main() -> None:
             fs_in_b=fs_in_b,
             seed_scale=float(args.seed_scale),
             fs_layer_start=int(args.fs_layer_start),
+            fs_alpha_schedule=str(args.fs_alpha_schedule),
+            fs_alpha_min=float(args.fs_alpha_min),
+            fs_alpha_max=float(args.fs_alpha_max),
             fs_norm=bool(args.fs_norm),
             fs_clip=float(args.fs_clip),
             fs_detach=bool(args.fs_detach),
@@ -432,6 +438,9 @@ def main() -> None:
                         fs_in_b=fs_in_b,
                         seed_scale=float(args.seed_scale),
                         fs_layer_start=int(args.fs_layer_start),
+                        fs_alpha_schedule=str(args.fs_alpha_schedule),
+                        fs_alpha_min=float(args.fs_alpha_min),
+                        fs_alpha_max=float(args.fs_alpha_max),
                         fs_norm=bool(args.fs_norm),
                         fs_clip=float(args.fs_clip),
                         fs_detach=bool(args.fs_detach),
@@ -498,6 +507,9 @@ def main() -> None:
                     "val_loss": sum(val_losses) / len(val_losses),
                     "val_tok_acc": sum(val_accs) / len(val_accs),
                     "alpha_mean": float(torch.sigmoid(alpha[1:]).mean()),
+                    "fs_alpha_schedule": str(args.fs_alpha_schedule),
+                    "fs_alpha_min": float(args.fs_alpha_min),
+                    "fs_alpha_max": float(args.fs_alpha_max),
                     "alpha_head_mean": (float(torch.sigmoid(alpha_head[1:]).mean()) if alpha_head is not None else None),
                 }
                 with open(metrics_path, "a", encoding="utf-8") as f:

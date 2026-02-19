@@ -2,9 +2,6 @@
 
 This note summarizes the current status of **Future-Seed (FS)** in post-training on real tasks.
 
-For a full chronological record (including failed runs and diagnostics), see:
-- `DETAILED_EXPERIMENT_LOG.md`
-
 ## Setup
 
 - Base model: `rwkv7-g1d-0.1b-20260129-ctx8192.pth`
@@ -53,15 +50,29 @@ Interpretation: at `L=2048`, FS is not stable on this probe.
 
 Interpretation: longer context can show larger gains on some seeds, but instability remains.
 
-## Ongoing Run
+## Latest Update (Round 8)
 
 - `L=4096`, q-after, stabilized FS with weaker seed injection (`alpha_init=-4`)
-- Script: `run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.sh`
-- Log: `runs/run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.log`
-- Goal: reduce negative outlier seeds while keeping positive long-context gains.
+- File: `runs/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
+- Mean delta token-acc: **-0.0056**
+- Per-seed deltas: `+0.0141`, `+0.0458`, `-0.0766`
+
+Interpretation: simply weakening fixed seed injection (`alpha=-4`) did **not** fix variance; seed2 remained a strong negative outlier.
+
+## Current In-Progress (Round 9)
+
+- New method: **depth-scheduled FS injection** (still single-pass left->right per layer).
+  - `fs_alpha_schedule=linear`
+  - `fs_alpha_min=0.25`, `fs_alpha_max=1.0`
+  - keeps stabilized stack: `fs_layer_start=6`, `fs_norm`, `fs_detach`, `fs_clip=1.0`
+- Scripts:
+  - `run_arc_optionsfirst_stabilized_round4_sched_linear.sh`
+  - `run_hotpot_qafter_stabilized_len4096_round9_sched_linear_s012.sh`
+- Goal: reduce seed variance without losing the causal-unfriendly gains.
 
 ## Current Conclusion
 
 1. FS is **useful in specific causal-unfriendly prompt orderings** (clear on ARC options-first).
 2. FS is **not universally positive** in post-training; on Hotpot it remains high-variance.
 3. The key open problem is **stability across seeds** on long-context QA.
+4. The next lever is **schedule/structure** (not just smaller constant alpha).

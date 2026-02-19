@@ -55,6 +55,41 @@ def infer_config_from_state_dict(sd: Dict[str, torch.Tensor]) -> RWKV7G1DConfig:
     )
 
 
+def _fs_schedule_multiplier(
+    schedule: str,
+    layer_idx: int,
+    layer_start: int,
+    num_layers: int,
+    vmin: float,
+    vmax: float,
+) -> float:
+    """Layer-depth schedule multiplier for Future-Seed gate."""
+    if schedule == "none":
+        return 1.0
+
+    if num_layers <= 0:
+        return float(vmax)
+
+    start = max(1, int(layer_start))
+    i0 = max(start, 1)
+    i1 = max(i0, num_layers - 1)
+    if i1 <= i0:
+        p = 1.0
+    else:
+        p = float(layer_idx - i0) / float(i1 - i0)
+        p = max(0.0, min(1.0, p))
+
+    lo = float(vmin)
+    hi = float(vmax)
+    if schedule == "linear":
+        return lo + (hi - lo) * p
+    if schedule == "cosine":
+        # 0->1 smooth ramp.
+        c = 0.5 - 0.5 * math.cos(math.pi * p)
+        return lo + (hi - lo) * c
+    raise ValueError(f"Unsupported fs_alpha_schedule: {schedule}")
+
+
 class LowRankAdapter(nn.Module):
     """RWKV7 LoRA-style module, but named to match BlinkDL .pth keys.
 
@@ -407,6 +442,9 @@ class RWKV7G1DLM(nn.Module):
         fs_in_b: Optional[torch.Tensor] = None,
         seed_scale: float = 1.0,
         fs_layer_start: int = 1,
+        fs_alpha_schedule: str = "none",
+        fs_alpha_min: float = 1.0,
+        fs_alpha_max: float = 1.0,
         fs_norm: bool = False,
         fs_clip: float = 0.0,
         fs_detach: bool = False,
@@ -426,6 +464,8 @@ class RWKV7G1DLM(nn.Module):
           where x_last is the layer input's last-token hidden state.
         seed_scale: scalar multiplier applied after gating.
         fs_layer_start: apply FS only for layers i >= fs_layer_start (i>0 always).
+        fs_alpha_schedule: optional depth schedule for FS strength: {none, linear, cosine}.
+        fs_alpha_min/fs_alpha_max: schedule output range (multiplier on seed gate).
         fs_norm: if True, RMS-normalize the future seed per head before gating (stabilizes scale drift).
         fs_clip: if >0, clip the gated FS tensor to [-fs_clip, +fs_clip] before injecting.
         fs_detach: if True, stop gradients through the future seed tensor (stabilizes post-training).
@@ -444,7 +484,15 @@ class RWKV7G1DLM(nn.Module):
                 s0 = seed_states[i]
             if future_seed and i > 0 and i >= int(fs_layer_start):
                 assert prev_sT is not None
-                g: torch.Tensor = x.new_tensor(seed_scale, dtype=torch.float32)
+                sched = _fs_schedule_multiplier(
+                    schedule=str(fs_alpha_schedule),
+                    layer_idx=i,
+                    layer_start=int(fs_layer_start),
+                    num_layers=len(self.blocks),
+                    vmin=float(fs_alpha_min),
+                    vmax=float(fs_alpha_max),
+                )
+                g: torch.Tensor = x.new_tensor(seed_scale * sched, dtype=torch.float32)
 
                 # Input-adaptive gate (per sample) is the default when any of fs_in_* is provided.
                 if (fs_in_w is not None) or (fs_in_b is not None):

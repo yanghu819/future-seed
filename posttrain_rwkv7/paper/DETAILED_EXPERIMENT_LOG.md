@@ -1,137 +1,117 @@
-# Detailed Experiment Log: RWKV7 Future-Seed Post-Training
+# Future-Seed Post-Training: Detailed Experiment Log
 
-Last updated: **2026-02-19**
+Date: 2026-02-19  
+Base model: `rwkv7-g1d-0.1b-20260129-ctx8192.pth`  
+Rule: keep model scan strictly left->right; FS only via cross-layer terminal-state seeding.
 
-This document records all major real-task post-training experiments, including positive results, failures, and interpretation.
+## Common FS Config (Stabilized Recipe)
 
-## 1. Objective
-
-Goal: test whether **Future-Seed (FS)** improves post-training (SFT-style) on real tasks, not only synthetic right-copy style tasks.
-
-Primary hypothesis:
-- FS should help more when prompt order is **causally unfriendly** (critical evidence appears in positions that are hard for strict left-to-right compression).
-
-## 2. Common Setup
-
-- Model: `rwkv7-g1d-0.1b-20260129-ctx8192.pth`
-- FS usage: enabled on prompt/prefill (`mode=prompt_fs`), decode remains causal.
-- Metrics:
-  - `val_tok_acc` (token accuracy on supervised answer region)
-  - `val_loss`
-- Compare `no_fs` vs `prompt_fs`; report delta as `FS - no_fs`.
-
-Stable FS recipe used in later rounds:
-- `alpha_init=-2`
-- `alpha_lr=0` (fixed gate in most runs)
+- `mode=prompt_fs` (prefill/prompt only)
+- `alpha_init=-2` (unless explicitly changed)
+- `alpha_lr=0`
 - `fs_layer_start=6`
 - `fs_norm`
 - `fs_detach`
 - `fs_clip=1.0`
 
-## 3. ARC-Challenge (Multiple-Choice, Real Task)
+## Real-Task Results (Completed)
 
-### 3.1 Input-adaptive gate attempt (mixed / weak)
-- Summary: `results/_summary_arc_optionsfirst_inputgate_r1.txt`
-- Setting: options-first, `fs_in_gate` on, `fs_w_lr=fs_b_lr=1e-3`
+## ARC-Challenge (MCQ)
+
+### R2: Options-first (causal-unfriendly)
+
+- Script: `run_arc_stabilized_round2.sh`
+- Summary: `runs/_summary_arc_optionsfirst_stabilized_r2.txt`
 - Result:
-  - mean `Δacc = +0.0052` (std `0.0184`)
-  - mean `Δloss = +0.0139`
-  - 2 seeds negative, 1 seed positive
-- Verdict: weak and unstable.
+  - mean `d_acc = +0.0339`, std `0.0205`
+  - seed deltas: `+0.0156`, `+0.0234`, `+0.0625`
+- Status: **success / stable positive**
 
-### 3.2 Stabilized FS without input gate (clear positive)
-- Summary: `results/_summary_arc_optionsfirst_stabilized_r2.txt`
-- Setting: options-first, stable FS recipe, no `fs_in_gate`
+### R3: Question-first (causal-friendly control)
+
+- Script: `run_arc_qfirst_stabilized_round3.sh`
+- Summary: `runs/_summary_arc_qfirst_stabilized_r3.txt`
 - Result:
-  - mean `Δacc = +0.0339` (std `0.0205`)
-  - mean `Δloss = -0.0182`
-  - 3/3 seeds positive
-- Verdict: **successful**.
+  - mean `d_acc = -0.0052`, std `0.0097`
+  - seed deltas: `-0.0156`, `+0.0078`, `-0.0078`
+- Status: **control matched expectation** (no universal gain)
 
-### 3.3 Question-first control (near-zero / slight negative)
-- Summary: `results/_summary_arc_qfirst_stabilized_r3.txt`
-- Same config as 3.2 but `q_first=True`
+## HotpotQA Long Context
+
+### R4: q-after, L=2048
+
+- Script: `run_hotpot_qafter_stabilized_round4_s0.sh` + `_s12.sh`
+- Summary: `runs/_summary_hotpot_qafter_stabilized_r4_s012.txt`
 - Result:
-  - mean `Δacc = -0.0052`
-  - mean `Δloss = +0.0003`
-- Verdict: FS gain is tied to order difficulty, not universal.
+  - mean `d_acc = -0.0027`, std `0.0171`
+  - seed deltas: `+0.0084`, `+0.0104`, `-0.0269`
+- Status: **mixed / unstable**
 
-## 4. HotpotQA (Long-Context QA, Real Task)
+### R5: q-first, L=2048 (control)
 
-### 4.1 Early baseline-like runs (negative)
-- Summaries:
-  - `results/_summary_hotpot_qafter.txt`
-  - `results/_summary_hotpot_qfirst.txt`
+- Script: `run_hotpot_qfirst_stabilized_round5_s012.sh`
+- Summary: `runs/_summary_hotpot_qfirst_stabilized_r5_s012.txt`
 - Result:
-  - q-after mean `Δacc = -0.0196`
-  - q-first mean `Δacc = -0.0175`
-- Verdict: FS harmed average performance under early setup.
+  - mean `d_acc = -0.0090`, std `0.0085`
+  - seed deltas: `-0.0104`, `+0.0021`, `-0.0186`
+- Status: **negative control (no gain)**
 
-### 4.2 Stabilized recipe at L=2048 (still unstable)
-- Summaries:
-  - `results/_summary_hotpot_qafter_stabilized_r4_s012.txt`
-  - `results/_summary_hotpot_qfirst_stabilized_r5_s012.txt`
+### R6: q-after, L=4096, alpha=-2
+
+- Script: `run_hotpot_qafter_stabilized_len4096_round6_s0.sh` + `_s12.sh`
+- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`
 - Result:
-  - q-after mean `Δacc = -0.0027` (close to zero, high variance)
-  - q-first mean `Δacc = -0.0090`
-- Verdict: stabilization helps compared to early negative runs, but no robust positive gain at 2048.
+  - mean `d_acc = +0.0012`, std `0.0388`
+  - seed deltas: `+0.0382`, `+0.0179`, `-0.0525`
+- Status: **slight mean gain but high variance**
 
-### 4.3 Longer prompt L=4096 with stable FS (`alpha=-2`)
-- Summaries:
-  - `results/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`
-  - `results/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt`
+### R7: q-first, L=4096, seed0
+
+- Script: `run_hotpot_qfirst_stabilized_len4096_round7_s0.sh`
+- Summary: `runs/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt`
 - Result:
-  - q-after: mean `Δacc = +0.0012` (2 positive seeds, 1 strong negative seed)
-  - q-first seed0: `Δacc = +0.0025`, but `Δloss` worsened (+0.0873)
-- Verdict: some long-context upside exists, but seed variance remains a central issue.
+  - `d_acc = +0.0025` (single seed)
+  - loss worsened in that run
+- Status: **inconclusive (single-seed control)**
 
-## 5. Failure Cases and Diagnostics
+### R8: q-after, L=4096, alpha=-4
 
-## 5.1 Permission/script robustness issues
-- Some runs ended without summary due to executable-bit mismatch (e.g., `summarize_*.py` permission denied).
-- Fix: call summarizers via `./.venv/bin/python summarize_*.py` inside run scripts.
+- Script: `run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.sh`
+- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
+- Result:
+  - mean `d_acc = -0.0056`, std `0.0519`
+  - seed deltas: `+0.0141`, `+0.0458`, `-0.0766`
+- Status: **failure for variance reduction** (negative outlier got worse)
 
-## 5.2 Data sparsity at long length
-- At `L=4096` with `min_prompt_tokens=2048`, Hotpot could not build enough validation examples.
-- Observed error: *Only built 213 examples (wanted 512)*.
-- Fix: use `n_train=1000`, `n_val=200`, `min_prompt_tokens=1536` for L=4096 sweeps.
+## Failure Modes Observed
 
-## 5.3 High variance across seeds (main unresolved blocker)
-- Hotpot `q_after`, L=4096, `alpha=-2`:
-  - seed0 +0.0382
-  - seed1 +0.0179
-  - seed2 -0.0525
-- This single negative outlier dominates the mean.
+1. **Seed-level instability on long QA**
+- Same config can be strongly positive on one seed and strongly negative on another.
 
-## 6. Current Ongoing Experiment
+2. **Simple alpha weakening is insufficient**
+- Moving from `alpha=-2` to `alpha=-4` reduced mean utility on Hotpot L=4096.
 
-- Script: `scripts/run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.sh`
-- Change vs previous best-known setup: only `alpha_init` from `-2` to `-4` (weaker FS injection).
-- Purpose: reduce harmful outlier seeds while preserving gains in hard-order long-context setting.
-- Runtime status should be checked via:
-  - AutoDL log: `runs/run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.log`
-  - Expected summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
+3. **Task-order dependence is real**
+- ARC options-first gains are robust; q-first control removes gains.
+- Indicates FS utility is conditional on causal awkwardness, not a universal boost.
 
-## 7. Practical Takeaways So Far
+## In-Progress Mitigation
 
-1. FS can be useful for post-training on real tasks, but **conditional on ordering**:
-   - strong on ARC options-first
-   - weak/negative on easy-order controls
-2. FS is not yet a universally safe drop-in for long-context QA.
-3. Main research problem now is **stability across seeds** rather than “is there any gain”.
+### R9: Depth-Scheduled FS (new)
 
-## 8. Repro Pointers
+- Scripts:
+  - `run_arc_optionsfirst_stabilized_round4_sched_linear.sh`
+  - `run_hotpot_qafter_stabilized_len4096_round9_sched_linear_s012.sh`
+- New flags:
+  - `--fs_alpha_schedule linear`
+  - `--fs_alpha_min 0.25`
+  - `--fs_alpha_max 1.0`
+- Hypothesis:
+  - make early FS injection weaker, keep deeper layers stronger
+  - reduce negative seed outliers without killing positive cases
 
-Core scripts:
-- `scripts/train_arc_mc_sft.py`
-- `scripts/train_hotpot_longctx_sft.py`
-- `scripts/rwkv7_g1d.py`
+## Current Bottom Line
 
-Main run scripts:
-- `scripts/run_arc_stabilized_round2.sh`
-- `scripts/run_arc_qfirst_stabilized_round3.sh`
-- `scripts/run_hotpot_qafter_stabilized_round4_s12.sh`
-- `scripts/run_hotpot_qfirst_stabilized_round5_s012.sh`
-- `scripts/run_hotpot_qafter_stabilized_len4096_round6_s12.sh`
-- `scripts/run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.sh`
-
+- FS for post-training is **validated in specific real settings** (ARC options-first).
+- FS on real long-context QA is **not yet stable enough** for a universal claim.
+- Next milestone is not higher single-run peaks; it is **cross-seed stability** under fixed budget.

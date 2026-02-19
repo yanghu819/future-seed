@@ -38,6 +38,9 @@ def match(cfg: dict[str, Any], flt: dict[str, Any]) -> bool:
         "fs_b_lr": 0.0,
         "train_gate_only": False,
         "fs_layer_start": 1,
+        "fs_alpha_schedule": "none",
+        "fs_alpha_min": 1.0,
+        "fs_alpha_max": 1.0,
         "fs_norm": False,
         "fs_clip": 0.0,
         "fs_detach": False,
@@ -79,6 +82,9 @@ def main() -> None:
     ap.add_argument("--train_gate_only", action="store_true")
     ap.add_argument("--seed_scale", type=float, default=1.0)
     ap.add_argument("--fs_layer_start", type=int, default=1)
+    ap.add_argument("--fs_alpha_schedule", choices=["none", "linear", "cosine"], default="none")
+    ap.add_argument("--fs_alpha_min", type=float, default=1.0)
+    ap.add_argument("--fs_alpha_max", type=float, default=1.0)
     ap.add_argument("--fs_norm", action="store_true")
     ap.add_argument("--fs_clip", type=float, default=0.0)
     ap.add_argument("--fs_detach", action="store_true")
@@ -124,6 +130,9 @@ def main() -> None:
         "alpha_head_lr": float(args.alpha_head_lr),
         "seed_scale": float(args.seed_scale),
         "fs_layer_start": int(args.fs_layer_start),
+        "fs_alpha_schedule": str(args.fs_alpha_schedule),
+        "fs_alpha_min": float(args.fs_alpha_min),
+        "fs_alpha_max": float(args.fs_alpha_max),
         "fs_norm": bool(args.fs_norm),
         "fs_clip": float(args.fs_clip),
         "fs_detach": bool(args.fs_detach),
@@ -186,9 +195,11 @@ def main() -> None:
         rows = sorted(by_len[L], key=lambda r: r["seed"])
         d_acc = [r["d_acc"] for r in rows]
         d_loss = [r["d_loss"] for r in rows]
+        n_pos = sum(1 for x in d_acc if x > 0)
+        n_neg = sum(1 for x in d_acc if x < 0)
         print("=" * 90)
         print(
-            f"L={L} pairs={len(rows)} mean d_acc={st.mean(d_acc):+.4f} std={st.pstdev(d_acc):.4f} | mean d_loss={st.mean(d_loss):+.4f} std={st.pstdev(d_loss):.4f}"
+            f"L={L} pairs={len(rows)} mean d_acc={st.mean(d_acc):+.4f} std={st.pstdev(d_acc):.4f} | mean d_loss={st.mean(d_loss):+.4f} std={st.pstdev(d_loss):.4f} | sign(+/0/-)={n_pos}/{len(rows)-n_pos-n_neg}/{n_neg}"
         )
         for r in rows:
             print(
