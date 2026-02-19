@@ -1,0 +1,6 @@
+filter: {'ds': 'hotpot_qa', 'ds_cfg': 'distractor', 'train_split': 'train', 'val_split': 'validation', 'q_first': True, 'n_train': 2048, 'n_val': 512, 'max_prompt_tokens': 2048, 'min_prompt_tokens': 1024, 'max_answer_tokens': 24, 'bsz': 2, 'time_budget_sec': 240, 'max_steps': 0, 'eval_every': 50, 'val_batches': 16, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'fs_in_gate': False, 'fs_w_lr': 0.0, 'fs_b_lr': 0.0, 'train_gate_only': False, 'fs_variant': 'scalar', 'alpha_head_init': -2.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 6, 'fs_norm': True, 'fs_clip': 1.0, 'fs_detach': True}
+==========================================================================================
+L=2048 pairs=3 mean d_acc=-0.0090 std=0.0085 | mean d_loss=-0.0844 std=0.1910
+  seed=0 d_acc=-0.0104 (no=0.0713 fs=0.0608) d_loss=-0.1706
+  seed=1 d_acc=+0.0021 (no=0.0573 fs=0.0594) d_loss=+0.1804
+  seed=2 d_acc=-0.0186 (no=0.0885 fs=0.0699) d_loss=-0.2631
