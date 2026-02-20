@@ -112,6 +112,18 @@ Interpretation: linear depth schedule did not stabilize Hotpot; it regressed ave
 - Goal:
   - reduce negative outlier seeds while preserving the positive long-context seeds.
 
+## Next Queued (Round 11)
+
+- Script:
+  - `run_hotpot_qafter_stabilized_len4096_round11_grid_lstart10_12_alpha_m2_m3_s012.sh`
+- Auto-launch hook:
+  - `run_after_r10_start_r11.sh`
+- Grid:
+  - `fs_layer_start in {10,12}`
+  - `alpha_init in {-2,-3}`
+- Purpose:
+  - check whether deeper-only injection + weaker alpha gives a better mean/variance tradeoff than R10.
+
 ## Current Conclusion
 
 1. FS is **useful in specific causal-unfriendly prompt orderings** (clear on ARC options-first).

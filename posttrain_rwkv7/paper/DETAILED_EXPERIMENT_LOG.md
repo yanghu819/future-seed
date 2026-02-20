@@ -151,6 +151,19 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
   - avoid early/mid-layer harmful seed interference
   - keep useful deep-layer global conditioning
 
+### R11: Small grid queued after R10
+
+- Scripts:
+  - `run_hotpot_qafter_stabilized_len4096_round11_grid_lstart10_12_alpha_m2_m3_s012.sh`
+  - `run_after_r10_start_r11.sh`
+- Grid:
+  - `fs_layer_start`: `10`, `12`
+  - `alpha_init`: `-2`, `-3`
+- Fixed:
+  - `L=4096`, q-after, seeds `{0,1,2}`, scalar FS, `fs_norm`, `fs_detach`, `fs_clip=1.0`
+- Goal:
+  - find a robust config with better seed-sign consistency than R9.
+
 ## Current Bottom Line
 
 - FS for post-training is **validated in specific real settings** (ARC options-first).
