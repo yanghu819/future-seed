@@ -92,6 +92,26 @@ Interpretation: this linear depth schedule is not a free win; it reduced ARC gai
 - Expected summary file:
   - `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
 
+### Round-9 Hotpot Result (completed)
+
+- File: `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+- Result:
+  - mean delta token-acc: **-0.0220**
+  - sign pattern: **1 positive / 2 negative**
+  - mean delta loss: **-0.0188**
+
+Interpretation: linear depth schedule did not stabilize Hotpot; it regressed average accuracy versus the no-schedule baseline.
+
+## Current In-Progress (Round 10)
+
+- New mitigation: push FS injection to deeper layers only.
+  - `fs_layer_start=10` (from 6)
+  - keep `alpha_init=-2`, `fs_norm`, `fs_detach`, `fs_clip=1.0`
+- Script:
+  - `run_hotpot_qafter_stabilized_len4096_round10_lstart10_s012.sh`
+- Goal:
+  - reduce negative outlier seeds while preserving the positive long-context seeds.
+
 ## Current Conclusion
 
 1. FS is **useful in specific causal-unfriendly prompt orderings** (clear on ARC options-first).

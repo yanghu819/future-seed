@@ -130,6 +130,27 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 - Pending output:
   - `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
 
+### R9b Result: Hotpot q-after L=4096 (completed)
+
+- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+- Result:
+  - mean `d_acc = -0.0220`, std `0.0378`
+  - sign pattern: `1+ / 0 / 2-`
+  - mean `d_loss = -0.0188`
+- Status: **failed mitigation** (accuracy regressed vs R6 baseline config)
+
+## New Iteration
+
+### R10: Deeper-only FS injection on Hotpot
+
+- Script: `run_hotpot_qafter_stabilized_len4096_round10_lstart10_s012.sh`
+- Change from baseline:
+  - `fs_layer_start: 6 -> 10`
+  - keep constant alpha (`-2`), no schedule
+- Hypothesis:
+  - avoid early/mid-layer harmful seed interference
+  - keep useful deep-layer global conditioning
+
 ## Current Bottom Line
 
 - FS for post-training is **validated in specific real settings** (ARC options-first).
