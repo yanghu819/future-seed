@@ -112,6 +112,16 @@ Interpretation: linear depth schedule did not stabilize Hotpot; it regressed ave
 - Goal:
   - reduce negative outlier seeds while preserving the positive long-context seeds.
 
+### Round-10 Result (completed)
+
+- File: `runs/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt`
+- Result:
+  - mean delta token-acc: **-0.0225**
+  - sign pattern: **2 positive / 1 negative**
+  - mean delta loss: **-0.1906**
+
+Interpretation: delaying FS start to deeper layers (`fs_layer_start=10`) did not recover mean accuracy; still worse than R6 baseline.
+
 ## Next Queued (Round 11)
 
 - Script:
@@ -123,6 +133,21 @@ Interpretation: linear depth schedule did not stabilize Hotpot; it regressed ave
   - `alpha_init in {-2,-3}`
 - Purpose:
   - check whether deeper-only injection + weaker alpha gives a better mean/variance tradeoff than R10.
+
+## New Queued Track: MBPP + More Sudoku
+
+- MBPP real code task:
+  - `run_mbpp_qafter_stabilized_len4096_round1_s012.sh`
+  - `run_mbpp_qfirst_stabilized_len4096_round1_s012.sh`
+  - with `fill_notes_to_max` long-context setting.
+- Sudoku suite:
+  - `run_sudoku_suite_round1_s012.sh`
+  - settings:
+    - `sudoku4_prefix`, `sudoku4_suffix`
+    - `sudoku9_prefix`, `sudoku9_suffix`
+- Queue hook:
+  - `run_after_r11_start_mbpp_sudoku.sh`
+  - runs automatically after R11 finishes.
 
 ## Current Conclusion
 

@@ -151,6 +151,15 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
   - avoid early/mid-layer harmful seed interference
   - keep useful deep-layer global conditioning
 
+### R10 Result: Hotpot q-after L=4096 (completed)
+
+- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt`
+- Result:
+  - mean `d_acc = -0.0225`, std `0.0435`
+  - sign pattern: `2+ / 0 / 1-`
+  - mean `d_loss = -0.1906`
+- Status: **not adopted** (mean accuracy regressed vs R6 baseline)
+
 ### R11: Small grid queued after R10
 
 - Scripts:
@@ -163,6 +172,29 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
   - `L=4096`, q-after, seeds `{0,1,2}`, scalar FS, `fs_norm`, `fs_detach`, `fs_clip=1.0`
 - Goal:
   - find a robust config with better seed-sign consistency than R9.
+
+## Additional Task Expansion Queued
+
+### MBPP long-context post-training probe
+
+- Scripts:
+  - `run_mbpp_qafter_stabilized_len4096_round1_s012.sh`
+  - `run_mbpp_qfirst_stabilized_len4096_round1_s012.sh`
+- Objective:
+  - check whether FS helps retain problem/test constraints when answer trigger is far from relevant spec.
+
+### Sudoku suite (more Sudoku settings)
+
+- Script: `run_sudoku_suite_round1_s012.sh`
+- Settings:
+  - 4x4 prefix-mask / suffix-mask
+  - 9x9 prefix-mask / suffix-mask
+- Objective:
+  - evaluate FS on stronger global-consistency tasks beyond retrieval-style probes.
+
+### Queue hook
+
+- `run_after_r11_start_mbpp_sudoku.sh` waits for R11 completion, then runs MBPP + Sudoku batch.
 
 ## Current Bottom Line
 
