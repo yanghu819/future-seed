@@ -1,10 +1,12 @@
 | task | ordering | summary | L | mean_d_acc | mean_d_loss | mean_d_seq | sign(+/0/-) | role |
 |---|---|---|---:|---:|---:|---:|---|---|
 | arc | options_first | `_summary_arc_optionsfirst_inputgate_r1.txt` | 512 | +0.0052 | +0.0139 | - | - | - |
+| arc | options_first | `_summary_arc_optionsfirst_r14_utilmax_s01234.txt` | 512 | -0.0074 | +0.0121 | - | 2/0/3 | - |
 | arc | options_first | `_summary_arc_optionsfirst_stabilized_r2.txt` | 512 | +0.0339 | -0.0182 | - | 3/0/0 | core_positive |
 | arc | options_first | `_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt` | 512 | +0.0156 | +0.0295 | - | 2/0/1 | ablation |
 | arc | options_first | `_summary_arc_optionsfirst_stabilized_r5_s01234.txt` | 512 | -0.0203 | +0.0134 | - | 2/0/3 | stability_check |
 | arc | options_first | `_summary_arc_optionsfirst_static.txt` | 512 | +0.0026 | +0.0174 | - | - | - |
+| arc | q_first | `_summary_arc_qfirst_r14_utilmax_s01234.txt` | 512 | -0.0309 | -0.0112 | - | 2/0/3 | - |
 | arc | q_first | `_summary_arc_qfirst_stabilized_r3.txt` | 512 | -0.0052 | +0.0003 | - | 1/0/2 | control |
 | arc | q_first | `_summary_arc_qfirst_stabilized_r5_s01234.txt` | 512 | +0.0005 | -0.0202 | - | 2/0/3 | stability_check_control |
 | hotpot | q_after | `_summary_hotpot_qafter.txt` | 2048 | -0.0196 | +0.0750 | - | - | - |
