@@ -1,0 +1,8 @@
+filter: {'ds': 'hotpot_qa', 'ds_cfg': 'distractor', 'train_split': 'train', 'val_split': 'validation', 'q_first': True, 'n_train': 1000, 'n_val': 200, 'max_prompt_tokens': 4096, 'min_prompt_tokens': 1536, 'max_answer_tokens': 24, 'bsz': 2, 'time_budget_sec': 480, 'max_steps': 500, 'eval_every': 25, 'val_batches': 8, 'model_lr': 3e-05, 'alpha_init': -3.0, 'alpha_lr': 0.0, 'fs_in_gate': False, 'fs_w_lr': 0.0, 'fs_b_lr': 0.0, 'train_gate_only': False, 'fs_variant': 'scalar', 'alpha_head_init': -3.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 10, 'fs_alpha_schedule': 'none', 'fs_alpha_min': 1.0, 'fs_alpha_max': 1.0, 'fs_norm': True, 'fs_clip': 1.0, 'fs_detach': True}
+==========================================================================================
+L=4096 pairs=5 mean d_acc=+0.0052 std=0.0214 | mean d_loss=+0.0206 std=0.2923 | sign(+/0/-)=2/2/1
+  seed=0 d_acc=+0.0414 (no=0.0888 fs=0.1302) d_loss=-0.5435
+  seed=1 d_acc=-0.0250 (no=0.1135 fs=0.0885) d_loss=+0.0209
+  seed=2 d_acc=+0.0000 (no=0.0885 fs=0.0885) d_loss=+0.2339
+  seed=3 d_acc=+0.0000 (no=0.0885 fs=0.0885) d_loss=+0.1644
+  seed=4 d_acc=+0.0096 (no=0.0885 fs=0.0982) d_loss=+0.2274

@@ -327,3 +327,53 @@ Queue helpers used:
 - Aggregated outputs:
   - `results/_aggregate_results.jsonl`
   - `results/_aggregate_results.md`
+
+## 2026-02-21 Round12 (5-seed stability, high-util config)
+
+Goal:
+- stress-test previously reported signals with higher GPU utilization and fixed step caps.
+- settings changed from earlier rounds:
+  - ARC: `bsz=48`, `max_steps=2000`, `val_batches=8`
+  - Hotpot: `bsz=2`, `max_steps=500`, `val_batches=8`
+
+### ARC options-first (R5, seeds 0..4)
+
+- Script: `scripts/run_arc_optionsfirst_stabilized_round5_s01234.sh`
+- Summary: `results/_summary_arc_optionsfirst_stabilized_r5_s01234.txt`
+- Result:
+  - mean `d_acc = -0.0203`, std `0.0367`, sign `2+/3-`
+- Takeaway:
+  - under this high-throughput regime, options-first no longer shows stable FS gain.
+
+### ARC q-first control (R5, seeds 0..4)
+
+- Script: `scripts/run_arc_qfirst_stabilized_round5_s01234.sh`
+- Summary: `results/_summary_arc_qfirst_stabilized_r5_s01234.txt`
+- Result:
+  - mean `d_acc = +0.0005`, std `0.0094`, sign `2+/3-`
+- Takeaway:
+  - near-zero control, but does not rescue the options-first regression.
+
+### Hotpot q-after L4096 (R12, seeds 0..4)
+
+- Script: `scripts/run_hotpot_qafter_stabilized_len4096_round12_lstart10_alpha_m3_s01234.sh`
+- Summary: `results/_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`
+- Result:
+  - mean `d_acc = +0.0054`, std `0.0179`, sign `2+/2=/1-`
+- Takeaway:
+  - small positive mean with mixed signs and multiple no-op seeds.
+
+### Hotpot q-first L4096 control (R12, seeds 0..4)
+
+- Script: `scripts/run_hotpot_qfirst_stabilized_len4096_round12_lstart10_alpha_m3_s01234.sh`
+- Summary: `results/_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`
+- Result:
+  - mean `d_acc = +0.0052`, std `0.0214`, sign `2+/2=/1-`
+- Takeaway:
+  - similarly small mean gain in control ordering; ordering-specific hypothesis is not supported in this regime.
+
+### Updated practical conclusion after Round12
+
+1. FS behavior is strongly regime-dependent (batch/steps/eval cadence).
+2. Claims must be tied to a fixed compute protocol; otherwise sign can flip.
+3. For paper main results, keep one canonical protocol and report Round12 as robustness/failure analysis.

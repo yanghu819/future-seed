@@ -29,6 +29,9 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
   - Contact-pair QA:
     - r1/r2: exact tie on token/seq acc.
     - r3 balanced and r4 schedule: small negative mean deltas.
+- Round12 (5-seed high-util stability check):
+  - ARC options-first regressed (`_summary_arc_optionsfirst_stabilized_r5_s01234.txt`).
+  - Hotpot q-after/q-first both show small positive means but mixed signs (`_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`, `_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`).
 
 ## Notes
 

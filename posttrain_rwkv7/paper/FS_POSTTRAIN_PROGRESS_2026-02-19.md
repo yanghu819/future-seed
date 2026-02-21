@@ -247,3 +247,29 @@ Interpretation: protein probes show near-zero to slight-negative mean effects fo
 2. **Not supported**: broad post-training gains across MBPP, Hotpot, and protein tasks.
 3. **Observed failure mode**: either high seed variance or effective no-op behavior when FS is pushed too deep.
 4. **Practical guidance**: use FS as a targeted mechanism for constraint-style contexts, not as a universal post-training switch.
+
+## Update: 2026-02-21 (Round12 5-seed stability check)
+
+Round12 uses a higher-throughput training regime (`ARC bsz=48`, `Hotpot bsz=2`, fixed `max_steps`) to test seed stability under stronger hardware utilization.
+
+### ARC (5 seeds, options-first / q-first)
+
+- options-first:
+  - `results/_summary_arc_optionsfirst_stabilized_r5_s01234.txt`
+  - mean `d_acc = -0.0203` (2+/3-)
+- q-first:
+  - `results/_summary_arc_qfirst_stabilized_r5_s01234.txt`
+  - mean `d_acc = +0.0005` (2+/3-)
+
+Interpretation: the previous ARC positive signal is not stable under this optimization regime.
+
+### Hotpot L=4096 (5 seeds, lstart=10 alpha=-3)
+
+- q-after:
+  - `results/_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`
+  - mean `d_acc = +0.0054` (2+/2=/1-)
+- q-first:
+  - `results/_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`
+  - mean `d_acc = +0.0052` (2+/2=/1-)
+
+Interpretation: gains are small and appear in both orderings; this weakens the claim that FS gain is tied to causal-unfriendly ordering in this setup.

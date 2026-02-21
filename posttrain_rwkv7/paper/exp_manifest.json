@@ -236,6 +236,42 @@
       "paper_role": "ablation",
       "status": "completed",
       "mean_d_acc": -0.0043
+    },
+    {
+      "id": "arc_optionsfirst_r5_s01234",
+      "summary": "results/_summary_arc_optionsfirst_stabilized_r5_s01234.txt",
+      "task": "arc_mcq",
+      "ordering": "options_first",
+      "paper_role": "stability_check",
+      "status": "completed",
+      "mean_d_acc": -0.0203
+    },
+    {
+      "id": "arc_qfirst_r5_s01234",
+      "summary": "results/_summary_arc_qfirst_stabilized_r5_s01234.txt",
+      "task": "arc_mcq",
+      "ordering": "question_first",
+      "paper_role": "stability_check_control",
+      "status": "completed",
+      "mean_d_acc": 0.0005
+    },
+    {
+      "id": "hotpot_qafter_len4096_r12_l10_a3_s01234",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "stability_check",
+      "status": "completed",
+      "mean_d_acc": 0.0054
+    },
+    {
+      "id": "hotpot_qfirst_len4096_r12_l10_a3_s01234",
+      "summary": "results/_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_first",
+      "paper_role": "stability_check_control",
+      "status": "completed",
+      "mean_d_acc": 0.0052
     }
   ]
 }

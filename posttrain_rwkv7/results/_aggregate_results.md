@@ -3,14 +3,17 @@
 | arc | options_first | `_summary_arc_optionsfirst_inputgate_r1.txt` | 512 | +0.0052 | +0.0139 | - | - | - |
 | arc | options_first | `_summary_arc_optionsfirst_stabilized_r2.txt` | 512 | +0.0339 | -0.0182 | - | 3/0/0 | core_positive |
 | arc | options_first | `_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt` | 512 | +0.0156 | +0.0295 | - | 2/0/1 | ablation |
+| arc | options_first | `_summary_arc_optionsfirst_stabilized_r5_s01234.txt` | 512 | -0.0203 | +0.0134 | - | 2/0/3 | stability_check |
 | arc | options_first | `_summary_arc_optionsfirst_static.txt` | 512 | +0.0026 | +0.0174 | - | - | - |
 | arc | q_first | `_summary_arc_qfirst_stabilized_r3.txt` | 512 | -0.0052 | +0.0003 | - | 1/0/2 | control |
+| arc | q_first | `_summary_arc_qfirst_stabilized_r5_s01234.txt` | 512 | +0.0005 | -0.0202 | - | 2/0/3 | stability_check_control |
 | hotpot | q_after | `_summary_hotpot_qafter.txt` | 2048 | -0.0196 | +0.0750 | - | - | - |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt` | 4096 | -0.0225 | -0.1906 | - | 2/0/1 | ablation |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r11_lstart10_alpha-2_s012.txt` | 4096 | -0.0225 | -0.2831 | - | 2/0/1 | grid |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r11_lstart10_alpha-3_s012.txt` | 4096 | +0.0058 | +0.1495 | - | 2/0/1 | grid |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r11_lstart12_alpha-2_s012.txt` | 4096 | +0.0000 | -0.0467 | - | 0/3/0 | grid |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r11_lstart12_alpha-3_s012.txt` | 4096 | +0.0000 | +0.0000 | - | 0/3/0 | grid |
+| hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt` | 4096 | +0.0054 | -0.1489 | - | 2/2/1 | stability_check |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r6_s0.txt` | 4096 | +0.0382 | -0.0770 | - | - | - |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt` | 4096 | +0.0012 | -0.0192 | - | 2/0/1 | core_mixed |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt` | 4096 | -0.0056 | -0.2070 | - | 2/0/1 | ablation |
@@ -18,6 +21,7 @@
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_r4_s0.txt` | 2048 | +0.0084 | -0.0444 | - | - | - |
 | hotpot | q_after | `_summary_hotpot_qafter_stabilized_r4_s012.txt` | 2048 | -0.0027 | -0.1287 | - | - | core_negative |
 | hotpot | q_first | `_summary_hotpot_qfirst.txt` | 2048 | -0.0175 | +0.3038 | - | - | - |
+| hotpot | q_first | `_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt` | 4096 | +0.0052 | +0.0206 | - | 2/2/1 | stability_check_control |
 | hotpot | q_first | `_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt` | 4096 | +0.0025 | +0.0873 | - | - | single_seed_control |
 | hotpot | q_first | `_summary_hotpot_qfirst_stabilized_r5_s012.txt` | 2048 | -0.0090 | -0.0844 | - | - | control |
 | longfill | q_after | `_summary_longfill_qafter.txt` | 512 | +0.0034 | -0.0589 | - | - | - |
