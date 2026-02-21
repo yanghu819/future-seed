@@ -68,7 +68,7 @@ run_exp() {
   local log_file="runs/_round19_${task}_${stage}_${cfg}.log"
   rm -f "$log_file"
 
-  echo "RUN task=$task stage=$stage cfg=$cfg mode=$mode bsz=$bsz budget=$budget"
+  echo "RUN task=$task stage=$stage cfg=$cfg mode=$mode bsz=$bsz budget=$budget" >&2
   set +e
   ./.venv/bin/python "$trainer" "$@" --mode "$mode" --seed "$SEED" --bsz "$bsz" \
     --time_budget_sec "$budget" --max_steps "$steps" > "$log_file" 2>&1
@@ -79,7 +79,7 @@ run_exp() {
     local err
     err=$(tail -n 1 "$log_file" | sed 's/"/\\"/g')
     record_json "{\"task\":\"$task\",\"stage\":\"$stage\",\"config\":\"$cfg\",\"mode\":\"$mode\",\"status\":\"fail\",\"seed\":$SEED,\"bsz\":$bsz,\"budget\":$budget,\"steps\":$steps,\"run_dir\":\"\",\"best_val_loss\":null,\"best_val_tok_acc\":null,\"error\":\"$err\"}"
-    echo "FAIL task=$task cfg=$cfg (see $log_file)"
+    echo "FAIL task=$task cfg=$cfg (see $log_file)" >&2
     echo $'\t'
     return
   fi
@@ -88,7 +88,7 @@ run_exp() {
   run_dir=$(tail -n 1 "$log_file")
   if [[ ! -f "$run_dir/metrics.jsonl" ]]; then
     record_json "{\"task\":\"$task\",\"stage\":\"$stage\",\"config\":\"$cfg\",\"mode\":\"$mode\",\"status\":\"fail\",\"seed\":$SEED,\"bsz\":$bsz,\"budget\":$budget,\"steps\":$steps,\"run_dir\":\"$run_dir\",\"best_val_loss\":null,\"best_val_tok_acc\":null,\"error\":\"missing_metrics\"}"
-    echo "FAIL task=$task cfg=$cfg (missing metrics)"
+    echo "FAIL task=$task cfg=$cfg (missing metrics)" >&2
     echo $'\t'
     return
   fi
@@ -108,7 +108,7 @@ probe_bsz() {
   for b in $bsz_candidates; do
     local log_file="${probe_log_prefix}_b${b}.log"
     rm -f "$log_file"
-    echo "PROBE task=$task bsz=$b"
+    echo "PROBE task=$task bsz=$b" >&2
     set +e
     ./.venv/bin/python "$trainer" "$@" --mode no_fs --seed "$SEED" --bsz "$b" \
       --time_budget_sec 35 --max_steps 25 --eval_every 10 --val_batches 2 > "$log_file" 2>&1
@@ -171,7 +171,7 @@ run_task_hotpot() {
 
   local bsz
   bsz=$(probe_bsz "$task" "$trainer" "8 6 4 3 2 1" "${base_args[@]}" --alpha_lr 0 --alpha_init -3 --fs_variant scalar --fs_layer_start 10 --fs_norm --fs_detach --fs_clip 1.0)
-  echo "SELECT task=$task bsz=$bsz"
+  echo "SELECT task=$task bsz=$bsz" >&2
   record_json "{\"task\":\"$task\",\"stage\":\"probe\",\"config\":\"bsz\",\"mode\":\"na\",\"status\":\"ok\",\"seed\":$SEED,\"bsz\":$bsz,\"budget\":0,\"steps\":0,\"run_dir\":\"\",\"best_val_loss\":null,\"best_val_tok_acc\":null}"
 
   run_exp "$task" quick baseline no_fs "$trainer" "$bsz" "$QUICK_BUDGET" "$QUICK_STEPS" \
@@ -194,10 +194,10 @@ run_task_hotpot() {
   local promote
   promote=$(promote_from_quick "$task" "$TOPK" "$KEEP_DACC")
   if [[ -z "$promote" ]]; then
-    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)"
+    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)" >&2
     return
   fi
-  echo "PROMOTE task=$task configs=$promote"
+  echo "PROMOTE task=$task configs=$promote" >&2
 
   run_exp "$task" med baseline no_fs "$trainer" "$bsz" "$MED_BUDGET" "$MED_STEPS" \
     "${base_args[@]}" --eval_every 25 --val_batches 8 --alpha_lr 0 --alpha_init -3 --fs_variant scalar --fs_layer_start 10 --fs_norm --fs_detach --fs_clip 1.0 >/dev/null
@@ -237,7 +237,7 @@ run_task_mbpp() {
 
   local bsz
   bsz=$(probe_bsz "$task" "$trainer" "3 2 1" "${base_args[@]}" --alpha_lr 0 --alpha_init -2 --fs_variant scalar --fs_layer_start 6 --fs_norm --fs_detach --fs_clip 1.0)
-  echo "SELECT task=$task bsz=$bsz"
+  echo "SELECT task=$task bsz=$bsz" >&2
   record_json "{\"task\":\"$task\",\"stage\":\"probe\",\"config\":\"bsz\",\"mode\":\"na\",\"status\":\"ok\",\"seed\":$SEED,\"bsz\":$bsz,\"budget\":0,\"steps\":0,\"run_dir\":\"\",\"best_val_loss\":null,\"best_val_tok_acc\":null}"
 
   run_exp "$task" quick baseline no_fs "$trainer" "$bsz" "$QUICK_BUDGET" "$QUICK_STEPS" \
@@ -260,10 +260,10 @@ run_task_mbpp() {
   local promote
   promote=$(promote_from_quick "$task" "$TOPK" "$KEEP_DACC")
   if [[ -z "$promote" ]]; then
-    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)"
+    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)" >&2
     return
   fi
-  echo "PROMOTE task=$task configs=$promote"
+  echo "PROMOTE task=$task configs=$promote" >&2
   run_exp "$task" med baseline no_fs "$trainer" "$bsz" "$MED_BUDGET" "$MED_STEPS" \
     "${base_args[@]}" --eval_every 25 --val_batches 8 --alpha_lr 0 --alpha_init -2 --fs_variant scalar --fs_layer_start 6 --fs_norm --fs_detach --fs_clip 1.0 >/dev/null
 
@@ -304,7 +304,7 @@ run_task_protein_ss() {
 
   local bsz
   bsz=$(probe_bsz "$task" "$trainer" "8 6 4 3 2 1" "${base_args[@]}" --alpha_lr 0 --alpha_init -2 --fs_variant scalar --fs_layer_start 6 --fs_norm --fs_detach --fs_clip 1.0)
-  echo "SELECT task=$task bsz=$bsz"
+  echo "SELECT task=$task bsz=$bsz" >&2
   record_json "{\"task\":\"$task\",\"stage\":\"probe\",\"config\":\"bsz\",\"mode\":\"na\",\"status\":\"ok\",\"seed\":$SEED,\"bsz\":$bsz,\"budget\":0,\"steps\":0,\"run_dir\":\"\",\"best_val_loss\":null,\"best_val_tok_acc\":null}"
 
   run_exp "$task" quick baseline no_fs "$trainer" "$bsz" "$QUICK_BUDGET" "$QUICK_STEPS" \
@@ -325,10 +325,10 @@ run_task_protein_ss() {
   local promote
   promote=$(promote_from_quick "$task" "$TOPK" "$KEEP_DACC")
   if [[ -z "$promote" ]]; then
-    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)"
+    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)" >&2
     return
   fi
-  echo "PROMOTE task=$task configs=$promote"
+  echo "PROMOTE task=$task configs=$promote" >&2
   run_exp "$task" med baseline no_fs "$trainer" "$bsz" "$MED_BUDGET" "$MED_STEPS" \
     "${base_args[@]}" --eval_every 25 --val_batches 8 --alpha_lr 0 --alpha_init -2 --fs_variant scalar --fs_layer_start 6 --fs_norm --fs_detach --fs_clip 1.0 >/dev/null
 
@@ -367,7 +367,7 @@ run_task_protein_contact() {
 
   local bsz
   bsz=$(probe_bsz "$task" "$trainer" "8 6 4 3 2 1" "${base_args[@]}" --alpha_lr 0 --alpha_init -2 --fs_variant scalar --fs_layer_start 6 --fs_norm --fs_detach --fs_clip 1.0)
-  echo "SELECT task=$task bsz=$bsz"
+  echo "SELECT task=$task bsz=$bsz" >&2
   record_json "{\"task\":\"$task\",\"stage\":\"probe\",\"config\":\"bsz\",\"mode\":\"na\",\"status\":\"ok\",\"seed\":$SEED,\"bsz\":$bsz,\"budget\":0,\"steps\":0,\"run_dir\":\"\",\"best_val_loss\":null,\"best_val_tok_acc\":null}"
 
   run_exp "$task" quick baseline no_fs "$trainer" "$bsz" "$QUICK_BUDGET" "$QUICK_STEPS" \
@@ -388,10 +388,10 @@ run_task_protein_contact() {
   local promote
   promote=$(promote_from_quick "$task" "$TOPK" "$KEEP_DACC")
   if [[ -z "$promote" ]]; then
-    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)"
+    echo "PRUNE task=$task (no quick winner >= $KEEP_DACC)" >&2
     return
   fi
-  echo "PROMOTE task=$task configs=$promote"
+  echo "PROMOTE task=$task configs=$promote" >&2
   run_exp "$task" med baseline no_fs "$trainer" "$bsz" "$MED_BUDGET" "$MED_STEPS" \
     "${base_args[@]}" --eval_every 25 --val_batches 8 --alpha_lr 0 --alpha_init -2 --fs_variant scalar --fs_layer_start 6 --fs_norm --fs_detach --fs_clip 1.0 >/dev/null
 
@@ -465,4 +465,3 @@ for task in tasks:
             print(f"    {cfg:26s} d_acc={da:+.4f} d_loss={dl:+.4f} fs_acc={acc:.4f} [{mark}]")
     print("-"*110)
 PY
-
