@@ -35,3 +35,25 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
 - This snapshot does not include full training logs/checkpoints due size.
 - Full raw logs remain on AutoDL under:
   - `/root/autodl-tmp/future-seed-posttrain/runs/`
+
+## Result Integrity Workflow
+
+Run these checks before updating paper tables:
+
+```bash
+python3 scripts/summarize_all_results.py
+python3 scripts/check_doc_summary_refs.py --strict
+```
+
+Generated artifacts:
+
+- `results/_aggregate_results.jsonl`: one parsed row per summary metric line.
+- `results/_aggregate_results.md`: table used for quick paper sync.
+- `paper/exp_manifest.json`: canonical list of paper-facing experiments.
+
+## Next Paper Iteration (execution order)
+
+1. Re-run ARC options-first and Hotpot L4096 with 5 seeds under one fixed recipe.
+2. Keep q-first controls in each domain (ARC/Hotpot/MBPP/protein) for causal-friendly sanity.
+3. Extend MBPP eval from token-acc to executable pass rate (`exec_ok`, `tests_passed`).
+4. Add failure appendix from `results/_aggregate_results.md` (negative and no-op regimes).

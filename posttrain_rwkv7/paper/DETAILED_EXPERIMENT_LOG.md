@@ -21,7 +21,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R2: Options-first (causal-unfriendly)
 
 - Script: `run_arc_stabilized_round2.sh`
-- Summary: `runs/_summary_arc_optionsfirst_stabilized_r2.txt`
+- Summary: `results/_summary_arc_optionsfirst_stabilized_r2.txt`
 - Result:
   - mean `d_acc = +0.0339`, std `0.0205`
   - seed deltas: `+0.0156`, `+0.0234`, `+0.0625`
@@ -30,7 +30,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R3: Question-first (causal-friendly control)
 
 - Script: `run_arc_qfirst_stabilized_round3.sh`
-- Summary: `runs/_summary_arc_qfirst_stabilized_r3.txt`
+- Summary: `results/_summary_arc_qfirst_stabilized_r3.txt`
 - Result:
   - mean `d_acc = -0.0052`, std `0.0097`
   - seed deltas: `-0.0156`, `+0.0078`, `-0.0078`
@@ -41,7 +41,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R4: q-after, L=2048
 
 - Script: `run_hotpot_qafter_stabilized_round4_s0.sh` + `_s12.sh`
-- Summary: `runs/_summary_hotpot_qafter_stabilized_r4_s012.txt`
+- Summary: `results/_summary_hotpot_qafter_stabilized_r4_s012.txt`
 - Result:
   - mean `d_acc = -0.0027`, std `0.0171`
   - seed deltas: `+0.0084`, `+0.0104`, `-0.0269`
@@ -50,7 +50,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R5: q-first, L=2048 (control)
 
 - Script: `run_hotpot_qfirst_stabilized_round5_s012.sh`
-- Summary: `runs/_summary_hotpot_qfirst_stabilized_r5_s012.txt`
+- Summary: `results/_summary_hotpot_qfirst_stabilized_r5_s012.txt`
 - Result:
   - mean `d_acc = -0.0090`, std `0.0085`
   - seed deltas: `-0.0104`, `+0.0021`, `-0.0186`
@@ -59,7 +59,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R6: q-after, L=4096, alpha=-2
 
 - Script: `run_hotpot_qafter_stabilized_len4096_round6_s0.sh` + `_s12.sh`
-- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`
+- Summary: `results/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`
 - Result:
   - mean `d_acc = +0.0012`, std `0.0388`
   - seed deltas: `+0.0382`, `+0.0179`, `-0.0525`
@@ -68,7 +68,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R7: q-first, L=4096, seed0
 
 - Script: `run_hotpot_qfirst_stabilized_len4096_round7_s0.sh`
-- Summary: `runs/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt`
+- Summary: `results/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt`
 - Result:
   - `d_acc = +0.0025` (single seed)
   - loss worsened in that run
@@ -77,7 +77,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R8: q-after, L=4096, alpha=-4
 
 - Script: `run_hotpot_qafter_stabilized_len4096_round8_alpha_m4_s012.sh`
-- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
+- Summary: `results/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
 - Result:
   - mean `d_acc = -0.0056`, std `0.0519`
   - seed deltas: `+0.0141`, `+0.0458`, `-0.0766`
@@ -113,7 +113,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 ### R9a Result: ARC options-first (completed)
 
 - Script: `run_arc_optionsfirst_stabilized_round4_sched_linear.sh`
-- Summary: `runs/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`
+- Summary: `results/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`
 - Result:
   - mean `d_acc = +0.0156`, std `0.0292`
   - sign pattern: `2+ / 0 / 1-`
@@ -128,11 +128,11 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 - Script: `run_hotpot_qafter_stabilized_len4096_round9_sched_linear_s012.sh`
 - Launch mode: queued after ARC via `run_after_arc_start_hotpot_r9.sh`
 - Pending output:
-  - `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+  - `results/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
 
 ### R9b Result: Hotpot q-after L=4096 (completed)
 
-- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+- Summary: `results/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
 - Result:
   - mean `d_acc = -0.0220`, std `0.0378`
   - sign pattern: `1+ / 0 / 2-`
@@ -153,7 +153,7 @@ Rule: keep model scan strictly left->right; FS only via cross-layer terminal-sta
 
 ### R10 Result: Hotpot q-after L=4096 (completed)
 
-- Summary: `runs/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt`
+- Summary: `results/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt`
 - Result:
   - mean `d_acc = -0.0225`, std `0.0435`
   - sign pattern: `2+ / 0 / 1-`
@@ -318,3 +318,12 @@ Queue helpers used:
 2. The strongest positive signal remains in explicitly causal-unfriendly or small-constraint tasks.
 3. On MBPP and protein probes under current budgets, FS does not provide reliable gains.
 4. For realistic claims, report FS as a **targeted mechanism** rather than a global post-training improvement.
+
+## Reproducibility Tooling (added)
+
+- Manifest: `paper/exp_manifest.json`
+- Global summary parser: `scripts/summarize_all_results.py`
+- Doc/reference checker: `scripts/check_doc_summary_refs.py`
+- Aggregated outputs:
+  - `results/_aggregate_results.jsonl`
+  - `results/_aggregate_results.md`

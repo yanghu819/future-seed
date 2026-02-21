@@ -14,15 +14,23 @@ This note summarizes the current status of **Future-Seed (FS)** in post-training
   - `fs_detach`
   - `fs_clip=1.0`
 
+## Repro/Bookkeeping Update (2026-02-21)
+
+- Canonical manifest added: `paper/exp_manifest.json`
+- Aggregate parser added: `scripts/summarize_all_results.py`
+- Doc/file consistency checker added: `scripts/check_doc_summary_refs.py`
+- Auto-generated table:
+  - `results/_aggregate_results.md`
+
 ## Main Results So Far
 
 ### ARC-Challenge (real MCQ)
 
 - **Options-first (causal-unfriendly)**: FS helps.
-  - File: `runs/_summary_arc_optionsfirst_stabilized_r2.txt`
+  - File: `results/_summary_arc_optionsfirst_stabilized_r2.txt`
   - Mean delta token-acc: **+0.0339** (3 seeds, all positive)
 - **Question-first (causal-friendly control)**: FS does not help.
-  - File: `runs/_summary_arc_qfirst_stabilized_r3.txt`
+  - File: `results/_summary_arc_qfirst_stabilized_r3.txt`
   - Mean delta token-acc: **-0.0052**
 
 Interpretation: FS gains appear in orderings where useful evidence is placed in a causally awkward position.
@@ -30,10 +38,10 @@ Interpretation: FS gains appear in orderings where useful evidence is placed in 
 ### HotpotQA Long Context (real QA)
 
 - Baseline stabilized run (`L=2048`, q-after):
-  - File: `runs/_summary_hotpot_qafter_stabilized_r4_s012.txt`
+  - File: `results/_summary_hotpot_qafter_stabilized_r4_s012.txt`
   - Mean delta token-acc: **-0.0027** (high variance)
 - Control (`L=2048`, q-first):
-  - File: `runs/_summary_hotpot_qfirst_stabilized_r5_s012.txt`
+  - File: `results/_summary_hotpot_qfirst_stabilized_r5_s012.txt`
   - Mean delta token-acc: **-0.0090**
 
 Interpretation: at `L=2048`, FS is not stable on this probe.
@@ -41,11 +49,11 @@ Interpretation: at `L=2048`, FS is not stable on this probe.
 ### HotpotQA Longer Prompt (`L=4096`)
 
 - q-after, `alpha=-2`:
-  - File: `runs/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`
+  - File: `results/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`
   - Mean delta token-acc: **+0.0012**
   - Per-seed deltas: `+0.0382`, `+0.0179`, `-0.0525` (still high variance)
 - q-first control, seed0:
-  - File: `runs/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt`
+  - File: `results/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt`
   - Delta token-acc: **+0.0025**, but loss worsens.
 
 Interpretation: longer context can show larger gains on some seeds, but instability remains.
@@ -53,7 +61,7 @@ Interpretation: longer context can show larger gains on some seeds, but instabil
 ## Latest Update (Round 8)
 
 - `L=4096`, q-after, stabilized FS with weaker seed injection (`alpha_init=-4`)
-- File: `runs/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
+- File: `results/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt`
 - Mean delta token-acc: **-0.0056**
 - Per-seed deltas: `+0.0141`, `+0.0458`, `-0.0766`
 
@@ -72,7 +80,7 @@ Interpretation: simply weakening fixed seed injection (`alpha=-4`) did **not** f
 
 ### First Round-9 Result (ARC options-first, scheduled FS)
 
-- File: `runs/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`
+- File: `results/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`
 - Config delta vs R2:
   - `fs_alpha_schedule=linear`
   - `fs_alpha_min=0.25`
@@ -90,11 +98,11 @@ Interpretation: this linear depth schedule is not a free win; it reduced ARC gai
 - Triggered automatically after ARC via:
   - `run_after_arc_start_hotpot_r9.sh`
 - Expected summary file:
-  - `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+  - `results/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
 
 ### Round-9 Hotpot Result (completed)
 
-- File: `runs/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
+- File: `results/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt`
 - Result:
   - mean delta token-acc: **-0.0220**
   - sign pattern: **1 positive / 2 negative**
@@ -114,7 +122,7 @@ Interpretation: linear depth schedule did not stabilize Hotpot; it regressed ave
 
 ### Round-10 Result (completed)
 
-- File: `runs/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt`
+- File: `results/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt`
 - Result:
   - mean delta token-acc: **-0.0225**
   - sign pattern: **2 positive / 1 negative**
