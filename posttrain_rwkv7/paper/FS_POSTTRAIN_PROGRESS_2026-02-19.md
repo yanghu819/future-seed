@@ -455,3 +455,32 @@ Interpretation:
 
 - Punctuation restoration is currently the most stable positive real-text FS regime.
 - MBPP retains mean-positive signal but shows seed instability, so it should be treated as conditional rather than robust.
+
+## Update: 2026-02-21 (Round28 MBPP throughput sweep, completed)
+
+Artifacts:
+
+- `results/_summary_round28_mbpp_bsz_sweep_s0.txt`
+- `results/_round28_mbpp_bsz_sweep_s0_records.jsonl`
+
+Round28 outcomes:
+
+1. `bsz=2`:
+   - baseline quick: `10.46%`
+   - FS quick: `+1.00pp`
+   - FS med: `25.39%` (**+14.92pp**)
+2. `bsz=4`:
+   - baseline quick: `11.71%`
+   - FS quick: `9.66%` (**-2.05pp**)
+3. `bsz=6`:
+   - baseline quick: `14.50%`
+   - FS quick: `12.42%` (**-2.08pp**)
+4. `bsz=8`:
+   - baseline failed (OOM)
+
+Interpretation:
+
+- MBPP FS-positive behavior is sharply throughput-dependent.
+- For post-training search, MBPP should be split into two regimes:
+  - low-throughput (`bsz=2`, FS-positive candidate)
+  - high-throughput (`bsz>=4`, FS-negative under current recipe).

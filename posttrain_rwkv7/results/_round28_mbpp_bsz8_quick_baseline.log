@@ -1,0 +1,27 @@
+Using the latest cached version of the dataset since mbpp couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'full' at /root/autodl-tmp/hf_datasets/mbpp/full/0.0.0/4bb6404fdc6cacfda99d4ac4205087b89d32030c (last modified on Fri Feb 20 15:27:45 2026).
+Loaded cache: cache/mbpp_longctx_tok_792a5df76093.pt
+Traceback (most recent call last):
+  File "/root/autodl-tmp/future-seed-posttrain/train_mbpp_longctx_sft.py", line 582, in <module>
+    main()
+  File "/root/autodl-tmp/future-seed-posttrain/train_mbpp_longctx_sft.py", line 439, in main
+    prompt_hidden, prompt_states = model(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/rwkv7_g1d.py", line 533, in forward
+    x, v_first, sT = block(x, v_first, s0, return_state=need_state)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/rwkv7_g1d.py", line 394, in forward
+    att_out, v_first, sT = self.att(att_in, v_first, s0, return_state=return_state)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/rwkv7_g1d.py", line 270, in forward
+    w_pre = self.w_lora(xw).float()
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 72.00 MiB. GPU 0 has a total capacity of 23.64 GiB of which 31.69 MiB is free. Process 227695 has 23.61 GiB memory in use. Of the allocated memory 23.10 GiB is allocated by PyTorch, and 51.92 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

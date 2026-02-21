@@ -180,6 +180,28 @@ Results:
   - seed0 `+0.80pp`, seed1 `+0.58pp`, seed2 `+2.20pp`
   - mean `+1.19pp`, positive seeds `3/3`
 
+### 3.9 Round28 MBPP throughput sweep (completed)
+
+Artifacts:
+
+- `results/_summary_round28_mbpp_bsz_sweep_s0.txt`
+- `results/_round28_mbpp_bsz_sweep_s0_records.jsonl`
+
+Results:
+
+- `bsz=2`:
+  - baseline quick `10.46%`
+  - FS quick `+1.00pp`
+  - FS med `25.39%` (**+14.92pp**)
+- `bsz=4`:
+  - baseline quick `11.71%`
+  - FS quick `-2.05pp`
+- `bsz=6`:
+  - baseline quick `14.50%`
+  - FS quick `-2.08pp`
+- `bsz=8`:
+  - baseline failed (OOM)
+
 ## 4. Failure Analysis
 
 We repeatedly observe four failure modes:
@@ -190,6 +212,7 @@ We repeatedly observe four failure modes:
 4. **Data-build bottlenecks**: null conclusions can be caused by insufficient constructed examples.
 5. **Throughput sensitivity**: MBPP can flip sign across throughput recipes.
 6. **Seed instability**: MBPP positive regime is weaker than punc on seed robustness.
+7. **Resource cliff**: MBPP crosses an OOM cliff at higher batch sizes in current setup.
 
 The Round20/21 protocol directly addresses (4) by making build failures explicit and then retesting.
 
@@ -200,6 +223,7 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
 3. MBPP gains are **recipe-sensitive** and weakly seed-stable in current setup.
 4. A serial immediate-prune workflow is effective for quickly finding viable FS regimes on one 4090.
 5. Punctuation restoration is currently the most reproducible non-synthetic FS-positive regime.
+6. MBPP currently requires low-throughput operation (`bsz=2`) to retain FS gains.
 
 ## 6. What Is Included in This Repo
 
@@ -222,6 +246,7 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
   - `results/_summary_round25_punc_salvage_s0.txt`
   - `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
   - `results/_summary_round27_seedcheck_positive_s012.txt`
+  - `results/_summary_round28_mbpp_bsz_sweep_s0.txt`
 
 ## 7. Limitations and Next Steps
 
@@ -233,6 +258,6 @@ Limitations:
 Next:
 
 1. Add completion-level MBPP metric (pass@k / executable tests), not just token accuracy.
-2. Run throughput-controlled MBPP sweeps (`bsz=2/4/8`) under fixed steps/time.
+2. Shift MBPP branch to low-throughput-only until executable metrics are added.
 3. Keep punc/head_l8 as a rolling stability benchmark (multi-seed every round).
 4. Build harder non-saturated protein-contact formulation.

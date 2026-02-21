@@ -149,6 +149,20 @@ Main outcome:
     - s0: `+0.80pp`, s1: `+0.58pp`, s2: `+2.20pp`
     - mean: `+1.19pp`, positive seeds: `3/3`
 
+### Round28 (MBPP throughput sweep, completed)
+
+- Summary: `results/_summary_round28_mbpp_bsz_sweep_s0.txt`
+- Records: `results/_round28_mbpp_bsz_sweep_s0_records.jsonl`
+- Outcome:
+  - `bsz=2`:
+    - baseline quick: `10.46%`
+    - FS quick: `+1.00pp`
+    - FS med: `25.39%` (**+14.92pp**)
+  - `bsz=4`: FS quick `-2.05pp`
+  - `bsz=6`: FS quick `-2.08pp`
+  - `bsz=8`: baseline OOM/fail
+  - key conclusion: MBPP FS gain is concentrated in low-throughput (`bsz=2`) regime.
+
 ## Notes
 
 - This snapshot does not include full training logs/checkpoints due size.
@@ -173,6 +187,6 @@ Generated artifacts:
 ## Next Paper Iteration (execution order)
 
 1. Convert MBPP eval from token-acc to executable pass metrics (`exec_ok`, `tests_passed`).
-2. Run throughput-controlled MBPP sweeps (`bsz=2/4/8`) to isolate recipe sensitivity.
+2. Keep MBPP at low-throughput (`bsz=2`) for FS-positive branch; treat high-throughput branch as separate negative regime.
 3. Keep punc-restore multi-seed tracking as a stable positive real-text regime.
 4. Retest Hotpot with matched low-throughput recipe before any FS variant expansion.

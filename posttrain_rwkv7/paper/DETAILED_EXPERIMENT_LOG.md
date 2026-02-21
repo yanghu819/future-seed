@@ -608,3 +608,32 @@ Outcomes:
 Interpretation:
 - Punctuation restoration currently has the strongest seed-level robustness among non-synthetic real-text tasks.
 - MBPP remains conditionally positive, not yet robust.
+
+## 2026-02-21 Round28 (MBPP throughput sweep, completed)
+
+Script:
+- `scripts/run_round28_mbpp_bsz_sweep_s0.sh`
+
+Outputs:
+- `results/_summary_round28_mbpp_bsz_sweep_s0.txt`
+- `results/_round28_mbpp_bsz_sweep_s0_records.jsonl`
+- `results/_log_round28_mbpp_bsz_sweep_s0.20260221_225305.log` (final clean run)
+- `results/_launcher_round28.log`
+
+Outcomes:
+- `bsz=2`:
+  - baseline quick `10.46%`
+  - FS quick `+1.00pp`
+  - FS med `25.39%` (**+14.92pp**)
+- `bsz=4`:
+  - baseline quick `11.71%`
+  - FS quick `-2.05pp`
+- `bsz=6`:
+  - baseline quick `14.50%`
+  - FS quick `-2.08pp`
+- `bsz=8`:
+  - baseline OOM/fail
+
+Interpretation:
+- MBPP gain from FS is concentrated in low-throughput settings.
+- Throughput increase is currently a stronger negative factor than FS variant choice on MBPP.

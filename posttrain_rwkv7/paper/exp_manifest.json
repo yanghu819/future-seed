@@ -416,6 +416,15 @@
       "paper_role": "seedcheck_positive",
       "status": "completed",
       "mean_d_acc": 0.0119
+    },
+    {
+      "id": "round28_mbpp_bsz2_scalar_l8_trainable_med",
+      "summary": "results/_summary_round28_mbpp_bsz_sweep_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "throughput_sweep_positive_low_bsz",
+      "status": "completed",
+      "mean_d_acc": 0.1492
     }
   ]
 }
