@@ -557,3 +557,54 @@ Outcomes:
 
 Interpretation:
 - The punc task is a valid additional positive real-text regime once memory settings are corrected.
+
+## 2026-02-21 Round26 (low-throughput MBPP/Hotpot, completed)
+
+Script:
+- `scripts/run_round26_mbpp_hotpot_lowthroughput_s0.sh`
+
+Outputs:
+- `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
+- `results/_round26_mbpp_hotpot_lowthroughput_records.jsonl`
+- `results/_log_round26_mbpp_hotpot_lowthroughput_s0.*.log`
+
+Outcomes:
+- `mbpp_low`:
+  - baseline quick `10.46%`
+  - quick `scalar_l8_trainable` `+1.00pp`
+  - med `scalar_l8_trainable` `29.64%` (**+19.17pp**)
+- `hotpot_low`:
+  - baseline quick `14.34%`
+  - `scalar_l10_trainable`: `+0.00pp`
+  - `scalar_l10_sched_cos`: `+0.00pp`
+  - `head_l10`: `-1.84pp`
+
+Interpretation:
+- MBPP sign-flip is throughput-sensitive in current setup (`bsz=2` works, higher-throughput setups often regress).
+- Hotpot remains no-gain even under the same low-throughput control.
+
+## 2026-02-21 Round27 (seed robustness check, completed)
+
+Script:
+- `scripts/run_round27_seedcheck_positive_s012.sh`
+
+Outputs:
+- `results/_summary_round27_seedcheck_positive_s012.txt`
+- `results/_round27_seedcheck_positive_s012_records.jsonl`
+- `results/_log_round27_seedcheck_positive_s012.20260221_223003.log`
+
+Outcomes:
+- `mbpp_low + scalar_l8_trainable` (quick):
+  - seed0 `+1.00pp`
+  - seed1 `+0.32pp`
+  - seed2 `-0.82pp`
+  - mean `+0.17pp`, positive seeds `2/3`
+- `punc_restore + head_l8` (quick):
+  - seed0 `+0.80pp`
+  - seed1 `+0.58pp`
+  - seed2 `+2.20pp`
+  - mean `+1.19pp`, positive seeds `3/3`
+
+Interpretation:
+- Punctuation restoration currently has the strongest seed-level robustness among non-synthetic real-text tasks.
+- MBPP remains conditionally positive, not yet robust.

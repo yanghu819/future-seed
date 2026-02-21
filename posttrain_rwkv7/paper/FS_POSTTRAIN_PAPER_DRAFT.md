@@ -145,6 +145,41 @@ Results:
     - med `head_l8`: `12.64%` (**+3.45pp**)
     - med `scalar_l8_sched_cos`: `11.90%` (**+2.71pp**)
 
+### 3.7 Round26 low-throughput check (completed)
+
+Artifacts:
+
+- `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
+- `results/_round26_mbpp_hotpot_lowthroughput_records.jsonl`
+
+Results:
+
+- `mbpp_low`:
+  - quick baseline: `10.46%`
+  - quick `scalar_l8_trainable`: `+1.00pp`
+  - medium `scalar_l8_trainable`: `29.64%` (**+19.17pp**)
+- `hotpot_low`:
+  - quick baseline: `14.34%`
+  - `scalar_l10_trainable`: `+0.00pp`
+  - `scalar_l10_sched_cos`: `+0.00pp`
+  - `head_l10`: `-1.84pp`
+
+### 3.8 Round27 seedcheck for positive regimes (completed)
+
+Artifacts:
+
+- `results/_summary_round27_seedcheck_positive_s012.txt`
+- `results/_round27_seedcheck_positive_s012_records.jsonl`
+
+Results:
+
+- `mbpp_low + scalar_l8_trainable` (quick):
+  - seed0 `+1.00pp`, seed1 `+0.32pp`, seed2 `-0.82pp`
+  - mean `+0.17pp`, positive seeds `2/3`
+- `punc_restore + head_l8` (quick):
+  - seed0 `+0.80pp`, seed1 `+0.58pp`, seed2 `+2.20pp`
+  - mean `+1.19pp`, positive seeds `3/3`
+
 ## 4. Failure Analysis
 
 We repeatedly observe four failure modes:
@@ -153,6 +188,8 @@ We repeatedly observe four failure modes:
 2. **Task dependence**: gains do not transfer uniformly across tasks.
 3. **No-op collapse**: some deep-start settings produce near-zero deltas.
 4. **Data-build bottlenecks**: null conclusions can be caused by insufficient constructed examples.
+5. **Throughput sensitivity**: MBPP can flip sign across throughput recipes.
+6. **Seed instability**: MBPP positive regime is weaker than punc on seed robustness.
 
 The Round20/21 protocol directly addresses (4) by making build failures explicit and then retesting.
 
@@ -160,8 +197,9 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
 
 1. FS is **not** a universal post-training improvement.
 2. FS can be **strongly useful** in specific real-task regimes (protein SS strongest; punc restore positive after memory correction).
-3. MBPP gains are **recipe-sensitive** and can flip sign under throughput-oriented settings.
+3. MBPP gains are **recipe-sensitive** and weakly seed-stable in current setup.
 4. A serial immediate-prune workflow is effective for quickly finding viable FS regimes on one 4090.
+5. Punctuation restoration is currently the most reproducible non-synthetic FS-positive regime.
 
 ## 6. What Is Included in This Repo
 
@@ -182,6 +220,8 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
   - `results/_round22_adaptive_search_records.jsonl`
   - `results/_summary_round24_punc_protein_s0.txt`
   - `results/_summary_round25_punc_salvage_s0.txt`
+  - `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
+  - `results/_summary_round27_seedcheck_positive_s012.txt`
 
 ## 7. Limitations and Next Steps
 
@@ -192,6 +232,7 @@ Limitations:
 
 Next:
 
-1. Re-run top protein SS + punc settings with small multi-seed confirmation.
-2. Add completion-level MBPP metric (pass@k / executable tests), not just token accuracy.
-3. Build harder non-saturated protein-contact formulation.
+1. Add completion-level MBPP metric (pass@k / executable tests), not just token accuracy.
+2. Run throughput-controlled MBPP sweeps (`bsz=2/4/8`) under fixed steps/time.
+3. Keep punc/head_l8 as a rolling stability benchmark (multi-seed every round).
+4. Build harder non-saturated protein-contact formulation.

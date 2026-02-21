@@ -1,0 +1,9 @@
+{"task":"mbpp_low","stage":"quick","config":"baseline","status":"ok","bsz":2,"best_val_loss":5.309768080711365,"best_val_tok_acc":0.10464649298212805,"run_dir":"runs/20260221-222016/mbpp_longctx_sft/no_fs"}
+{"task":"mbpp_low","stage":"quick","config":"scalar_l8_trainable","status":"ok","bsz":2,"best_val_loss":5.2231481075286865,"best_val_tok_acc":0.11464287284860677,"run_dir":"runs/20260221-222101/mbpp_longctx_sft/prompt_fs"}
+{"task":"mbpp_low","stage":"med","config":"scalar_l8_trainable","status":"ok","bsz":2,"best_val_loss":4.184071958065033,"best_val_tok_acc":0.29639628304185267,"run_dir":"runs/20260221-222147/mbpp_longctx_sft/prompt_fs"}
+{"task":"mbpp_low","stage":"quick","config":"scalar_l8_sched_cos","status":"ok","bsz":2,"best_val_loss":5.11199164390564,"best_val_tok_acc":0.10399910692061798,"run_dir":"runs/20260221-222338/mbpp_longctx_sft/prompt_fs"}
+{"task":"mbpp_low","stage":"quick","config":"head_l8","status":"ok","bsz":2,"best_val_loss":5.215002536773682,"best_val_tok_acc":0.10602508630309429,"run_dir":"runs/20260221-222424/mbpp_longctx_sft/prompt_fs"}
+{"task":"hotpot_low","stage":"quick","config":"baseline","status":"ok","bsz":2,"best_val_loss":15.911927700042725,"best_val_tok_acc":0.14337121212121212,"run_dir":"runs/20260221-222510/hotpot_longctx_sft/no_fs"}
+{"task":"hotpot_low","stage":"quick","config":"scalar_l10_trainable","status":"ok","bsz":2,"best_val_loss":16.43256664276123,"best_val_tok_acc":0.14337121212121212,"run_dir":"runs/20260221-222548/hotpot_longctx_sft/prompt_fs"}
+{"task":"hotpot_low","stage":"quick","config":"scalar_l10_sched_cos","status":"ok","bsz":2,"best_val_loss":15.683011293411255,"best_val_tok_acc":0.14337121212121212,"run_dir":"runs/20260221-222628/hotpot_longctx_sft/prompt_fs"}
+{"task":"hotpot_low","stage":"quick","config":"head_l10","status":"ok","bsz":2,"best_val_loss":15.704895257949829,"best_val_tok_acc":0.125,"run_dir":"runs/20260221-222708/hotpot_longctx_sft/prompt_fs"}

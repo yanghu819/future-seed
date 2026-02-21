@@ -1,0 +1,33 @@
+Round26 started: Sat Feb 21 22:20:06 CST 2026
+RUN task=mbpp_low stage=quick cfg=baseline mode=no_fs budget=120
+RUN task=mbpp_low stage=quick cfg=scalar_l8_trainable mode=prompt_fs budget=120
+RUN task=mbpp_low stage=med cfg=scalar_l8_trainable mode=prompt_fs budget=360
+RUN task=mbpp_low stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs budget=120
+PRUNE task=mbpp_low cfg=scalar_l8_sched_cos d_acc_pp=-0.06473860615100746%
+RUN task=mbpp_low stage=quick cfg=head_l8 mode=prompt_fs budget=120
+PRUNE task=mbpp_low cfg=head_l8 d_acc_pp=0.1378593320966237%
+RUN task=hotpot_low stage=quick cfg=baseline mode=no_fs budget=120
+RUN task=hotpot_low stage=quick cfg=scalar_l10_trainable mode=prompt_fs budget=120
+PRUNE task=hotpot_low cfg=scalar_l10_trainable d_acc_pp=0.0%
+RUN task=hotpot_low stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs budget=120
+PRUNE task=hotpot_low cfg=scalar_l10_sched_cos d_acc_pp=0.0%
+RUN task=hotpot_low stage=quick cfg=head_l10 mode=prompt_fs budget=120
+PRUNE task=hotpot_low cfg=head_l10 d_acc_pp=-1.8371212121212122%
+====================================================================================================================
+Round26 low-throughput summary (mbpp+hotpot)
+====================================================================================================================
+[hotpot_low]
+  baseline quick: acc=14.34% loss=15.9119 bsz=2
+    scalar_l10_trainable     d_acc=+0.00pp acc=14.34%
+    scalar_l10_sched_cos     d_acc=+0.00pp acc=14.34%
+    head_l10                 d_acc=-1.84pp acc=12.50%
+--------------------------------------------------------------------------------------------------------------------
+[mbpp_low]
+  baseline quick: acc=10.46% loss=5.3098 bsz=2
+    scalar_l8_trainable      d_acc=+1.00pp acc=11.46%
+    head_l8                  d_acc=+0.14pp acc=10.60%
+    scalar_l8_sched_cos      d_acc=-0.06pp acc=10.40%
+  med confirmed:
+    scalar_l8_trainable      d_acc=+19.17pp acc=29.64% loss=4.1841
+--------------------------------------------------------------------------------------------------------------------
+Round26 finished: Sat Feb 21 22:27:36 CST 2026

@@ -122,6 +122,33 @@ Main outcome:
   - quick best: `+0.80pp` (`scalar_l8_sched_cos`, `head_l8`).
   - med best: `head_l8` `12.64%` (**+3.45pp**), `scalar_l8_sched_cos` `11.90%` (**+2.71pp**).
 
+### Round26 (low-throughput MBPP/Hotpot check, completed)
+
+- Summary: `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
+- Records: `results/_round26_mbpp_hotpot_lowthroughput_records.jsonl`
+- Outcome:
+  - `mbpp_low`:
+    - baseline quick: `10.46%`
+    - quick `scalar_l8_trainable`: `+1.00pp`
+    - med `scalar_l8_trainable`: `29.64%` (**+19.17pp**)
+  - `hotpot_low`:
+    - baseline quick: `14.34%`
+    - `scalar_l10_trainable`: `+0.00pp`
+    - `scalar_l10_sched_cos`: `+0.00pp`
+    - `head_l10`: `-1.84pp`
+
+### Round27 (seed robustness check for positive regimes, completed)
+
+- Summary: `results/_summary_round27_seedcheck_positive_s012.txt`
+- Records: `results/_round27_seedcheck_positive_s012_records.jsonl`
+- Outcome:
+  - `mbpp_low + scalar_l8_trainable` (quick):
+    - s0: `+1.00pp`, s1: `+0.32pp`, s2: `-0.82pp`
+    - mean: `+0.17pp`, positive seeds: `2/3`
+  - `punc_restore + head_l8` (quick):
+    - s0: `+0.80pp`, s1: `+0.58pp`, s2: `+2.20pp`
+    - mean: `+1.19pp`, positive seeds: `3/3`
+
 ## Notes
 
 - This snapshot does not include full training logs/checkpoints due size.
@@ -145,7 +172,7 @@ Generated artifacts:
 
 ## Next Paper Iteration (execution order)
 
-1. Re-run ARC options-first and Hotpot L4096 with 5 seeds under one fixed recipe.
-2. Keep q-first controls in each domain (ARC/Hotpot/MBPP/protein) for causal-friendly sanity.
-3. Extend MBPP eval from token-acc to executable pass rate (`exec_ok`, `tests_passed`).
-4. Add failure appendix from `results/_aggregate_results.md` (negative and no-op regimes).
+1. Convert MBPP eval from token-acc to executable pass metrics (`exec_ok`, `tests_passed`).
+2. Run throughput-controlled MBPP sweeps (`bsz=2/4/8`) to isolate recipe sensitivity.
+3. Keep punc-restore multi-seed tracking as a stable positive real-text regime.
+4. Retest Hotpot with matched low-throughput recipe before any FS variant expansion.

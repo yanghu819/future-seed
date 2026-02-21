@@ -410,3 +410,48 @@ Interpretation:
 - FS remains non-universal on MBPP/Hotpot under this recipe.
 - FS remains consistently useful on protein SS.
 - Punctuation/case restoration becomes a new positive real-text regime once memory config is corrected.
+
+## Update: 2026-02-21 (Round26 low-throughput MBPP/Hotpot, completed)
+
+Artifacts:
+
+- `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
+- `results/_round26_mbpp_hotpot_lowthroughput_records.jsonl`
+
+Round26 outcomes:
+
+1. `mbpp_low` (`bsz=2`):
+   - quick baseline: `10.46%`
+   - quick `scalar_l8_trainable`: `+1.00pp`
+   - med `scalar_l8_trainable`: `29.64%` (**+19.17pp**)
+2. `hotpot_low` (`bsz=2`):
+   - quick baseline: `14.34%`
+   - `scalar_l10_trainable`: `+0.00pp`
+   - `scalar_l10_sched_cos`: `+0.00pp`
+   - `head_l10`: `-1.84pp`
+
+Interpretation:
+
+- MBPP FS gain is throughput-sensitive: low-throughput restored a strong positive regime.
+- Hotpot remains no-gain in the matched low-throughput setup.
+
+## Update: 2026-02-21 (Round27 seed robustness check, completed)
+
+Artifacts:
+
+- `results/_summary_round27_seedcheck_positive_s012.txt`
+- `results/_round27_seedcheck_positive_s012_records.jsonl`
+
+Round27 outcomes:
+
+1. `mbpp_low + scalar_l8_trainable` (quick, seeds 0/1/2):
+   - s0 `+1.00pp`, s1 `+0.32pp`, s2 `-0.82pp`
+   - mean `+0.17pp`, positive seeds `2/3`
+2. `punc_restore + head_l8` (quick, seeds 0/1/2):
+   - s0 `+0.80pp`, s1 `+0.58pp`, s2 `+2.20pp`
+   - mean `+1.19pp`, positive seeds `3/3`
+
+Interpretation:
+
+- Punctuation restoration is currently the most stable positive real-text FS regime.
+- MBPP retains mean-positive signal but shows seed instability, so it should be treated as conditional rather than robust.

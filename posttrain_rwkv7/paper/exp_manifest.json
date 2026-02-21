@@ -380,6 +380,42 @@
       "paper_role": "real_task_positive_secondary",
       "status": "completed",
       "mean_d_acc": 0.0271
+    },
+    {
+      "id": "round26_mbpp_low_scalar_l8_trainable_med",
+      "summary": "results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive",
+      "status": "completed",
+      "mean_d_acc": 0.1917
+    },
+    {
+      "id": "round26_hotpot_low_scalar_l10_trainable_quick",
+      "summary": "results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "real_task_no_gain",
+      "status": "completed",
+      "mean_d_acc": 0.0
+    },
+    {
+      "id": "round27_mbpp_low_scalar_l8_trainable_quick_s012",
+      "summary": "results/_summary_round27_seedcheck_positive_s012.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "seedcheck_mixed",
+      "status": "completed",
+      "mean_d_acc": 0.0017
+    },
+    {
+      "id": "round27_punc_head_l8_quick_s012",
+      "summary": "results/_summary_round27_seedcheck_positive_s012.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "seedcheck_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0119
     }
   ]
 }
