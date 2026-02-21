@@ -341,3 +341,72 @@ Interpretation:
 - fixing data-build constraints uncovered a clear positive MBPP regime.
 - protein-contact remains saturated/no-gain in current formulation.
 - protein SS gains become stronger under targeted search than in Round20.
+
+## Update: 2026-02-21 (Round22 adaptive serial search, completed)
+
+Artifacts:
+
+- `results/_summary_round22_adaptive_search_s0.txt`
+- `results/_round22_adaptive_search_records.jsonl`
+
+Outcomes:
+
+1. `mbpp_focus`:
+   - quick baseline: `15.49%`
+   - all tested FS variants regressed (`-0.92pp` to `-4.83pp`)
+2. `protein_ss_expand`:
+   - quick baseline: `28.15%`
+   - best quick: `scalar_l10_nodetach` `+1.50pp`
+   - mixed sign, weaker than Round21 targeted regime
+3. `sudoku4_refine`:
+   - quick baseline: `58.89%`
+   - med best: `scalar_l6_trainable` `92.18%` (**+33.29pp**)
+4. `sudoku9_probe`:
+   - quick baseline: `1.35%`
+   - med best: `scalar_l6_trainable` `2.86%` (**+1.51pp**)
+
+## Update: 2026-02-21 (Round23 real-task sweep, partial)
+
+Artifacts:
+
+- `results/_round23_real_task_sweep_records.jsonl`
+- `results/_launcher_round23.log`
+
+Outcomes (completed tasks before abort):
+
+1. `mbpp_rt`: all quick FS variants regressed (`-1.28pp` to `-4.67pp`).
+2. `hotpot_rt`: FS quick variants tied baseline (`+0.00pp`).
+3. `punc_restore_rt`: run aborted by HF connectivity (infrastructure/network issue).
+
+## Update: 2026-02-21 (Round24/25 continuation, completed)
+
+Artifacts:
+
+- `results/_summary_round24_punc_protein_s0.txt`
+- `results/_round24_punc_protein_records.jsonl`
+- `results/_summary_round25_punc_salvage_s0.txt`
+- `results/_round25_punc_salvage_records.jsonl`
+
+Round24 outcomes:
+
+1. `protein_ss_rt`:
+   - quick baseline: `30.17%`
+   - med `scalar_l10_sched_cos`: `34.31%` (**+4.14pp**)
+2. `punc_restore_rt`:
+   - baseline failed by OOM at `bsz=10` (configuration issue)
+
+Round25 outcomes (memory-safe punc config):
+
+1. baseline quick: `9.18%`
+2. quick best:
+   - `scalar_l8_sched_cos`: `+0.80pp`
+   - `head_l8`: `+0.80pp`
+3. med confirmed:
+   - `head_l8`: `12.64%` (**+3.45pp**)
+   - `scalar_l8_sched_cos`: `11.90%` (**+2.71pp**)
+
+Interpretation:
+
+- FS remains non-universal on MBPP/Hotpot under this recipe.
+- FS remains consistently useful on protein SS.
+- Punctuation/case restoration becomes a new positive real-text regime once memory config is corrected.

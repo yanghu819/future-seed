@@ -4,7 +4,7 @@ Status: draft for repo tracking (updated 2026-02-21).
 
 ## Abstract
 
-We study whether Future-Seed (FS), a cross-layer terminal-state seeding mechanism for RWKV, helps post-training on real tasks. We run controlled no-FS vs FS probes under fixed budgets, then add a serial immediate-prune search protocol to reduce compute waste and surface task-specific gains quickly. Across ARC/Hotpot/MBPP/Sudoku/protein tasks, FS is not a universal gain switch. However, under the same single-GPU budget, we find a strong positive regime on protein secondary-structure spot labeling, with up to +8.02 percentage points over no-FS. In contrast, Hotpot remains non-improving in the tested protocol, and several earlier null results are partly explained by sample-construction bottlenecks. Our conclusion is that FS should be treated as a targeted mechanism whose utility depends on task structure and training regime.
+We study whether Future-Seed (FS), a cross-layer terminal-state seeding mechanism for RWKV, helps post-training on real tasks. We run controlled no-FS vs FS probes under fixed budgets, then apply a serial immediate-prune search protocol to reduce compute waste and surface working regimes quickly. Across ARC/Hotpot/MBPP/Sudoku/protein and real-text restoration probes, FS is not a universal gain switch. However, under the same single-GPU budget, we repeatedly find strong positive regimes on protein secondary-structure spot labeling (up to +13.31pp in targeted runs; +4.14pp in later stability runs) and a memory-safe punctuation/case restoration probe (+3.45pp). In contrast, Hotpot remains non-improving in the tested protocols, and MBPP gains are recipe-sensitive (positive in one targeted setup, negative in several high-throughput sweeps). Our conclusion is that FS should be treated as a targeted mechanism whose utility depends on task structure and training regime.
 
 ## 1. Introduction
 
@@ -99,6 +99,52 @@ Results:
     - `scalar_l10_trainable`: `33.95%` (**+12.82pp**)
     - `head_l10`: `33.48%` (**+12.35pp**)
 
+### 3.4 Round22 adaptive search (completed)
+
+Artifacts:
+
+- `results/_summary_round22_adaptive_search_s0.txt`
+- `results/_round22_adaptive_search_records.jsonl`
+
+Results:
+
+- `mbpp_focus`: all FS quick variants regressed (`-0.92pp` to `-4.83pp`).
+- `protein_ss_expand`: small mixed quick gains (best `+1.50pp`).
+- `sudoku4_refine`: strong positive med gains (best `+33.29pp`).
+- `sudoku9_probe`: modest positive med gains (best `+1.51pp`).
+
+### 3.5 Round23 real-task sweep (partial)
+
+Artifacts:
+
+- `results/_round23_real_task_sweep_records.jsonl`
+- `results/_launcher_round23.log`
+
+Completed results:
+
+- `mbpp_rt`: quick FS variants all negative.
+- `hotpot_rt`: FS quick variants exact-tie baseline (`+0.00pp`).
+- punctuation run aborted due HF connectivity (infra issue).
+
+### 3.6 Round24/25 continuation
+
+Artifacts:
+
+- `results/_summary_round24_punc_protein_s0.txt`
+- `results/_summary_round25_punc_salvage_s0.txt`
+
+Results:
+
+- `protein_ss_rt` (Round24):
+  - baseline quick: `30.17%`
+  - med `scalar_l10_sched_cos`: `34.31%` (**+4.14pp**)
+- `punc_restore_rt`:
+  - Round24 baseline failed by OOM at `bsz=10` (configuration failure).
+  - Round25 memory-safe rerun (`bsz=2`) recovered:
+    - baseline quick: `9.18%`
+    - med `head_l8`: `12.64%` (**+3.45pp**)
+    - med `scalar_l8_sched_cos`: `11.90%` (**+2.71pp**)
+
 ## 4. Failure Analysis
 
 We repeatedly observe four failure modes:
@@ -113,8 +159,9 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
 ## 5. Main Takeaways
 
 1. FS is **not** a universal post-training improvement.
-2. FS can be **strongly useful** in specific real-task regimes (currently strongest on protein SS spot).
-3. A serial immediate-prune workflow is effective for quickly finding viable FS regimes on one 4090.
+2. FS can be **strongly useful** in specific real-task regimes (protein SS strongest; punc restore positive after memory correction).
+3. MBPP gains are **recipe-sensitive** and can flip sign under throughput-oriented settings.
+4. A serial immediate-prune workflow is effective for quickly finding viable FS regimes on one 4090.
 
 ## 6. What Is Included in This Repo
 
@@ -131,6 +178,10 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
   - `results/_round20_serial_earlystop_records.jsonl`
   - `results/_summary_round21_targeted_search_s0.txt`
   - `results/_round21_targeted_search_records.jsonl`
+  - `results/_summary_round22_adaptive_search_s0.txt`
+  - `results/_round22_adaptive_search_records.jsonl`
+  - `results/_summary_round24_punc_protein_s0.txt`
+  - `results/_summary_round25_punc_salvage_s0.txt`
 
 ## 7. Limitations and Next Steps
 
@@ -141,6 +192,6 @@ Limitations:
 
 Next:
 
-1. Re-run top protein SS settings with small multi-seed confirmation.
-2. Add one completion-level metric for MBPP in the same serial prune framework.
-3. Build a harder protein-contact variant that avoids saturation at ~98.8% baseline.
+1. Re-run top protein SS + punc settings with small multi-seed confirmation.
+2. Add completion-level MBPP metric (pass@k / executable tests), not just token accuracy.
+3. Build harder non-saturated protein-contact formulation.

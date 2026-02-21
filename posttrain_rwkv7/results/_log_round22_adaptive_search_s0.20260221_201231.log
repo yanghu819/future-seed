@@ -1,0 +1,82 @@
+Round22 started: Sat Feb 21 20:12:31 CST 2026
+PROBE task=mbpp_focus bsz=4
+RUN task=mbpp_focus stage=quick cfg=baseline mode=no_fs bsz=4 budget=120
+RUN task=mbpp_focus stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=4 budget=120
+PRUNE task=mbpp_focus cfg=scalar_l8_trainable d_acc_pp=-0.9161037640897318%
+RUN task=mbpp_focus stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs bsz=4 budget=120
+PRUNE task=mbpp_focus cfg=scalar_l8_sched_cos d_acc_pp=-2.883827291441915%
+RUN task=mbpp_focus stage=quick cfg=scalar_l10_trainable mode=prompt_fs bsz=4 budget=120
+PRUNE task=mbpp_focus cfg=scalar_l10_trainable d_acc_pp=-4.83479557916178%
+RUN task=mbpp_focus stage=quick cfg=head_l8 mode=prompt_fs bsz=4 budget=120
+PRUNE task=mbpp_focus cfg=head_l8 d_acc_pp=-2.162852198413401%
+RUN task=mbpp_focus stage=quick cfg=scalar_l8_nodetach mode=prompt_fs bsz=4 budget=120
+PRUNE task=mbpp_focus cfg=scalar_l8_nodetach d_acc_pp=-1.9634480583971965%
+PROBE task=protein_ss_expand bsz=16
+PROBE task=protein_ss_expand bsz=12
+PROBE task=protein_ss_expand bsz=10
+RUN task=protein_ss_expand stage=quick cfg=baseline mode=no_fs bsz=10 budget=120
+RUN task=protein_ss_expand stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs bsz=10 budget=120
+RUN task=protein_ss_expand stage=quick cfg=scalar_l10_trainable mode=prompt_fs bsz=10 budget=120
+RUN task=protein_ss_expand stage=quick cfg=scalar_l12_sched_cos mode=prompt_fs bsz=10 budget=120
+RUN task=protein_ss_expand stage=quick cfg=head_l10 mode=prompt_fs bsz=10 budget=120
+RUN task=protein_ss_expand stage=med cfg=head_l10 mode=prompt_fs bsz=10 budget=420
+RUN task=protein_ss_expand stage=quick cfg=scalar_l10_nodetach mode=prompt_fs bsz=10 budget=120
+RUN task=protein_ss_expand stage=med cfg=scalar_l10_nodetach mode=prompt_fs bsz=10 budget=420
+PROBE task=sudoku4_refine bsz=64
+RUN task=sudoku4_refine stage=quick cfg=baseline mode=no_fs bsz=64 budget=120
+RUN task=sudoku4_refine stage=quick cfg=scalar_l6_trainable mode=prompt_fs bsz=64 budget=120
+RUN task=sudoku4_refine stage=med cfg=scalar_l6_trainable mode=prompt_fs bsz=64 budget=420
+RUN task=sudoku4_refine stage=quick cfg=scalar_l6_sched_cos mode=prompt_fs bsz=64 budget=120
+RUN task=sudoku4_refine stage=med cfg=scalar_l6_sched_cos mode=prompt_fs bsz=64 budget=420
+RUN task=sudoku4_refine stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=64 budget=120
+RUN task=sudoku4_refine stage=med cfg=scalar_l8_trainable mode=prompt_fs bsz=64 budget=420
+RUN task=sudoku4_refine stage=quick cfg=head_l6 mode=prompt_fs bsz=64 budget=120
+PROBE task=sudoku9_probe bsz=16
+RUN task=sudoku9_probe stage=quick cfg=baseline mode=no_fs bsz=16 budget=120
+RUN task=sudoku9_probe stage=quick cfg=scalar_l6_trainable mode=prompt_fs bsz=16 budget=120
+RUN task=sudoku9_probe stage=med cfg=scalar_l6_trainable mode=prompt_fs bsz=16 budget=420
+RUN task=sudoku9_probe stage=quick cfg=scalar_l6_sched_cos mode=prompt_fs bsz=16 budget=120
+RUN task=sudoku9_probe stage=med cfg=scalar_l6_sched_cos mode=prompt_fs bsz=16 budget=420
+RUN task=sudoku9_probe stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=16 budget=120
+RUN task=sudoku9_probe stage=quick cfg=head_l6 mode=prompt_fs bsz=16 budget=120
+======================================================================================================================
+Round22 adaptive search summary (single seed, serial early-prune)
+======================================================================================================================
+[mbpp_focus]
+  baseline quick: acc=15.49% loss=4.9165 bsz=4
+    scalar_l8_trainable      d_acc=-0.92pp acc=14.57%
+    scalar_l8_nodetach       d_acc=-1.96pp acc=13.52%
+    head_l8                  d_acc=-2.16pp acc=13.32%
+    scalar_l8_sched_cos      d_acc=-2.88pp acc=12.60%
+    scalar_l10_trainable     d_acc=-4.83pp acc=10.65%
+----------------------------------------------------------------------------------------------------------------------
+[protein_ss_expand]
+  baseline quick: acc=28.15% loss=6.1164 bsz=10
+    scalar_l10_nodetach      d_acc=+1.50pp acc=29.65%
+    head_l10                 d_acc=+1.27pp acc=29.42%
+    scalar_l10_trainable     d_acc=+0.31pp acc=28.46%
+    scalar_l12_sched_cos     d_acc=+0.00pp acc=28.15%
+    scalar_l10_sched_cos     d_acc=-2.24pp acc=25.91%
+----------------------------------------------------------------------------------------------------------------------
+[sudoku4_refine]
+  baseline quick: acc=58.89% loss=2.7309 bsz=64
+    scalar_l8_trainable      d_acc=+5.58pp acc=64.47%
+    scalar_l6_trainable      d_acc=+5.27pp acc=64.16%
+    scalar_l6_sched_cos      d_acc=+3.30pp acc=62.18%
+    head_l6                  d_acc=-2.09pp acc=56.80%
+  med confirmed:
+    scalar_l6_trainable      d_acc=+33.29pp acc=92.18% loss=0.3751
+    scalar_l8_trainable      d_acc=+31.95pp acc=90.83% loss=0.4655
+    scalar_l6_sched_cos      d_acc=+30.93pp acc=89.82% loss=0.5766
+----------------------------------------------------------------------------------------------------------------------
+[sudoku9_probe]
+  baseline quick: acc=1.35% loss=8.7601 bsz=16
+    scalar_l6_trainable      d_acc=+0.24pp acc=1.59%
+    scalar_l6_sched_cos      d_acc=+0.21pp acc=1.56%
+    scalar_l8_trainable      d_acc=+0.18pp acc=1.53%
+    head_l6                  d_acc=+0.08pp acc=1.43%
+  med confirmed:
+    scalar_l6_trainable      d_acc=+1.51pp acc=2.86% loss=5.9115
+    scalar_l6_sched_cos      d_acc=+1.42pp acc=2.77% loss=6.0190
+----------------------------------------------------------------------------------------------------------------------
+Round22 finished: Sat Feb 21 20:55:04 CST 2026

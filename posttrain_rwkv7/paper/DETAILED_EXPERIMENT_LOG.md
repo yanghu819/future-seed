@@ -477,3 +477,83 @@ Round21 interpretation:
 - at least one previously non-work real task (`mbpp`) becomes strongly positive once data-build constraints are fixed.
 - protein-contact remains a no-gain task under current prompt/label formulation.
 - protein SS remains the strongest effective scene for FS in this repository snapshot.
+
+## 2026-02-21 Round22 (adaptive serial search, completed)
+
+Script:
+- `scripts/run_round22_adaptive_search_s0.sh`
+
+Outputs:
+- `results/_summary_round22_adaptive_search_s0.txt`
+- `results/_round22_adaptive_search_records.jsonl`
+- `results/_log_round22_adaptive_search_s0.*.log`
+
+Highlights:
+- `mbpp_focus`: baseline `15.49%`; all tested FS quick variants regressed (`-0.92pp` to `-4.83pp`).
+- `protein_ss_expand`: baseline `28.15%`; best quick `+1.50pp` (`scalar_l10_nodetach`), mixed signs.
+- `sudoku4_refine`: very strong positive regime, med best `+33.29pp`.
+- `sudoku9_probe`: small but consistent positive med gains (best `+1.51pp`).
+
+Interpretation:
+- MBPP positive regime from Round21 is not stable under this higher-throughput recipe.
+- Protein SS stays positive but magnitude is recipe-sensitive.
+- Sudoku confirms FS can strongly help constrained in-place repair (especially easier 4x4).
+
+## 2026-02-21 Round23 (real-task sweep, partial)
+
+Script:
+- `scripts/run_round23_real_task_sweep_s0.sh`
+
+Outputs:
+- `results/_round23_real_task_sweep_records.jsonl`
+- `results/_launcher_round23.log`
+- `results/_log_round23_real_task_sweep_s0.*.log`
+
+Completed outcomes:
+- `mbpp_rt`: all quick FS variants negative (`-1.28pp` to `-4.67pp`).
+- `hotpot_rt`: quick FS variants exact-tie baseline (`+0.00pp`).
+- `punc_restore_rt`: run aborted by HF connectivity; treated as infrastructure failure, not model verdict.
+
+## 2026-02-21 Round24 (punc + protein continuation, completed)
+
+Script:
+- `scripts/run_round24_punc_protein_s0.sh`
+
+Outputs:
+- `results/_summary_round24_punc_protein_s0.txt`
+- `results/_round24_punc_protein_records.jsonl`
+- `results/_log_round24_punc_protein_s0.*.log`
+
+Outcomes:
+- `protein_ss_rt`:
+  - quick baseline `30.17%`
+  - med `scalar_l10_sched_cos` `34.31%` (**+4.14pp**)
+- `punc_restore_rt`:
+  - baseline failed with OOM at `bsz=10` (configuration issue, not discarded task).
+
+## 2026-02-21 Round25 (punc salvage, completed)
+
+Script:
+- `scripts/run_round25_punc_salvage_s0.sh`
+
+Outputs:
+- `results/_summary_round25_punc_salvage_s0.txt`
+- `results/_round25_punc_salvage_records.jsonl`
+- `results/_log_round25_punc_salvage_s0.*.log`
+
+Memory-safe config:
+- `bsz=2`, `max_prompt_tokens=1536`, `max_answer_tokens=128`
+- dataset from cached `hotpot_qa` text fields (offline mode)
+
+Outcomes:
+- baseline quick `9.18%`
+- quick:
+  - `scalar_l8_sched_cos`: `+0.80pp`
+  - `head_l8`: `+0.80pp`
+  - `scalar_l8_trainable`: `-2.20pp`
+- med:
+  - `head_l8`: `12.64%` (**+3.45pp**)
+  - `scalar_l8_sched_cos`: `11.90%` (**+2.71pp**)
+
+Interpretation:
+- The punc task is a valid additional positive real-text regime once memory settings are corrected.

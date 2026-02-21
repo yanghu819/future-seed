@@ -63,6 +63,35 @@ def _clean_line(s: str) -> str:
     return s
 
 
+def _extract_text(ex: dict) -> str:
+    t = _clean_line(ex.get("text", "")) if isinstance(ex, dict) else ""
+    if t:
+        return t
+
+    parts: List[str] = []
+    for k in ("question", "answer", "instruction", "prompt", "output"):
+        v = ex.get(k, "") if isinstance(ex, dict) else ""
+        v = _clean_line(v)
+        if v:
+            parts.append(v)
+    if parts:
+        return " ".join(parts)
+
+    # Hotpot-style fallback.
+    ctx = ex.get("context", None) if isinstance(ex, dict) else None
+    if isinstance(ctx, dict):
+        sents = ctx.get("sentences", [])
+        if isinstance(sents, list):
+            flat = []
+            for sent_list in sents[:2]:
+                if isinstance(sent_list, list):
+                    flat.extend(_clean_line(x) for x in sent_list[:3] if _clean_line(x))
+            if flat:
+                return " ".join(flat)
+
+    return ""
+
+
 def _is_candidate(s: str, min_chars: int, max_chars: int) -> bool:
     if len(s) < min_chars or len(s) > max_chars:
         return False
@@ -147,12 +176,15 @@ def build_examples(
     note_pool_size: int,
     seed: int,
 ) -> List[Tuple[List[int], List[int]]]:
-    ds_obj = load_dataset(ds, ds_cfg, split=split)
+    if ds_cfg:
+        ds_obj = load_dataset(ds, ds_cfg, split=split)
+    else:
+        ds_obj = load_dataset(ds, split=split)
     rng = random.Random(seed)
 
     lines: List[str] = []
     for ex in ds_obj:
-        t = _clean_line(ex.get("text", ""))
+        t = _extract_text(ex)
         if not t:
             continue
         if _is_candidate(t, min_chars=min_chars, max_chars=max_chars):
@@ -523,4 +555,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,0 +1,6 @@
+{"stage":"quick","config":"baseline","status":"ok","bsz":2,"best_val_loss":10.42514681816101,"best_val_tok_acc":0.09184472934472934,"run_dir":"runs/20260221-220730/punc_restore_sft/no_fs"}
+{"stage":"quick","config":"scalar_l8_trainable","status":"ok","bsz":2,"best_val_loss":10.509965896606445,"best_val_tok_acc":0.0698539886039886,"run_dir":"runs/20260221-220808/punc_restore_sft/prompt_fs"}
+{"stage":"quick","config":"scalar_l8_sched_cos","status":"ok","bsz":2,"best_val_loss":10.434839487075806,"best_val_tok_acc":0.09987535612535613,"run_dir":"runs/20260221-220849/punc_restore_sft/prompt_fs"}
+{"stage":"med","config":"scalar_l8_sched_cos","status":"ok","bsz":2,"best_val_loss":10.196441650390625,"best_val_tok_acc":0.11895317720869503,"run_dir":"runs/20260221-220930/punc_restore_sft/prompt_fs"}
+{"stage":"quick","config":"head_l8","status":"ok","bsz":2,"best_val_loss":10.471112251281738,"best_val_tok_acc":0.09987535612535613,"run_dir":"runs/20260221-221103/punc_restore_sft/prompt_fs"}
+{"stage":"med","config":"head_l8","status":"ok","bsz":2,"best_val_loss":10.264726161956787,"best_val_tok_acc":0.12635338494846135,"run_dir":"runs/20260221-221140/punc_restore_sft/prompt_fs"}

@@ -317,6 +317,69 @@
       "paper_role": "new_positive_regime",
       "status": "completed",
       "mean_d_acc": 0.1331
+    },
+    {
+      "id": "round22_mbpp_focus_bestquick",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "real_task_negative",
+      "status": "completed",
+      "mean_d_acc": -0.0092
+    },
+    {
+      "id": "round22_protein_ss_expand_bestquick",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive_small",
+      "status": "completed",
+      "mean_d_acc": 0.015
+    },
+    {
+      "id": "round22_sudoku4_refine_bestmed",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "sudoku",
+      "ordering": "random_mask_4x4",
+      "paper_role": "core_positive",
+      "status": "completed",
+      "mean_d_acc": 0.3329
+    },
+    {
+      "id": "round22_sudoku9_probe_bestmed",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "sudoku",
+      "ordering": "random_mask_9x9",
+      "paper_role": "hard_positive_small",
+      "status": "completed",
+      "mean_d_acc": 0.0151
+    },
+    {
+      "id": "round24_protein_ss_rt_sched_cos_med",
+      "summary": "results/_summary_round24_punc_protein_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0414
+    },
+    {
+      "id": "round25_punc_head_l8_med",
+      "summary": "results/_summary_round25_punc_salvage_s0.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0345
+    },
+    {
+      "id": "round25_punc_sched_cos_med",
+      "summary": "results/_summary_round25_punc_salvage_s0.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive_secondary",
+      "status": "completed",
+      "mean_d_acc": 0.0271
     }
   ]
 }

@@ -86,6 +86,42 @@ Main outcome:
     - `scalar_l10_trainable`: `33.95%` (**+12.82pp**)
     - `head_l10`: `33.48%` (**+12.35pp**)
 
+### Round22 (adaptive serial search, completed)
+
+- Summary: `results/_summary_round22_adaptive_search_s0.txt`
+- Records: `results/_round22_adaptive_search_records.jsonl`
+- Outcome:
+  - `mbpp_focus`: all tested FS variants regressed (`-0.92pp` to `-4.83pp`).
+  - `protein_ss_expand`: small positive quick deltas (best `+1.50pp` quick), but mixed.
+  - `sudoku4_refine`: strong gains; med best `+33.29pp`.
+  - `sudoku9_probe`: small but consistent gains; med best `+1.51pp`.
+
+### Round23 (real-task sweep, partially completed before network abort)
+
+- Records: `results/_round23_real_task_sweep_records.jsonl`
+- Launcher log: `results/_launcher_round23.log`
+- Outcome (completed parts):
+  - `mbpp_rt`: all FS quick variants regressed (`-1.28pp` to `-4.67pp`).
+  - `hotpot_rt`: FS quick variants were exact ties to baseline (`+0.00pp`).
+  - `punc_restore_rt`: aborted due HF connectivity while probing (not a model failure).
+
+### Round24 (punc + protein continuation, completed)
+
+- Summary: `results/_summary_round24_punc_protein_s0.txt`
+- Records: `results/_round24_punc_protein_records.jsonl`
+- Outcome:
+  - `protein_ss_rt`: med `scalar_l10_sched_cos` reached `34.31%` (**+4.14pp** over quick baseline).
+  - `punc_restore_rt`: baseline failed by OOM at `bsz=10` (configuration issue).
+
+### Round25 (punc salvage with memory-safe config, completed)
+
+- Summary: `results/_summary_round25_punc_salvage_s0.txt`
+- Records: `results/_round25_punc_salvage_records.jsonl`
+- Outcome:
+  - memory-safe setting (`bsz=2`, shorter prompt/answer) removed OOM and produced stable gains.
+  - quick best: `+0.80pp` (`scalar_l8_sched_cos`, `head_l8`).
+  - med best: `head_l8` `12.64%` (**+3.45pp**), `scalar_l8_sched_cos` `11.90%` (**+2.71pp**).
+
 ## Notes
 
 - This snapshot does not include full training logs/checkpoints due size.
