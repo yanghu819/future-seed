@@ -40,10 +40,11 @@ for seed in "${SEEDS[@]}"; do
       --max_prompt_tokens "$L" \
       --min_prompt_tokens "$MIN_PROMPT" \
       --max_answer_tokens 24 \
-      --bsz 1 \
+      --bsz 2 \
       --time_budget_sec "$TIME_BUDGET" \
+      --max_steps 500 \
       --eval_every 25 \
-      --val_batches 16 \
+      --val_batches 8 \
       --model_lr 3e-5 \
       --alpha_lr 0 \
       --alpha_init "$ALPHA_INIT" \
@@ -59,11 +60,11 @@ done
 ./.venv/bin/python summarize_hotpot_by_len.py \
   --q_first \
   --seeds "0,1,2,3,4" \
-  --bsz 1 \
+  --bsz 2 \
   --time_budget_sec "$TIME_BUDGET" \
-  --max_steps 0 \
+  --max_steps 500 \
   --eval_every 25 \
-  --val_batches 16 \
+  --val_batches 8 \
   --ds hotpot_qa \
   --ds_cfg distractor \
   --train_split train \

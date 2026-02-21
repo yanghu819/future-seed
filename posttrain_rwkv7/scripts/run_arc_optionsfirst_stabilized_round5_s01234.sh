@@ -36,10 +36,11 @@ for seed in "${SEEDS[@]}"; do
       --n_val 200 \
       --max_prompt_tokens "$L" \
       --max_answer_tokens 8 \
-      --bsz 8 \
+      --bsz 48 \
       --time_budget_sec 240 \
+      --max_steps 2000 \
       --eval_every 50 \
-      --val_batches 16 \
+      --val_batches 8 \
       --model_lr 3e-5 \
       --alpha_lr "$ALPHA_LR" \
       --alpha_init "$ALPHA_INIT" \
@@ -54,11 +55,11 @@ done
 
 ./.venv/bin/python summarize_arc_by_order.py \
   --seeds "0,1,2,3,4" \
-  --bsz 8 \
+  --bsz 48 \
   --time_budget_sec 240 \
-  --max_steps 0 \
+  --max_steps 2000 \
   --eval_every 50 \
-  --val_batches 16 \
+  --val_batches 8 \
   --ds ai2_arc \
   --ds_cfg ARC-Challenge \
   --train_split train \
