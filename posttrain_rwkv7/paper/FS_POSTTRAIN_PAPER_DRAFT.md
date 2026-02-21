@@ -77,19 +77,27 @@ Findings:
 
 This is the strongest real-task signal in the current repository.
 
-### 3.3 Round21 targeted follow-up (ongoing)
+### 3.3 Round21 targeted follow-up (completed)
 
-Partial artifacts:
+Artifacts:
 
-- `results/_round21_targeted_search_records.partial.jsonl`
-- `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+- `results/_summary_round21_targeted_search_s0.txt`
+- `results/_round21_targeted_search_records.jsonl`
 
-Current partial signal:
+Results:
 
-- MBPP after data-build fixes now runs; `scalar_l8_trainable` passes quick stage (`+1.00pp`) and is promoted.
-- Protein contact after data-build fixes now runs; screening is ongoing.
-
-These partial logs are tracked as in-progress evidence and are not final claims.
+- `mbpp_fix`:
+  - quick baseline: `10.46%`
+  - medium `scalar_l8_trainable`: `24.07%` (**+13.61pp**)
+- `protein_contact_fix`:
+  - quick baseline: `98.83%`
+  - all FS variants pruned (`+0.00pp`)
+- `protein_ss_refine`:
+  - quick baseline: `21.14%`
+  - medium best:
+    - `scalar_l10_sched_cos`: `34.45%` (**+13.31pp**)
+    - `scalar_l10_trainable`: `33.95%` (**+12.82pp**)
+    - `head_l10`: `33.48%` (**+12.35pp**)
 
 ## 4. Failure Analysis
 
@@ -121,7 +129,8 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
 - Latest search records:
   - `results/_summary_round20_serial_earlystop_s0.txt`
   - `results/_round20_serial_earlystop_records.jsonl`
-  - `results/_round21_targeted_search_records.partial.jsonl`
+  - `results/_summary_round21_targeted_search_s0.txt`
+  - `results/_round21_targeted_search_records.jsonl`
 
 ## 7. Limitations and Next Steps
 
@@ -132,7 +141,6 @@ Limitations:
 
 Next:
 
-1. Finalize Round21 and export completed summary.
-2. Re-run top protein SS settings with small multi-seed confirmation.
-3. Add one completion-level metric for MBPP in the same serial prune framework.
-
+1. Re-run top protein SS settings with small multi-seed confirmation.
+2. Add one completion-level metric for MBPP in the same serial prune framework.
+3. Build a harder protein-contact variant that avoids saturation at ~98.8% baseline.

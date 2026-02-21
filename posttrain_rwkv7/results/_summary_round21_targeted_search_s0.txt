@@ -1,0 +1,32 @@
+============================================================================================================
+Round21 targeted search summary (single seed)
+============================================================================================================
+[mbpp_fix]
+  baseline quick: acc=0.1046 loss=5.3564 bsz=2
+    scalar_l8_trainable      d_acc=+0.0100 acc=0.1146 [KEEP]
+    head_l8                  d_acc=+0.0014 acc=0.1060 [PRUNE]
+    scalar_l8_norm_node      d_acc=+0.0006 acc=0.1052 [PRUNE]
+    scalar_l8_sched_cos      d_acc=-0.0067 acc=0.0979 [PRUNE]
+  med confirmed:
+    scalar_l8_trainable      d_acc=+0.1361 acc=0.2407 loss=4.5021
+------------------------------------------------------------------------------------------------------------
+[protein_contact_fix]
+  baseline quick: acc=0.9883 loss=0.1937 bsz=4
+    scalar_l8_norm_node      d_acc=+0.0000 acc=0.9883 [PRUNE]
+    scalar_l8_trainable      d_acc=+0.0000 acc=0.9883 [PRUNE]
+    scalar_l8_sched_cos      d_acc=+0.0000 acc=0.9883 [PRUNE]
+    head_l8                  d_acc=+0.0000 acc=0.9883 [PRUNE]
+  med confirmed: none
+------------------------------------------------------------------------------------------------------------
+[protein_ss_refine]
+  baseline quick: acc=0.2114 loss=6.2359 bsz=8
+    scalar_l10_trainable     d_acc=+0.0448 acc=0.2562 [KEEP]
+    scalar_l10_norm_node     d_acc=+0.0287 acc=0.2401 [KEEP]
+    scalar_l10_sched_cos     d_acc=+0.0201 acc=0.2315 [KEEP]
+    head_l10                 d_acc=+0.0172 acc=0.2286 [KEEP]
+  med confirmed:
+    scalar_l10_sched_cos     d_acc=+0.1331 acc=0.3445 loss=5.5123
+    scalar_l10_trainable     d_acc=+0.1282 acc=0.3395 loss=5.6065
+    head_l10                 d_acc=+0.1235 acc=0.3348 loss=5.5625
+    scalar_l10_norm_node     d_acc=+0.1143 acc=0.3257 loss=5.6950
+------------------------------------------------------------------------------------------------------------

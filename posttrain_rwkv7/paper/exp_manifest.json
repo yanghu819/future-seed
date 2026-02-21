@@ -290,6 +290,33 @@
       "paper_role": "new_positive_regime",
       "status": "completed",
       "mean_d_acc": 0.0802
+    },
+    {
+      "id": "round21_targeted_search_s0",
+      "summary": "results/_summary_round21_targeted_search_s0.txt",
+      "task": "multi_task_search",
+      "ordering": "mixed",
+      "paper_role": "targeted_search",
+      "status": "completed",
+      "mean_d_acc": null
+    },
+    {
+      "id": "mbpp_fix_round21_scalar_l8_trainable_s0",
+      "summary": "results/_summary_round21_targeted_search_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "new_positive_regime",
+      "status": "completed",
+      "mean_d_acc": 0.1361
+    },
+    {
+      "id": "protein_ss_refine_round21_scalar_l10_sched_cos_s0",
+      "summary": "results/_summary_round21_targeted_search_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "new_positive_regime",
+      "status": "completed",
+      "mean_d_acc": 0.1331
     }
   ]
 }

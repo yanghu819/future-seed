@@ -430,21 +430,22 @@ Round20 conclusion:
 - `hotpot` remains non-work in this protocol
 - `mbpp` and `protein_contact` required dataset-build fixes before fair FS comparison
 
-## 2026-02-21 Round21 (targeted follow-up, in progress)
+## 2026-02-21 Round21 (targeted follow-up, completed)
 
 Script:
 - `scripts/run_round21_targeted_search_s0.sh`
 
-Partial outputs:
-- `results/_round21_targeted_search_records.partial.jsonl`
-- `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+Outputs:
+- `results/_summary_round21_targeted_search_s0.txt`
+- `results/_round21_targeted_search_records.jsonl`
+- `results/_log_round21_targeted_search_s0.20260221_193225.log`
 
 Targeted goals:
 1. fix MBPP and protein-contact sample-construction failures
 2. keep serial + immediate prune policy
 3. search only high-priority FS variants
 
-### Current partial trace
+### Completed trace
 
 #### mbpp_fix (reduced construction constraints)
 - baseline quick now runs:
@@ -456,9 +457,23 @@ Targeted goals:
   - `scalar_l8_trainable`: `+1.00pp` (kept -> medium run)
 
 #### protein_contact_fix
-- baseline quick now runs under revised sampling settings
-- FS screening ongoing (not finalized in this snapshot)
+- baseline quick: `98.83%`
+- all tested FS variants pruned (`+0.00pp`), no measurable gain in this setup
 
-Round21 interpretation (partial):
-- at least one previously non-work task (`mbpp`) becomes measurable and shows a positive FS candidate when constraints are fixed
-- confirms that some earlier null results were setup-limited rather than definitive algorithm failure
+#### protein_ss_refine
+- baseline quick: `21.14%`
+- quick keep set:
+  - `scalar_l10_norm_node`: `+2.87pp`
+  - `scalar_l10_trainable`: `+4.48pp`
+  - `scalar_l10_sched_cos`: `+2.01pp`
+  - `head_l10`: `+1.72pp`
+- med confirmed:
+  - `scalar_l10_sched_cos`: `34.45%` (**+13.31pp**)
+  - `scalar_l10_trainable`: `33.95%` (**+12.82pp**)
+  - `head_l10`: `33.48%` (**+12.35pp**)
+  - `scalar_l10_norm_node`: `32.57%` (**+11.43pp**)
+
+Round21 interpretation:
+- at least one previously non-work real task (`mbpp`) becomes strongly positive once data-build constraints are fixed.
+- protein-contact remains a no-gain task under current prompt/label formulation.
+- protein SS remains the strongest effective scene for FS in this repository snapshot.

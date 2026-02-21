@@ -62,20 +62,29 @@ Interpretation:
 - FS is not broadly useful on every real task.
 - FS can be strongly useful on selected protein sequence-labeling settings.
 
-### Round21 (targeted follow-up, in progress)
+### Round21 (targeted follow-up, completed)
 
-- Records (partial): `results/_round21_targeted_search_records.partial.jsonl`
-- Log snapshot (partial): `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+- Summary: `results/_summary_round21_targeted_search_s0.txt`
+- Records: `results/_round21_targeted_search_records.jsonl`
 - Goal:
   - repair previously failed task settings (`mbpp`, `protein_contact`)
   - keep serial + aggressive prune policy
   - retain only candidates with quick `d_acc >= +0.002` (`+0.20pp`)
 
-Current partial signal:
+Main outcome:
 
-- `mbpp_fix` quick baseline now runs.
-- `scalar_l8_trainable` passes quick threshold and is promoted to medium run.
-- `protein_contact_fix` baseline now runs (further FS screening ongoing).
+- `mbpp_fix`:
+  - baseline quick: `10.46%`
+  - med-confirmed `scalar_l8_trainable`: `24.07%` (**+13.61pp**)
+- `protein_contact_fix`:
+  - baseline quick: `98.83%`
+  - all FS variants pruned (`+0.00pp`, no gain)
+- `protein_ss_refine`:
+  - baseline quick: `21.14%`
+  - med-confirmed best:
+    - `scalar_l10_sched_cos`: `34.45%` (**+13.31pp**)
+    - `scalar_l10_trainable`: `33.95%` (**+12.82pp**)
+    - `head_l10`: `33.48%` (**+12.35pp**)
 
 ## Notes
 

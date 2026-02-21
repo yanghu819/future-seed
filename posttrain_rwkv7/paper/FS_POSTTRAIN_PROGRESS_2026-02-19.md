@@ -308,28 +308,36 @@ Interpretation:
 - FS is not broadly effective across all tested real tasks.
 - FS can be strongly effective on specific protein sequence-labeling setups.
 
-## Update: 2026-02-21 (Round21 targeted follow-up, in progress)
+## Update: 2026-02-21 (Round21 targeted follow-up, completed)
 
 Goal:
 
 - recover previously non-work tasks by fixing data-build bottlenecks
 - keep serial + immediate-prune policy
 
-Partial artifacts:
+Artifacts:
 
-- `results/_round21_targeted_search_records.partial.jsonl`
-- `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+- `results/_summary_round21_targeted_search_s0.txt`
+- `results/_round21_targeted_search_records.jsonl`
 
-Current partial signal:
+Round21 outcomes:
 
-- `mbpp_fix`:
-  - quick baseline runs at `10.46%`
-  - `scalar_l8_trainable` survives quick stage (`+1.00pp`) and is promoted to medium run
-- `protein_contact_fix`:
-  - quick baseline now runs under revised sampling settings
-  - FS screening still in progress
+1. `mbpp_fix`:
+   - quick baseline: `10.46%`
+   - med-confirmed `scalar_l8_trainable`: `24.07%` (**+13.61pp**)
+2. `protein_contact_fix`:
+   - quick baseline: `98.83%`
+   - all tested FS variants pruned (`+0.00pp`, no gain)
+3. `protein_ss_refine`:
+   - quick baseline: `21.14%`
+   - med-confirmed best:
+     - `scalar_l10_sched_cos`: `34.45%` (**+13.31pp**)
+     - `scalar_l10_trainable`: `33.95%` (**+12.82pp**)
+     - `head_l10`: `33.48%` (**+12.35pp**)
+     - `scalar_l10_norm_node`: `32.57%` (**+11.43pp**)
 
-Reporting policy:
+Interpretation:
 
-- finalized claims use completed summary files only
-- partial logs are tracked as ongoing evidence, not final paper numbers
+- fixing data-build constraints uncovered a clear positive MBPP regime.
+- protein-contact remains saturated/no-gain in current formulation.
+- protein SS gains become stronger under targeted search than in Round20.
