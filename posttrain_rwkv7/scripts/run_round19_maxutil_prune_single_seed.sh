@@ -50,10 +50,7 @@ PY
 
 record_json() {
   local payload="$1"
-  ./.venv/bin/python - <<PY >> "$RUN_REC"
-import json
-print(json.dumps($payload))
-PY
+  printf "%s\n" "$payload" >> "$RUN_REC"
 }
 
 run_exp() {
