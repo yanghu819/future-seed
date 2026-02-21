@@ -155,3 +155,87 @@ Interpretation: delaying FS start to deeper layers (`fs_layer_start=10`) did not
 2. FS is **not universally positive** in post-training; on Hotpot it remains high-variance.
 3. The key open problem is **stability across seeds** on long-context QA.
 4. The next lever is **schedule/structure** (not just smaller constant alpha).
+
+---
+
+## Update: 2026-02-21 (R11 + MBPP + Sudoku + Protein)
+
+### Hotpot R11 Grid (L=4096, q-after)
+
+- `lstart=10, alpha=-2`:
+  - File: `results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart10_alpha-2_s012.txt`
+  - Mean `d_acc = -0.0225` (2+/1-), mean `d_loss = -0.2831`
+- `lstart=10, alpha=-3`:
+  - File: `results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart10_alpha-3_s012.txt`
+  - Mean `d_acc = +0.0058` (2+/1-), mean `d_loss = +0.1495`
+- `lstart=12, alpha=-2`:
+  - File: `results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart12_alpha-2_s012.txt`
+  - Mean `d_acc = +0.0000` (3 zero deltas), near no-op
+- `lstart=12, alpha=-3`:
+  - File: `results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart12_alpha-3_s012.txt`
+  - Mean `d_acc = +0.0000` (3 zero deltas), exact no-op
+
+Interpretation: deeper start at layer 12 collapses to no-op; layer 10 variants remain unstable.
+
+### MBPP Long-Context (real code generation)
+
+- q-after:
+  - `results/_summary_mbpp_qafter_stabilized_len4096_r1_s012.txt`
+  - Mean `d_acc = -0.0191` (0+/3-), mean `d_loss = +0.0293`
+- q-first:
+  - `results/_summary_mbpp_qfirst_stabilized_len4096_r1_s012.txt`
+  - Mean `d_acc = -0.0254` (0+/3-), mean `d_loss = +0.1034`
+
+Interpretation: FS regressed MBPP in both orderings.
+
+### Sudoku Suite
+
+- 4x4 prefix:
+  - `results/_summary_sudoku4_prefix_r1_s012.txt`
+  - Mean `d_acc = +0.0029` (3+/0-)
+- 4x4 suffix:
+  - `results/_summary_sudoku4_suffix_r1_s012.txt`
+  - Mean `d_acc = +0.0003` (1+/1-/1=0)
+- 9x9 prefix:
+  - `results/_summary_sudoku9_prefix_r1_s012.txt`
+  - Mean `d_acc = -0.0009` (1+/2-)
+- 9x9 suffix:
+  - `results/_summary_sudoku9_suffix_r1_s012.txt`
+  - Mean `d_acc = -0.2861` (0+/3-), mean `d_loss = +1.5500`
+
+Interpretation: FS helps weakly on easy 4x4 constraints; does not scale to harder 9x9 suffix setting.
+
+### Protein Real-Task Probes
+
+#### Secondary-structure spot labeling
+
+- q-after:
+  - `results/_summary_protein_ss_spot_qafter_len2048_r1_s012.txt`
+  - Mean `d_acc = -0.0011` (2+/1-), `d_seq = 0`
+- q-first:
+  - `results/_summary_protein_ss_spot_qfirst_len2048_r1_s012.txt`
+  - Mean `d_acc = -0.0001` (2+/1-), `d_seq = 0`
+
+#### Contact-pair QA
+
+- R1 (baseline settings):
+  - `results/_summary_protein_contact_pair_qafter_len2048_r1_s012.txt`
+  - Mean `d_acc = 0.0000` (all ties)
+- R2 (trainable alpha, `alpha_lr=5e-4`, `seed_scale=0.5`, `lstart=8`):
+  - `results/_summary_protein_contact_pair_qafter_len2048_r2_trainable_s012.txt`
+  - Mean `d_acc = 0.0000` (all ties)
+- R3 (balanced harder pairs):
+  - `results/_summary_protein_contact_pair_qafter_len2048_r3_balanced_s012.txt`
+  - Mean `d_acc = -0.0007` (2+/1-), `d_seq = 0`
+- R4 (balanced + linear FS schedule):
+  - `results/_summary_protein_contact_pair_qafter_len2048_r4_sched_s012.txt`
+  - Mean `d_acc = -0.0043` (1+/2-), `d_seq = 0`
+
+Interpretation: protein probes show near-zero to slight-negative mean effects for FS under current compute budget.
+
+## Revised Bottom Line
+
+1. **Supported**: FS can help in selected causal-unfriendly settings (ARC options-first, weak 4x4 Sudoku).
+2. **Not supported**: broad post-training gains across MBPP, Hotpot, and protein tasks.
+3. **Observed failure mode**: either high seed variance or effective no-op behavior when FS is pushed too deep.
+4. **Practical guidance**: use FS as a targeted mechanism for constraint-style contexts, not as a universal post-training switch.

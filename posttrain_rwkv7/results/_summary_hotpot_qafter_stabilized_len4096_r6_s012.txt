@@ -1,6 +1,6 @@
-filter: {'ds': 'hotpot_qa', 'ds_cfg': 'distractor', 'train_split': 'train', 'val_split': 'validation', 'q_first': False, 'n_train': 1000, 'n_val': 200, 'max_prompt_tokens': 4096, 'min_prompt_tokens': 1536, 'max_answer_tokens': 24, 'bsz': 1, 'time_budget_sec': 480, 'max_steps': 0, 'eval_every': 25, 'val_batches': 16, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'fs_in_gate': False, 'fs_w_lr': 0.0, 'fs_b_lr': 0.0, 'train_gate_only': False, 'fs_variant': 'scalar', 'alpha_head_init': -2.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 6, 'fs_norm': True, 'fs_clip': 1.0, 'fs_detach': True}
+filter: {'ds': 'hotpot_qa', 'ds_cfg': 'distractor', 'train_split': 'train', 'val_split': 'validation', 'q_first': False, 'n_train': 1000, 'n_val': 200, 'max_prompt_tokens': 4096, 'min_prompt_tokens': 1536, 'max_answer_tokens': 24, 'bsz': 1, 'time_budget_sec': 480, 'max_steps': 0, 'eval_every': 25, 'val_batches': 16, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'fs_in_gate': False, 'fs_w_lr': 0.0, 'fs_b_lr': 0.0, 'train_gate_only': False, 'fs_variant': 'scalar', 'alpha_head_init': -2.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 6, 'fs_alpha_schedule': 'none', 'fs_alpha_min': 1.0, 'fs_alpha_max': 1.0, 'fs_norm': True, 'fs_clip': 1.0, 'fs_detach': True}
 ==========================================================================================
-L=4096 pairs=3 mean d_acc=+0.0012 std=0.0388 | mean d_loss=-0.0192 std=0.1669
+L=4096 pairs=3 mean d_acc=+0.0012 std=0.0388 | mean d_loss=-0.0192 std=0.1669 | sign(+/0/-)=2/0/1
   seed=0 d_acc=+0.0382 (no=0.0875 fs=0.1257) d_loss=-0.0770
   seed=1 d_acc=+0.0179 (no=0.0938 fs=0.1116) d_loss=-0.1884
   seed=2 d_acc=-0.0525 (no=0.1641 fs=0.1116) d_loss=+0.2080
