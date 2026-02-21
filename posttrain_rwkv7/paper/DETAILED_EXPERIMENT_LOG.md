@@ -377,3 +377,88 @@ Goal:
 1. FS behavior is strongly regime-dependent (batch/steps/eval cadence).
 2. Claims must be tied to a fixed compute protocol; otherwise sign can flip.
 3. For paper main results, keep one canonical protocol and report Round12 as robustness/failure analysis.
+
+## 2026-02-21 Round20 (serial immediate-prune, single seed)
+
+Script:
+- `scripts/run_round20_serial_earlystop_s0.sh`
+
+Outputs:
+- `results/_summary_round20_serial_earlystop_s0.txt`
+- `results/_round20_serial_earlystop_records.jsonl`
+
+Protocol:
+- one GPU, serial queue only
+- quick stage first (`time_budget_sec=80`)
+- immediate prune if quick `d_acc < +0.001` (`+0.10pp`)
+- medium confirm only for survivors (`time_budget_sec=220`)
+
+### Task outcomes
+
+#### Hotpot
+- selected probe `bsz=6`
+- baseline quick: `acc=6.17%`
+- all FS variants pruned
+- strongest negative quick regressions around `-2.93pp`
+
+#### MBPP
+- selected probe `bsz=1`
+- baseline failed due sample construction limit:
+  - `Only built 374 examples (wanted 900).`
+- moved to targeted fix round
+
+#### Protein contact
+- selected probe `bsz=1`
+- baseline failed due sample construction limit:
+  - `Only built 168 examples (wanted 180).`
+- moved to targeted fix round
+
+#### Protein SS spot
+- selected probe `bsz=8`
+- baseline quick: `24.66%`
+- quick survivors all promoted
+- medium confirmed gains:
+  - `scalar_l10_norm_node`: `32.69%` (**+8.02pp**)
+  - `scalar_l10_trainable`: `32.38%` (**+7.72pp**)
+  - `scalar_l10_sched_cos`: `32.23%` (**+7.57pp**)
+  - `head_l10`: `31.97%` (**+7.31pp**)
+  - `scalar_l10_norm_detach`: `31.46%` (**+6.80pp**)
+  - `scalar_l10_nonorm_detach`: `30.32%` (**+5.66pp**)
+
+Round20 conclusion:
+- strong positive FS regime found on `protein_ss`
+- `hotpot` remains non-work in this protocol
+- `mbpp` and `protein_contact` required dataset-build fixes before fair FS comparison
+
+## 2026-02-21 Round21 (targeted follow-up, in progress)
+
+Script:
+- `scripts/run_round21_targeted_search_s0.sh`
+
+Partial outputs:
+- `results/_round21_targeted_search_records.partial.jsonl`
+- `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+
+Targeted goals:
+1. fix MBPP and protein-contact sample-construction failures
+2. keep serial + immediate prune policy
+3. search only high-priority FS variants
+
+### Current partial trace
+
+#### mbpp_fix (reduced construction constraints)
+- baseline quick now runs:
+  - `acc=10.46%`
+- quick FS:
+  - `scalar_l8_norm_node`: `+0.06pp` (pruned by threshold)
+  - `scalar_l8_sched_cos`: `-0.67pp` (pruned)
+  - `head_l8`: `+0.14pp` (pruned)
+  - `scalar_l8_trainable`: `+1.00pp` (kept -> medium run)
+
+#### protein_contact_fix
+- baseline quick now runs under revised sampling settings
+- FS screening ongoing (not finalized in this snapshot)
+
+Round21 interpretation (partial):
+- at least one previously non-work task (`mbpp`) becomes measurable and shows a positive FS candidate when constraints are fixed
+- confirms that some earlier null results were setup-limited rather than definitive algorithm failure

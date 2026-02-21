@@ -9,6 +9,7 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
 - `paper/`: current paper/progress note.
   - `paper/FS_POSTTRAIN_PROGRESS_2026-02-19.md`: short status note.
   - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
+  - `paper/FS_POSTTRAIN_PAPER_DRAFT.md`: current paper draft synced with latest experiments.
 
 ## Key Findings (latest snapshot)
 
@@ -32,6 +33,49 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
 - Round12 (5-seed high-util stability check):
   - ARC options-first regressed (`_summary_arc_optionsfirst_stabilized_r5_s01234.txt`).
   - Hotpot q-after/q-first both show small positive means but mixed signs (`_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`, `_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`).
+
+## Latest Rapid-Iteration Update (2026-02-21, Round20/21)
+
+### Round20 (single-seed, serial, immediate-prune)
+
+- Summary: `results/_summary_round20_serial_earlystop_s0.txt`
+- Full records: `results/_round20_serial_earlystop_records.jsonl`
+- Policy:
+  - single GPU serial execution
+  - quick screen first
+  - prune candidate immediately if quick `d_acc < +0.001` (i.e., `< +0.10pp`)
+
+Main outcome:
+
+- `hotpot`: **all tested FS variants pruned** (no positive quick gain).
+- `mbpp`: baseline run failed under this setting (insufficient built examples; fixed in next round).
+- `protein_contact`: baseline run failed under this setting (insufficient built examples; fixed in next round).
+- `protein_ss`: clear positive regime found.
+  - quick baseline: `24.66%`
+  - best med-confirmed FS:
+    - `scalar_l10_norm_node`: `32.69%` (**+8.02pp**)
+    - `scalar_l10_trainable`: `32.38%` (**+7.72pp**)
+    - `scalar_l10_sched_cos`: `32.23%` (**+7.57pp**)
+
+Interpretation:
+
+- FS is not broadly useful on every real task.
+- FS can be strongly useful on selected protein sequence-labeling settings.
+
+### Round21 (targeted follow-up, in progress)
+
+- Records (partial): `results/_round21_targeted_search_records.partial.jsonl`
+- Log snapshot (partial): `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+- Goal:
+  - repair previously failed task settings (`mbpp`, `protein_contact`)
+  - keep serial + aggressive prune policy
+  - retain only candidates with quick `d_acc >= +0.002` (`+0.20pp`)
+
+Current partial signal:
+
+- `mbpp_fix` quick baseline now runs.
+- `scalar_l8_trainable` passes quick threshold and is promoted to medium run.
+- `protein_contact_fix` baseline now runs (further FS screening ongoing).
 
 ## Notes
 

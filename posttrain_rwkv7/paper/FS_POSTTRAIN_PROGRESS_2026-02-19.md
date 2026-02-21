@@ -273,3 +273,63 @@ Interpretation: the previous ARC positive signal is not stable under this optimi
   - mean `d_acc = +0.0052` (2+/2=/1-)
 
 Interpretation: gains are small and appear in both orderings; this weakens the claim that FS gain is tied to causal-unfriendly ordering in this setup.
+
+## Update: 2026-02-21 (Round20 serial immediate-prune)
+
+Protocol:
+
+- one GPU, strictly serial execution
+- quick-stage first, then immediate prune
+- prune threshold: `quick d_acc < +0.001` (i.e., `< +0.10pp`)
+
+Artifacts:
+
+- `results/_summary_round20_serial_earlystop_s0.txt`
+- `results/_round20_serial_earlystop_records.jsonl`
+
+Round20 outcomes:
+
+1. `hotpot`:
+   - baseline quick acc: `6.17%`
+   - all FS variants pruned (no positive quick delta)
+2. `mbpp` (old setting):
+   - baseline build failed due sample construction constraints
+3. `protein_contact` (old setting):
+   - baseline build failed due sample construction constraints
+4. `protein_ss`:
+   - baseline quick acc: `24.66%`
+   - med-confirmed best:
+     - `scalar_l10_norm_node`: `32.69%` (**+8.02pp**)
+     - `scalar_l10_trainable`: `32.38%` (**+7.72pp**)
+     - `scalar_l10_sched_cos`: `32.23%` (**+7.57pp**)
+
+Interpretation:
+
+- FS is not broadly effective across all tested real tasks.
+- FS can be strongly effective on specific protein sequence-labeling setups.
+
+## Update: 2026-02-21 (Round21 targeted follow-up, in progress)
+
+Goal:
+
+- recover previously non-work tasks by fixing data-build bottlenecks
+- keep serial + immediate-prune policy
+
+Partial artifacts:
+
+- `results/_round21_targeted_search_records.partial.jsonl`
+- `results/_log_round21_targeted_search_s0.20260221_193225.log.partial`
+
+Current partial signal:
+
+- `mbpp_fix`:
+  - quick baseline runs at `10.46%`
+  - `scalar_l8_trainable` survives quick stage (`+1.00pp`) and is promoted to medium run
+- `protein_contact_fix`:
+  - quick baseline now runs under revised sampling settings
+  - FS screening still in progress
+
+Reporting policy:
+
+- finalized claims use completed summary files only
+- partial logs are tracked as ongoing evidence, not final paper numbers
