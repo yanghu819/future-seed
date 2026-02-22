@@ -1,0 +1,22 @@
+Round32 started: Sun Feb 22 17:11:42 CST 2026
+RUN seed=0 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=0 stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs budget=110
+RUN seed=1 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=1 stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs budget=110
+RUN seed=2 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=2 stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs budget=110
+RUN seed=3 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=3 stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs budget=110
+RUN seed=4 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=4 stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs budget=110
+====================================================================================================================
+Round32 protein_ss seed-5 summary
+====================================================================================================================
+[quick]
+  seed=0: baseline=27.51% fs=26.96% d_acc=-0.55pp
+  seed=1: baseline=28.63% fs=28.15% d_acc=-0.48pp
+  seed=2: baseline=27.20% fs=26.96% d_acc=-0.24pp
+  seed=3: baseline=26.35% fs=24.79% d_acc=-1.56pp
+  seed=4: baseline=23.52% fs=22.35% d_acc=-1.17pp
+  mean d_acc=-0.80pp, positive_seeds=0/5
+Round32 finished: Sun Feb 22 17:26:46 CST 2026

@@ -1,0 +1,3 @@
+{"variant":"baseline_asym","status":"ok","run_dir":"runs/20260222-170555/embedding_hotpot/baseline","val_r1":0.0078125,"val_r5":0.0234375,"val_mrr10":0.015104166666666667}
+{"variant":"fs_doconly_asym","status":"ok","run_dir":"runs/20260222-170725/embedding_hotpot/fs","val_r1":0.010416666666666666,"val_r5":0.020833333333333332,"val_mrr10":0.01376901455026455}
+{"variant":"fs_full_asym","status":"ok","run_dir":"runs/20260222-170901/embedding_hotpot/fs","val_r1":0.0078125,"val_r5":0.015625,"val_mrr10":0.012220982142857143}

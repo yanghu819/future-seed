@@ -1,0 +1,13 @@
+Round31 embedding variants started: Sun Feb 22 17:05:38 CST 2026
+RUN variant=baseline_asym
+RUN variant=fs_doconly_asym
+RUN variant=fs_full_asym
+====================================================================================================================
+Round31 embedding variants summary
+====================================================================================================================
+[baseline_asym] R@1=0.78% R@5=2.34% MRR@10=1.51%
+[fs_doconly_asym] R@1=1.04% R@5=2.08% MRR@10=1.38%
+[fs_full_asym] R@1=0.78% R@5=1.56% MRR@10=1.22%
+delta fs_doconly_asym-baseline: d_R@1=+0.26pp d_MRR@10=-0.13pp
+delta fs_full_asym-baseline: d_R@1=+0.00pp d_MRR@10=-0.29pp
+Round31 embedding variants finished: Sun Feb 22 17:10:24 CST 2026

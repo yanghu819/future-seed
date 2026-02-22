@@ -1,0 +1,5 @@
+Loading protein dataset...
+Using the latest cached version of the dataset since lamm-mit/protein_secondary_structure_from_PDB couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'default' at /root/autodl-tmp/hf_datasets/lamm-mit___protein_secondary_structure_from_pdb/default/0.0.0/a7893c3368ddf7a299e879a4d4df3f2b483d9b07 (last modified on Fri Feb 20 19:48:41 2026).
+Saved cache: cache/protein_ss_spot_tok_6e3075b0abf9f10f.pt
+runs/20260222-172346/protein_ss_spot_sft/no_fs

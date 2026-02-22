@@ -151,6 +151,17 @@ class EmbHead(nn.Module):
         return F.normalize(self.proj(x), dim=-1)
 
 
+def pool_hidden(hidden: torch.Tensor, lengths: torch.Tensor, mode: str) -> torch.Tensor:
+    if mode == "mean":
+        t = hidden.size(1)
+        mask = (torch.arange(t, device=hidden.device)[None, :] < lengths[:, None]).float()
+        return (hidden.float() * mask.unsqueeze(-1)).sum(dim=1) / lengths.clamp(min=1).float().unsqueeze(-1)
+    if mode == "last":
+        idx = lengths.clamp(min=1) - 1
+        return hidden[torch.arange(hidden.size(0), device=hidden.device), idx].float()
+    raise ValueError(f"unsupported pool mode: {mode}")
+
+
 @torch.no_grad()
 def retrieval_metrics(q: torch.Tensor, d: torch.Tensor) -> Tuple[float, float, float]:
     # q,d: [N,D], already normalized
@@ -200,6 +211,9 @@ def main() -> None:
     ap.add_argument("--eval_every", type=int, default=20)
 
     ap.add_argument("--emb_dim", type=int, default=256)
+    ap.add_argument("--asym_head", action="store_true", help="Use separate query/doc projection heads.")
+    ap.add_argument("--query_pool", choices=["mean", "last"], default="mean")
+    ap.add_argument("--doc_pool", choices=["mean", "last"], default="mean")
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--weight_decay", type=float, default=0.01)
     ap.add_argument("--temp", type=float, default=0.07)
@@ -211,6 +225,7 @@ def main() -> None:
     ap.add_argument("--fs_norm", action="store_true")
     ap.add_argument("--fs_detach", action="store_true")
     ap.add_argument("--fs_clip", type=float, default=1.0)
+    ap.add_argument("--fs_doc_only", action="store_true", help="Apply FS on document encoder only.")
 
     ap.add_argument("--weights", type=str, default="assets/weights/rwkv7-g1d-0.1b-20260129-ctx8192.pth")
     ap.add_argument("--vocab", type=str, default="assets/tokenizer/rwkv_vocab_v20230424.txt")
@@ -282,13 +297,21 @@ def main() -> None:
     for p in model.parameters():
         p.requires_grad_(False)
 
-    head = EmbHead(model.cfg.hidden_size, args.emb_dim).to(device)
+    if args.asym_head:
+        q_head = EmbHead(model.cfg.hidden_size, args.emb_dim).to(device)
+        d_head = EmbHead(model.cfg.hidden_size, args.emb_dim).to(device)
+    else:
+        shared = EmbHead(model.cfg.hidden_size, args.emb_dim).to(device)
+        q_head = shared
+        d_head = shared
 
     fs_alpha = None
     if args.mode == "fs":
         fs_alpha = nn.Parameter(torch.full((model.cfg.num_layers,), float(args.alpha_init), device=device, dtype=torch.float32))
 
-    params = [{"params": list(head.parameters()), "lr": args.lr, "weight_decay": args.weight_decay}]
+    # Deduplicate params in shared-head mode.
+    base_params = {id(p): p for p in list(q_head.parameters()) + list(d_head.parameters())}
+    params = [{"params": list(base_params.values()), "lr": args.lr, "weight_decay": args.weight_decay}]
     if fs_alpha is not None:
         params.append({"params": [fs_alpha], "lr": args.alpha_lr, "weight_decay": 0.0})
     opt = torch.optim.AdamW(params)
@@ -298,9 +321,9 @@ def main() -> None:
     (run_base / "config.json").write_text(json.dumps(vars(args), indent=2), encoding="utf-8")
     metrics_f = (run_base / "metrics.jsonl").open("w", encoding="utf-8")
 
-    def encode(ids: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
+    def encode(ids: torch.Tensor, lengths: torch.Tensor, *, use_fs: bool, pool_mode: str, head: EmbHead) -> torch.Tensor:
         kwargs = {}
-        if args.mode == "fs":
+        if args.mode == "fs" and use_fs:
             kwargs.update(
                 dict(
                     future_seed=True,
@@ -313,16 +336,14 @@ def main() -> None:
                 )
             )
         h, _ = model(ids, **kwargs)
-        # causal model + right padding: hidden at real positions is unaffected by pad suffix.
-        t = h.size(1)
-        mask = (torch.arange(t, device=h.device)[None, :] < lengths[:, None]).float()
-        pooled = (h.float() * mask.unsqueeze(-1)).sum(dim=1) / lengths.clamp(min=1).float().unsqueeze(-1)
+        pooled = pool_hidden(h, lengths, pool_mode)
         return head(pooled)
 
     @torch.no_grad()
     def eval_retrieval() -> Tuple[float, float, float]:
         model.eval()
-        head.eval()
+        q_head.eval()
+        d_head.eval()
         q_all = []
         d_all = []
         for chunk in batch_iter(val_pairs, args.bsz, random.Random(1234)):
@@ -334,8 +355,20 @@ def main() -> None:
             d_pad = d_pad.to(device)
             q_len = q_len.to(device)
             d_len = d_len.to(device)
-            q_emb = encode(q_pad, q_len)
-            d_emb = encode(d_pad, d_len)
+            q_emb = encode(
+                q_pad,
+                q_len,
+                use_fs=(args.mode == "fs" and not args.fs_doc_only),
+                pool_mode=args.query_pool,
+                head=q_head,
+            )
+            d_emb = encode(
+                d_pad,
+                d_len,
+                use_fs=(args.mode == "fs"),
+                pool_mode=args.doc_pool,
+                head=d_head,
+            )
             q_all.append(q_emb)
             d_all.append(d_emb)
         q = torch.cat(q_all, dim=0)
@@ -351,7 +384,8 @@ def main() -> None:
         for chunk in batch_iter(train_pairs, args.bsz, train_rng):
             step += 1
             model.eval()
-            head.train()
+            q_head.train()
+            d_head.train()
 
             q_ids = [x[0] for x in chunk]
             d_ids = [x[1] for x in chunk]
@@ -362,8 +396,20 @@ def main() -> None:
             q_len = q_len.to(device)
             d_len = d_len.to(device)
 
-            q_emb = encode(q_pad, q_len)
-            d_emb = encode(d_pad, d_len)
+            q_emb = encode(
+                q_pad,
+                q_len,
+                use_fs=(args.mode == "fs" and not args.fs_doc_only),
+                pool_mode=args.query_pool,
+                head=q_head,
+            )
+            d_emb = encode(
+                d_pad,
+                d_len,
+                use_fs=(args.mode == "fs"),
+                pool_mode=args.doc_pool,
+                head=d_head,
+            )
 
             logits = (q_emb @ d_emb.T) / float(args.temp)
             labels = torch.arange(logits.size(0), device=device)
