@@ -1,0 +1,35 @@
+Round34 started: Sun Feb 22 19:27:45 CST 2026
+RUN task=punc_hotpot stage=quick cfg=baseline mode=no_fs
+RUN task=punc_hotpot stage=quick cfg=head_l8 mode=prompt_fs
+RUN task=punc_hotpot stage=med cfg=head_l8 mode=prompt_fs
+RUN task=punc_hotpot stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_hotpot stage=med cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_wikitext stage=quick cfg=baseline mode=no_fs
+RUN task=punc_mbpp stage=quick cfg=baseline mode=no_fs
+RUN task=punc_mbpp stage=quick cfg=head_l8 mode=prompt_fs
+RUN task=punc_mbpp stage=med cfg=head_l8 mode=prompt_fs
+RUN task=punc_mbpp stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_mbpp stage=med cfg=scalar_l8_sched_cos mode=prompt_fs
+====================================================================================================================
+Round34 punc transfer summary
+====================================================================================================================
+[punc_hotpot]
+  baseline quick: acc=9.18%
+    head_l8                d_acc=+0.80pp acc=9.99%
+    scalar_l8_sched_cos    d_acc=+0.80pp acc=9.99%
+  med:
+    scalar_l8_sched_cos    d_acc=+2.70pp acc=11.89%
+    head_l8                d_acc=+2.42pp acc=11.60%
+--------------------------------------------------------------------------------------------------------------------
+[punc_mbpp]
+  baseline quick: acc=37.62%
+    scalar_l8_sched_cos    d_acc=+3.06pp acc=40.67%
+    head_l8                d_acc=+2.62pp acc=40.24%
+  med:
+    scalar_l8_sched_cos    d_acc=+10.63pp acc=48.25%
+    head_l8                d_acc=+9.67pp acc=47.29%
+--------------------------------------------------------------------------------------------------------------------
+[punc_wikitext]
+  baseline failed
+--------------------------------------------------------------------------------------------------------------------
+Round34 finished: Sun Feb 22 19:41:36 CST 2026
