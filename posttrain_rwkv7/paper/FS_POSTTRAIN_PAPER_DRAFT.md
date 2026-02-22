@@ -202,6 +202,49 @@ Results:
 - `bsz=8`:
   - baseline failed (OOM)
 
+### 3.10 Round29 punc seed-5 stability (completed)
+
+Artifacts:
+
+- `results/_summary_round29_punc_seed5_s01234.txt`
+- `results/_round29_punc_seed5_s01234_records.jsonl`
+
+Results (quick, `punc_restore + head_l8`, seeds 0..4):
+
+- seed0 `+0.80pp`
+- seed1 `+0.58pp`
+- seed2 `+2.20pp`
+- seed3 `+2.41pp`
+- seed4 `+0.64pp`
+- mean `+1.33pp`, positive seeds `5/5`
+
+### 3.11 Round30 embedding smoke (completed)
+
+Artifacts:
+
+- `results/_summary_round30_embedding_hotpot_s0.txt`
+- `results/_round30_embedding_hotpot_s0_records.jsonl`
+
+Setup:
+
+- retrieval-style contrastive probe on Hotpot pairs (`question -> context`)
+- frozen RWKV backbone + trainable embedding head
+- baseline vs FS (`fs_layer_start=8`, trainable scalar gate)
+
+Results:
+
+- baseline:
+  - `R@1=1.17%`
+  - `R@5=3.12%`
+  - `MRR@10=1.93%`
+- FS:
+  - `R@1=0.78%`
+  - `R@5=3.12%`
+  - `MRR@10=1.69%`
+- delta (FS - baseline):
+  - `d_R@1=-0.39pp`
+  - `d_MRR@10=-0.24pp`
+
 ## 4. Failure Analysis
 
 We repeatedly observe four failure modes:
@@ -213,6 +256,7 @@ We repeatedly observe four failure modes:
 5. **Throughput sensitivity**: MBPP can flip sign across throughput recipes.
 6. **Seed instability**: MBPP positive regime is weaker than punc on seed robustness.
 7. **Resource cliff**: MBPP crosses an OOM cliff at higher batch sizes in current setup.
+8. **Embedding mismatch**: first retrieval-style embedding probe is negative for FS.
 
 The Round20/21 protocol directly addresses (4) by making build failures explicit and then retesting.
 
@@ -224,6 +268,7 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
 4. A serial immediate-prune workflow is effective for quickly finding viable FS regimes on one 4090.
 5. Punctuation restoration is currently the most reproducible non-synthetic FS-positive regime.
 6. MBPP currently requires low-throughput operation (`bsz=2`) to retain FS gains.
+7. We do not yet have evidence that FS improves embedding quality.
 
 ## 6. What Is Included in This Repo
 
@@ -247,6 +292,8 @@ The Round20/21 protocol directly addresses (4) by making build failures explicit
   - `results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt`
   - `results/_summary_round27_seedcheck_positive_s012.txt`
   - `results/_summary_round28_mbpp_bsz_sweep_s0.txt`
+  - `results/_summary_round29_punc_seed5_s01234.txt`
+  - `results/_summary_round30_embedding_hotpot_s0.txt`
 
 ## 7. Limitations and Next Steps
 
@@ -261,3 +308,4 @@ Next:
 2. Shift MBPP branch to low-throughput-only until executable metrics are added.
 3. Keep punc/head_l8 as a rolling stability benchmark (multi-seed every round).
 4. Build harder non-saturated protein-contact formulation.
+5. Revisit embedding only with stronger objectives and long-context retrieval settings.

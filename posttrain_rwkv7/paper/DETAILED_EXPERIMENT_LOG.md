@@ -637,3 +637,60 @@ Outcomes:
 Interpretation:
 - MBPP gain from FS is concentrated in low-throughput settings.
 - Throughput increase is currently a stronger negative factor than FS variant choice on MBPP.
+
+## 2026-02-22 Round29 (punc seed-5 stability, completed)
+
+Script:
+- `scripts/run_round29_punc_seed5_s01234.sh`
+
+Outputs:
+- `results/_summary_round29_punc_seed5_s01234.txt`
+- `results/_round29_punc_seed5_s01234_records.jsonl`
+- `results/_log_round29_punc_seed5_s01234.20260222_153614.log`
+
+Outcomes (quick, punc_restore + head_l8):
+- seed0: `+0.80pp`
+- seed1: `+0.58pp`
+- seed2: `+2.20pp`
+- seed3: `+2.41pp`
+- seed4: `+0.64pp`
+- mean: `+1.33pp`, positive seeds: `5/5`
+
+Interpretation:
+- Punctuation restoration remains the most stable non-synthetic FS-positive regime in this project.
+
+## 2026-02-22 Round30 (embedding smoke on Hotpot retrieval, completed)
+
+Scripts:
+- `scripts/train_embedding_hotpot_fs.py`
+- `scripts/run_round30_embedding_hotpot_s0.sh`
+
+Outputs:
+- `results/_summary_round30_embedding_hotpot_s0.txt`
+- `results/_round30_embedding_hotpot_s0_records.jsonl`
+- `results/_round30_embed_baseline_summary.json`
+- `results/_round30_embed_fs_summary.json`
+- `results/_round30_embed_baseline_metrics.jsonl`
+- `results/_round30_embed_fs_metrics.jsonl`
+
+Setup:
+- Frozen RWKV backbone (`rwkv7-g1d-0.1b`) + trainable embedding head.
+- Contrastive retrieval objective (in-batch InfoNCE) on Hotpot pairs.
+- Compare baseline vs FS (`fs_layer_start=8`, trainable scalar gate).
+
+Outcomes:
+- baseline:
+  - `R@1=1.17%`
+  - `R@5=3.12%`
+  - `MRR@10=1.93%`
+- FS:
+  - `R@1=0.78%`
+  - `R@5=3.12%`
+  - `MRR@10=1.69%`
+- delta (FS - baseline):
+  - `d_R@1=-0.39pp`
+  - `d_MRR@10=-0.24pp`
+
+Interpretation:
+- This first embedding probe is negative for FS.
+- Evidence currently does not support claiming FS gains for embedding quality under this simple contrastive setup.

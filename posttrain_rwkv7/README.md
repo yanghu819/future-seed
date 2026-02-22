@@ -163,6 +163,30 @@ Main outcome:
   - `bsz=8`: baseline OOM/fail
   - key conclusion: MBPP FS gain is concentrated in low-throughput (`bsz=2`) regime.
 
+### Round29 (punc seed-5 stability, completed)
+
+- Summary: `results/_summary_round29_punc_seed5_s01234.txt`
+- Records: `results/_round29_punc_seed5_s01234_records.jsonl`
+- Outcome (quick):
+  - seed deltas: `+0.80pp`, `+0.58pp`, `+2.20pp`, `+2.41pp`, `+0.64pp`
+  - mean: **+1.33pp**, positive seeds: **5/5**
+- Interpretation:
+  - confirms punc restoration as the most stable non-synthetic positive FS regime in current search.
+
+### Round30 (embedding smoke: Hotpot retrieval, completed)
+
+- Summary: `results/_summary_round30_embedding_hotpot_s0.txt`
+- Records: `results/_round30_embedding_hotpot_s0_records.jsonl`
+- Setup:
+  - retrieval-style contrastive probe on Hotpot pairs (`question -> context`)
+  - frozen RWKV backbone, train lightweight embedding head
+  - compare `baseline` vs `fs` (`fs_layer_start=8`, scalar gate trainable)
+- Outcome:
+  - baseline: `R@1=1.17%`, `R@5=3.12%`, `MRR@10=1.93%`
+  - fs: `R@1=0.78%`, `R@5=3.12%`, `MRR@10=1.69%`
+  - delta (FS - baseline): `d_R@1=-0.39pp`, `d_MRR@10=-0.24pp`
+  - interpretation: this first embedding smoke does **not** show FS benefit.
+
 ## Notes
 
 - This snapshot does not include full training logs/checkpoints due size.
@@ -190,3 +214,4 @@ Generated artifacts:
 2. Keep MBPP at low-throughput (`bsz=2`) for FS-positive branch; treat high-throughput branch as separate negative regime.
 3. Keep punc-restore multi-seed tracking as a stable positive real-text regime.
 4. Retest Hotpot with matched low-throughput recipe before any FS variant expansion.
+5. For embedding direction: try asymmetry-aware objectives / longer-doc pooling before claiming FS helps embeddings.

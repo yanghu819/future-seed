@@ -484,3 +484,53 @@ Interpretation:
 - For post-training search, MBPP should be split into two regimes:
   - low-throughput (`bsz=2`, FS-positive candidate)
   - high-throughput (`bsz>=4`, FS-negative under current recipe).
+
+## Update: 2026-02-22 (Round29 punc seed-5 stability, completed)
+
+Artifacts:
+
+- `results/_summary_round29_punc_seed5_s01234.txt`
+- `results/_round29_punc_seed5_s01234_records.jsonl`
+
+Round29 outcomes (quick, `punc_restore + head_l8`, seeds 0..4):
+
+- seed0 `+0.80pp`
+- seed1 `+0.58pp`
+- seed2 `+2.20pp`
+- seed3 `+2.41pp`
+- seed4 `+0.64pp`
+- mean `+1.33pp`, positive seeds `5/5`
+
+Interpretation:
+
+- This confirms punc restoration as a robust FS-positive real-text setting.
+
+## Update: 2026-02-22 (Round30 embedding smoke, completed)
+
+Artifacts:
+
+- `results/_summary_round30_embedding_hotpot_s0.txt`
+- `results/_round30_embedding_hotpot_s0_records.jsonl`
+- `results/_round30_embed_baseline_summary.json`
+- `results/_round30_embed_fs_summary.json`
+
+Round30 setup:
+
+- task: Hotpot retrieval-style contrastive embedding (`question -> context`)
+- frozen RWKV backbone + trainable embedding head
+- compare `baseline` vs `fs` (`fs_layer_start=8`, scalar gate trainable)
+
+Round30 outcomes:
+
+1. baseline:
+   - `R@1=1.17%`, `R@5=3.12%`, `MRR@10=1.93%`
+2. FS:
+   - `R@1=0.78%`, `R@5=3.12%`, `MRR@10=1.69%`
+3. delta (FS - baseline):
+   - `d_R@1=-0.39pp`
+   - `d_MRR@10=-0.24pp`
+
+Interpretation:
+
+- In this first embedding smoke setup, FS does not improve retrieval quality.
+- Current evidence supports FS as a post-training mechanism for selected generative/repair tasks, not yet as a plug-and-play embedding gain.

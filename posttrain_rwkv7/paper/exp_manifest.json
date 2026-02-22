@@ -425,6 +425,33 @@
       "paper_role": "throughput_sweep_positive_low_bsz",
       "status": "completed",
       "mean_d_acc": 0.1492
+    },
+    {
+      "id": "round30_embedding_hotpot_baseline_s0",
+      "summary": "results/_summary_round30_embedding_hotpot_s0.txt",
+      "task": "embedding_hotpot_retrieval",
+      "ordering": "question_to_context",
+      "paper_role": "embedding_pilot_baseline",
+      "status": "completed",
+      "mean_d_acc": null
+    },
+    {
+      "id": "round30_embedding_hotpot_fs_delta_s0",
+      "summary": "results/_summary_round30_embedding_hotpot_s0.txt",
+      "task": "embedding_hotpot_retrieval",
+      "ordering": "question_to_context",
+      "paper_role": "embedding_pilot_fs_delta",
+      "status": "completed",
+      "mean_d_acc": -0.0039
+    },
+    {
+      "id": "round29_punc_seed5_head_l8_quick_s01234",
+      "summary": "results/_summary_round29_punc_seed5_s01234.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "seedcheck_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0133
     }
   ]
 }

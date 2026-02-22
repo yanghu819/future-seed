@@ -1,0 +1,7 @@
+Loading data...
+Using the latest cached version of the dataset since hotpot_qa couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'distractor' at /root/autodl-tmp/hf_datasets/hotpot_qa/distractor/0.0.0/1908d6afbbead072334abe2965f91bd2709910ab (last modified on Wed Feb 18 11:20:36 2026).
+Using the latest cached version of the dataset since hotpot_qa couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'distractor' at /root/autodl-tmp/hf_datasets/hotpot_qa/distractor/0.0.0/1908d6afbbead072334abe2965f91bd2709910ab (last modified on Wed Feb 18 11:20:36 2026).
+Saved cache: cache/punc_restore_tok_8793043dd62c.pt
+runs/20260222-154427/punc_restore_sft/no_fs

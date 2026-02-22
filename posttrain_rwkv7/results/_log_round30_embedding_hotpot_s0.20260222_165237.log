@@ -1,0 +1,9 @@
+Round30 embedding started: Sun Feb 22 16:52:37 CST 2026
+RUN mode=baseline
+RUN mode=fs
+====================================================================================================================
+Round30 embedding summary (Hotpot retrieval)
+====================================================================================================================
+[baseline] failed
+[fs] failed
+Round30 embedding finished: Sun Feb 22 16:52:43 CST 2026
