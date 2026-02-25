@@ -215,3 +215,76 @@ Generated artifacts:
 3. Keep punc-restore multi-seed tracking as a stable positive real-text regime.
 4. Retest Hotpot with matched low-throughput recipe before any FS variant expansion.
 5. For embedding direction: try asymmetry-aware objectives / longer-doc pooling before claiming FS helps embeddings.
+
+## Latest Rapid-Iteration Update (2026-02-25, Round60/61)
+
+### Round60 (strict-quick, seed0, completed)
+
+- Script: `scripts/run_round60_strictquick_s0.py`
+- Summary: `results/_summary_round60_strictquick_s0.txt`
+- Records: `results/_round60_strictquick_s0_records.jsonl`
+
+Main outcomes:
+
+- `mbpp_strict`:
+  - quick baseline `42.70%`
+  - quick best `head_l10_strong`: `43.54%` (`+0.84pp`)
+  - med baseline: `48.39%`
+  - med FS (`head_l10_strong`): `49.94%` (**`+1.55pp` vs med baseline**)
+- `squad_strict`:
+  - quick baseline `14.17%`
+  - quick best `scalar_l8_sched_cos`: `15.45%` (`+1.28pp`)
+  - med baseline: `17.27%`
+  - med FS (`scalar_l8_sched_cos`): `17.47%` (**`+0.20pp` vs med baseline**)
+
+Interpretation:
+
+- strict recipe recovered positive med gains on both real tasks at seed0.
+- MBPP strict is currently the strongest post-training positive evidence branch.
+
+### Round61 (strict frontier, seed1, completed)
+
+- Script: `scripts/run_round61_strict_seed1_frontier.py`
+- Summary: `results/_summary_round61_strict_seed1_frontier.txt`
+- Records: `results/_round61_strict_seed1_frontier_records.jsonl`
+
+Search policy:
+
+- single-GPU serial execution
+- quick stage first (`150s`)
+- med stage only when quick best `>= +0.30pp`
+
+Main outcomes:
+
+- `squad_strict_seed1`:
+  - quick baseline `14.83%`
+  - best FS quick `scalar_l8_train1e4`: `14.58%` (`-0.25pp`)
+  - all tested FS quick variants were negative (`-0.25pp`, `-0.50pp`, `-0.75pp`)
+  - med was pruned (`quick_d_acc=-0.25pp < +0.30pp`)
+- `mbpp_strict_seed1`:
+  - quick baseline `40.43%`
+  - quick candidates:
+    - `head_l10_strong`: `43.86%` (`+3.43pp`)
+    - `head_l10_midlr`: `42.33%` (`+1.90pp`)
+    - `head_l10_sched_cos`: `41.86%` (`+1.43pp`)
+  - med baseline: `46.67%`
+  - med FS (`head_l10_strong`): `47.01%` (**`+0.35pp` vs med baseline**)
+
+Interpretation:
+
+- MBPP strict remains positive on seed1, but gain magnitude is reduced vs seed0.
+- SQuAD strict does not yet show seed-stable gain under current strict recipe.
+
+Current bottom line (real-task branch):
+
+- MBPP strict med:
+  - seed0: `+1.55pp`
+  - seed1: `+0.35pp`
+  - direction is consistent positive across 2 seeds.
+- SQuAD strict:
+  - seed0 positive, seed1 negative in quick stage; stability not established.
+
+Next round plan:
+
+1. SQuAD strict rescue: test more conservative scalar schedules and lower note pressure to reduce seed1 regression.
+2. MBPP strict confirmation: run seed2 with `head_l10_strong` under the same strict protocol to extend stability evidence.

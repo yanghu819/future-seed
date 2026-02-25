@@ -694,3 +694,73 @@ Outcomes:
 Interpretation:
 - This first embedding probe is negative for FS.
 - Evidence currently does not support claiming FS gains for embedding quality under this simple contrastive setup.
+
+## 2026-02-25 Round60 (strict-quick, seed0, completed)
+
+Script:
+- `scripts/run_round60_strictquick_s0.py`
+
+Outputs:
+- `results/_summary_round60_strictquick_s0.txt`
+- `results/_round60_strictquick_s0_records.jsonl`
+
+Task setting:
+- real-task strict branch on `squad` and `mbpp`
+- single GPU serial quick->med verification
+
+Outcomes:
+- `mbpp_strict`:
+  - quick baseline: `42.70%`
+  - quick best FS (`head_l10_strong`): `43.54%` (`+0.84pp`)
+  - med baseline: `48.39%`
+  - med FS (`head_l10_strong`): `49.94%` (**`+1.55pp` vs med baseline**)
+- `squad_strict`:
+  - quick baseline: `14.17%`
+  - quick best FS (`scalar_l8_sched_cos`): `15.45%` (`+1.28pp`)
+  - med baseline: `17.27%`
+  - med FS (`scalar_l8_sched_cos`): `17.47%` (**`+0.20pp` vs med baseline**)
+
+Decision:
+- adopt `head_l10_strong` as MBPP strict winner for cross-seed follow-up.
+- keep SQuAD strict branch active, but mark as low-margin pending seed check.
+
+## 2026-02-25 Round61 (strict frontier, seed1, completed)
+
+Script:
+- `scripts/run_round61_strict_seed1_frontier.py`
+
+Outputs:
+- `results/_summary_round61_strict_seed1_frontier.txt`
+- `results/_round61_strict_seed1_frontier_records.jsonl`
+
+Search policy:
+- `seed=1` robustness pass on strict recipe
+- quick stage first; med only if quick best `>= +0.30pp`
+- no multi-seed sweep expansion in this round
+
+Outcomes:
+- `squad_strict_seed1` quick:
+  - baseline: `14.83%`
+  - `scalar_l8_train1e4`: `14.58%` (`-0.25pp`)
+  - `scalar_l8_sched_cos_highfloor`: `14.32%` (`-0.50pp`)
+  - `scalar_l8_sched_cos`: `14.08%` (`-0.75pp`)
+  - med pruned (`quick_d_acc=-0.25pp < +0.30pp`)
+- `mbpp_strict_seed1`:
+  - quick baseline: `40.43%`
+  - quick `head_l10_strong`: `43.86%` (`+3.43pp`)
+  - quick `head_l10_midlr`: `42.33%` (`+1.90pp`)
+  - quick `head_l10_sched_cos`: `41.86%` (`+1.43pp`)
+  - med baseline: `46.67%`
+  - med FS (`head_l10_strong`): `47.01%` (**`+0.35pp` vs med baseline**)
+
+Failure / prune notes:
+- SQuAD strict branch failed quick gate on seed1 (all tested FS variants negative), so no extra med compute wasted.
+- MBPP quick alternates (`head_l10_midlr`, `head_l10_sched_cos`) were not promoted because they trailed `head_l10_strong`.
+
+Current judgment:
+- MBPP strict now has two positive med seeds (`seed0 +1.55pp`, `seed1 +0.35pp`), supporting non-toy real-task positive signal.
+- SQuAD strict remains unstable and requires dedicated rescue search before claiming stable gain.
+
+Next round plan:
+1. SQuAD strict rescue with more conservative FS schedules and lower prompt-note pressure.
+2. MBPP strict `seed2` confirmation on `head_l10_strong` to extend stability evidence.
