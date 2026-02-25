@@ -41,3 +41,24 @@ Failed/pruned:
 Next round plan:
 1. SQuAD strict rescue with conservative schedules and lower prompt-note pressure.
 2. MBPP strict seed2 confirmation on `head_l10_strong` to extend cross-seed evidence.
+
+---
+
+## Round62 - 3h finishpack (completed 2026-02-25)
+
+Best config vs baseline:
+- `punc_restore_seed0_scout`: `head_l8` med `11.09%` vs med baseline `10.59%` (**`+0.51pp`**)
+- `mbpp_strict_seed2_confirm`: `head_l10_strong` med `45.17%` vs med baseline `47.15%` (**`-1.98pp`**)
+- `squad_strict_seed1_rescue`: best quick FS `14.82%` vs quick baseline `14.83%` (**`-0.01pp`**)
+
+Failed/pruned:
+- `mbpp_strict_seed2_confirm`:
+  - `head_l10_midlr` quick pruned (`-1.26pp < -0.50pp`)
+  - winner `head_l10_strong` failed med confirmation (`-1.98pp`)
+- `squad_strict_seed1_rescue`:
+  - all rescue quick candidates non-positive (`-0.01pp`, `-0.50pp`, `-1.00pp`)
+  - med pruned due gate (`best_quick -0.01pp < +0.20pp`)
+
+Next round plan:
+1. Prioritize `punc_restore` as current most reliable useful task branch.
+2. Freeze or deprioritize unstable branches (`squad_strict`, current `mbpp_strict` recipe) until new hypotheses are ready.

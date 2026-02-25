@@ -764,3 +764,44 @@ Current judgment:
 Next round plan:
 1. SQuAD strict rescue with more conservative FS schedules and lower prompt-note pressure.
 2. MBPP strict `seed2` confirmation on `head_l10_strong` to extend stability evidence.
+
+## 2026-02-25 Round62 (3h finishpack, completed)
+
+Script:
+- `scripts/run_round62_3h_finishpack.py`
+
+Outputs:
+- `results/_summary_round62_3h_finishpack.txt`
+- `results/_round62_3h_finishpack_records.jsonl`
+
+Execution constraints:
+- hard 3-hour budget window
+- single-GPU serial execution
+- quick->med with immediate prune when quick drop exceeds `0.50pp`
+
+Branch A: MBPP strict seed2 confirmation
+- quick baseline: `41.36%`
+- quick `head_l10_strong`: `42.10%` (`+0.74pp`)
+- quick `head_l10_midlr`: `40.10%` (`-1.26pp`, pruned)
+- med baseline: `47.15%`
+- med FS (`head_l10_strong`): `45.17%` (**`-1.98pp` vs med baseline**)
+
+Branch B: SQuAD strict seed1 rescue
+- quick baseline: `14.83%`
+- rescue quick:
+  - `scalar_l8_sched_ultra`: `14.82%` (`-0.01pp`)
+  - `scalar_l8_train5e5`: `14.33%` (`-0.50pp`, pruned)
+  - `scalar_l10_sched_gentle`: `13.83%` (`-1.00pp`, pruned)
+- med pruned: best quick still below med gate (`-0.01pp < +0.20pp`)
+
+Branch C: PUNC restore seed0 scout
+- quick baseline: `8.44%`
+- quick `head_l8`: `10.10%` (`+1.66pp`)
+- quick `scalar_l8_sched_cos`: `8.18%` (`-0.26pp`)
+- med baseline: `10.59%`
+- med FS (`head_l8`): `11.09%` (**`+0.51pp` vs med baseline**)
+
+Round62 useful-task conclusion:
+- positive: `punc_restore` (current round positive on both quick and med).
+- mixed/unstable: `mbpp_strict` (seed2 med turned negative after seed0/seed1 positives).
+- not useful under tested rescue: `squad_strict`.

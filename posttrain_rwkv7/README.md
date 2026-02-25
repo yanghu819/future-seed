@@ -216,7 +216,7 @@ Generated artifacts:
 4. Retest Hotpot with matched low-throughput recipe before any FS variant expansion.
 5. For embedding direction: try asymmetry-aware objectives / longer-doc pooling before claiming FS helps embeddings.
 
-## Latest Rapid-Iteration Update (2026-02-25, Round60/61)
+## Latest Rapid-Iteration Update (2026-02-25, Round60/61/62)
 
 ### Round60 (strict-quick, seed0, completed)
 
@@ -275,16 +275,55 @@ Interpretation:
 - MBPP strict remains positive on seed1, but gain magnitude is reduced vs seed0.
 - SQuAD strict does not yet show seed-stable gain under current strict recipe.
 
+### Round62 (3h finishpack, completed)
+
+- Script: `scripts/run_round62_3h_finishpack.py`
+- Summary: `results/_summary_round62_3h_finishpack.txt`
+- Records: `results/_round62_3h_finishpack_records.jsonl`
+
+Search policy:
+
+- hard 3-hour execution window
+- single-GPU serial quick->med
+- immediate prune when quick drop below baseline exceeds `0.50pp`
+
+Main outcomes:
+
+- `mbpp_strict_seed2_confirm`:
+  - quick baseline `41.36%`
+  - quick `head_l10_strong`: `42.10%` (`+0.74pp`)
+  - med baseline: `47.15%`
+  - med FS (`head_l10_strong`): `45.17%` (**`-1.98pp` vs med baseline**)
+  - `head_l10_midlr` quick pruned: `-1.26pp`
+- `squad_strict_seed1_rescue`:
+  - quick baseline `14.83%`
+  - best rescue quick `scalar_l8_sched_ultra`: `14.82%` (`-0.01pp`)
+  - other rescue candidates: `-0.50pp`, `-1.00pp`
+  - med pruned (`best_quick=-0.01pp < +0.20pp gate`)
+- `punc_restore_seed0_scout`:
+  - quick baseline `8.44%`
+  - quick `head_l8`: `10.10%` (`+1.66pp`)
+  - med baseline: `10.59%`
+  - med `head_l8`: `11.09%` (**`+0.51pp` vs med baseline**)
+
+Interpretation:
+
+- MBPP strict is not stable across seeds under current recipe (seed2 flipped negative).
+- SQuAD strict rescue did not recover positive gain.
+- PUNC restore remains a practical positive branch in this budget regime.
+
 Current bottom line (real-task branch):
 
-- MBPP strict med:
-  - seed0: `+1.55pp`
-  - seed1: `+0.35pp`
-  - direction is consistent positive across 2 seeds.
-- SQuAD strict:
-  - seed0 positive, seed1 negative in quick stage; stability not established.
+- `punc_restore`:
+  - quick/med remain positive in latest scout (`+1.66pp` quick, `+0.51pp` med).
+  - combined with earlier multi-seed evidence, currently the most reliable FS-positive real-text branch.
+- `mbpp_strict`:
+  - seed0 `+1.55pp`, seed1 `+0.35pp`, seed2 `-1.98pp` (med).
+  - currently classified as conditional / unstable.
+- `squad_strict`:
+  - no stable positive signal after rescue attempts.
 
 Next round plan:
 
-1. SQuAD strict rescue: test more conservative scalar schedules and lower note pressure to reduce seed1 regression.
-2. MBPP strict confirmation: run seed2 with `head_l10_strong` under the same strict protocol to extend stability evidence.
+1. Freeze low-value branches (`squad_strict`, unstable `mbpp_strict`) to save compute.
+2. Focus compute on positive branches (`punc_restore` first, MBPP only with stronger regularization hypotheses).
