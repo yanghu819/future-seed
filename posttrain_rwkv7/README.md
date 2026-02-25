@@ -459,3 +459,42 @@ Current bottom line (real-task branch, after Round66):
   - requires additional seed-level reconfirmation before any stable-gain claim.
 - `punc_restore`:
   - high variance across seeds (strong positives and strong negatives), currently deprioritized.
+
+### Round67 (squad3+mbpp0, completed)
+
+- Script: `scripts/run_round67_squad3_mbpp0.py`
+- Summary: `results/_summary_round67_squad3_mbpp0.txt`
+- Records: `results/_round67_squad3_mbpp0_records.jsonl`
+
+Main outcomes:
+
+- `squad_seed3_train1e4_frontier`:
+  - quick baseline `14.67%`
+  - `scalar_l8_train1e4`: `14.06%` (`-0.61pp`, pruned)
+  - `scalar_l8_sched_cos`: `13.83%` (`-0.84pp`, pruned)
+  - med skipped
+- `mbpp_seed0_reconfirm_strict`:
+  - quick baseline `40.60%`
+  - `head_l10_strong`: `42.88%` (`+2.27pp`)
+  - `head_l8_nodetach`: `41.10%` (`+0.50pp`)
+  - med baseline `48.39%`
+  - med FS (`head_l10_strong`) `49.94%` (**`+1.54pp` vs med baseline**)
+
+Interpretation:
+
+- MBPP seed0 reconfirmed a strong med gain with `head_l10_strong`.
+- SQuAD train1e4 showed clear seed split (positive on seed0/2, negative on seed3).
+
+Current bottom line (real-task branch, after Round67):
+
+- `mbpp`:
+  - seed0 med `+1.55pp` (Round60) and reconfirm `+1.54pp` (Round67),
+  - seed1 med `+0.35pp` (Round61),
+  - seed2 med `-1.98pp` (Round62), seed3 med `-1.47pp` (Round66).
+  - conclusion: useful on part of seeds but not yet seed-stable.
+- `squad`:
+  - seed0 med `+1.73pp` (Round66), seed2 med `+0.71pp` (Round65),
+  - seed1/seed3 quick both negative and pruned.
+  - conclusion: currently the strongest practical branch, but still seed-split.
+- `punc_restore`:
+  - retained as high-variance auxiliary signal; not used as main proof branch.

@@ -1,0 +1,24 @@
+================================================================================================================
+Round67 squad3+mbpp0 summary
+================================================================================================================
+[mbpp_seed0_reconfirm_strict]
+  quick baseline: 40.60%
+    head_l10_strong              d_acc=+2.27pp acc=42.88%
+    head_l8_nodetach             d_acc=+0.50pp acc=41.10%
+  med:
+    baseline                     acc=48.39%
+    head_l10_strong              d_acc_vs_med=+1.54pp acc=49.94%
+----------------------------------------------------------------------------------------------------------------
+[squad_seed3_train1e4_frontier]
+  quick baseline: 14.67%
+    scalar_l8_train1e4           d_acc=-0.61pp acc=14.06%
+    scalar_l8_sched_cos          d_acc=-0.84pp acc=13.83%
+  med skipped: best_quick -0.61pp < med_gate -0.50pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -0.61pp < -0.50pp
+    scalar_l8_sched_cos          quick_drop -0.84pp < -0.50pp
+    scalar_l8_train1e4           best_quick -0.61pp < med_gate -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed0_reconfirm_strict      stage=med   cfg=head_l10_strong          d_acc=+1.54pp
+  squad_seed3_train1e4_frontier    stage=quick cfg=scalar_l8_train1e4       d_acc=-0.61pp

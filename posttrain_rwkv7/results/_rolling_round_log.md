@@ -142,3 +142,23 @@ Failed/pruned:
 Next round plan:
 1. Extend SQuAD train1e4 to seed3 to test whether med gains continue.
 2. Reconfirm MBPP strict on seed0 to compare against seed3 failure pattern.
+
+---
+
+## Round67 - squad3+mbpp0 (completed 2026-02-25)
+
+Best config vs baseline:
+- `mbpp_seed0_reconfirm_strict`: `head_l10_strong` med `49.94%` vs med baseline `48.39%` (**`+1.54pp`**)
+- `squad_seed3_train1e4_frontier`: best quick `scalar_l8_train1e4` `14.06%` vs quick baseline `14.67%` (**`-0.61pp`**)
+
+Failed/pruned:
+- `squad_seed3_train1e4_frontier`:
+  - `scalar_l8_train1e4` quick-pruned (`-0.61pp < -0.50pp`)
+  - `scalar_l8_sched_cos` quick-pruned (`-0.84pp < -0.50pp`)
+  - med skipped (`best_quick -0.61pp < med_gate -0.50pp`)
+- `mbpp_seed0_reconfirm_strict`:
+  - no prune; both quick candidates positive and winner passed med with `+1.54pp`
+
+Next round plan:
+1. SQuAD: run targeted rescue on seed1/seed3 to reduce seed split (train1e4 neighborhood only).
+2. MBPP: verify whether seed2/seed3 can be repaired or freeze MBPP as seed-conditional positive branch.

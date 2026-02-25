@@ -949,3 +949,35 @@ Outcomes:
 Round66 conclusion:
 - SQuAD `scalar_l8_train1e4` achieved another strong med gain, now positive on seed0 and seed2.
 - MBPP on seed3 showed quick-positive but med-negative reversal; stability remains unresolved.
+
+## 2026-02-25 Round67 (squad3+mbpp0, completed)
+
+Script:
+- `scripts/run_round67_squad3_mbpp0.py`
+
+Outputs:
+- `results/_summary_round67_squad3_mbpp0.txt`
+- `results/_round67_squad3_mbpp0_records.jsonl`
+
+Goal:
+- extend SQuAD train1e4 branch to seed3.
+- recheck MBPP strict winner on seed0 with current quick->med pipeline.
+
+Outcomes:
+
+1) `squad_seed3_train1e4_frontier`
+- quick baseline: `14.67%`
+- quick `scalar_l8_train1e4`: `14.06%` (`-0.61pp`, pruned)
+- quick `scalar_l8_sched_cos`: `13.83%` (`-0.84pp`, pruned)
+- med skipped (`best_quick -0.61pp < med_gate -0.50pp`)
+
+2) `mbpp_seed0_reconfirm_strict`
+- quick baseline: `40.60%`
+- quick `head_l10_strong`: `42.88%` (`+2.27pp`)
+- quick `head_l8_nodetach`: `41.10%` (`+0.50pp`)
+- med baseline: `48.39%`
+- med FS (`head_l10_strong`): `49.94%` (**`+1.54pp` vs med baseline**)
+
+Round67 conclusion:
+- MBPP seed0 positive signal is reproducible in the current pipeline.
+- SQuAD train1e4 branch remains seed-split: strong on seed0/2 but negative on seed3.
