@@ -312,18 +312,57 @@ Interpretation:
 - SQuAD strict rescue did not recover positive gain.
 - PUNC restore remains a practical positive branch in this budget regime.
 
+### Round63 (useful-followup, completed)
+
+- Script: `scripts/run_round63_useful_followup.py`
+- Summary: `results/_summary_round63_useful_followup.txt`
+- Records: `results/_round63_useful_followup_records.jsonl`
+
+Search policy:
+
+- continue single-GPU serial quick->med
+- focus on usefulness verification:
+  - `punc_restore` seed1/seed2 confirmation
+  - `mbpp` seed2 regularization rescue
+
+Main outcomes:
+
+- `mbpp_seed2_regrescue`:
+  - quick baseline `39.11%`
+  - quick best `head_l10_clip07`: `42.52%` (`+3.41pp`)
+  - med baseline: `46.69%`
+  - med FS (`head_l10_clip07`): `48.97%` (**`+2.28pp` vs med baseline**)
+- `punc_restore_seed1_confirm`:
+  - quick baseline `7.92%`
+  - quick best `scalar_l8_sched_cos`: `10.34%` (`+2.42pp`)
+  - med baseline: `12.20%`
+  - med FS (`scalar_l8_sched_cos`): `14.32%` (**`+2.12pp` vs med baseline**)
+- `punc_restore_seed2_confirm`:
+  - quick baseline `6.74%`
+  - quick best `scalar_l8_sched_cos`: `7.13%` (`+0.39pp`)
+  - med baseline: `12.78%`
+  - med FS (`scalar_l8_sched_cos`): `10.24%` (**`-2.55pp` vs med baseline**)
+  - `head_l8` was quick-pruned (`-0.61pp`)
+
+Interpretation:
+
+- MBPP shows a viable rescue path on seed2 when FS is regularized (`fs_clip=0.7`).
+- PUNC still has seed-level variance: strong positive on seed1, strong negative on seed2.
+
 Current bottom line (real-task branch):
 
+- `mbpp`:
+  - original strict recipe was unstable on seed2 (`-1.98pp` in Round62),
+  - but rescue recipe (`head_l10_clip07`) recovered to `+2.28pp` in Round63.
+  - currently classified as promising but recipe-sensitive.
 - `punc_restore`:
-  - quick/med remain positive in latest scout (`+1.66pp` quick, `+0.51pp` med).
-  - combined with earlier multi-seed evidence, currently the most reliable FS-positive real-text branch.
-- `mbpp_strict`:
-  - seed0 `+1.55pp`, seed1 `+0.35pp`, seed2 `-1.98pp` (med).
-  - currently classified as conditional / unstable.
+  - seed1 confirm is strongly positive (`+2.12pp` med),
+  - seed2 confirm is negative (`-2.55pp` med).
+  - currently classified as seed-variant, still needs one more seed to settle.
 - `squad_strict`:
-  - no stable positive signal after rescue attempts.
+  - no stable positive signal under current budget/regimes.
 
 Next round plan:
 
-1. Freeze low-value branches (`squad_strict`, unstable `mbpp_strict`) to save compute.
-2. Focus compute on positive branches (`punc_restore` first, MBPP only with stronger regularization hypotheses).
+1. MBPP: promote `head_l10_clip07` into seed1/seed0 replay to test whether rescue recipe is consistently better than old strict winner.
+2. PUNC: run one additional seed confirmation (`seed3`) on `scalar_l8_sched_cos` to decide keep-or-freeze.

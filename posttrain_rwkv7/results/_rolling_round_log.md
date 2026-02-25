@@ -62,3 +62,22 @@ Failed/pruned:
 Next round plan:
 1. Prioritize `punc_restore` as current most reliable useful task branch.
 2. Freeze or deprioritize unstable branches (`squad_strict`, current `mbpp_strict` recipe) until new hypotheses are ready.
+
+---
+
+## Round63 - useful-followup (completed 2026-02-25)
+
+Best config vs baseline:
+- `mbpp_seed2_regrescue`: `head_l10_clip07` med `48.97%` vs med baseline `46.69%` (**`+2.28pp`**)
+- `punc_restore_seed1_confirm`: `scalar_l8_sched_cos` med `14.32%` vs med baseline `12.20%` (**`+2.12pp`**)
+- `punc_restore_seed2_confirm`: `scalar_l8_sched_cos` med `10.24%` vs med baseline `12.78%` (**`-2.55pp`**)
+
+Failed/pruned:
+- `punc_restore_seed2_confirm`:
+  - `head_l8` quick pruned (`-0.61pp < -0.50pp`)
+  - `scalar_l8_sched_cos` failed med confirmation (`-2.55pp`)
+- no crash failures in this round; all failures are metric-based pruning/regression
+
+Next round plan:
+1. MBPP: validate rescue winner (`head_l10_clip07`) on additional seeds.
+2. PUNC: run one extra seed confirmation before deciding to keep or freeze the branch.

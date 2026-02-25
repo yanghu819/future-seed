@@ -805,3 +805,46 @@ Round62 useful-task conclusion:
 - positive: `punc_restore` (current round positive on both quick and med).
 - mixed/unstable: `mbpp_strict` (seed2 med turned negative after seed0/seed1 positives).
 - not useful under tested rescue: `squad_strict`.
+
+## 2026-02-25 Round63 (useful-followup, completed)
+
+Script:
+- `scripts/run_round63_useful_followup.py`
+
+Outputs:
+- `results/_summary_round63_useful_followup.txt`
+- `results/_round63_useful_followup_records.jsonl`
+
+Goal:
+- continue within short-cycle budget and identify genuinely useful branches fast.
+- verify if `punc`/`mbpp` can sustain positive deltas with focused follow-up.
+
+Outcomes:
+
+1) `punc_restore_seed1_confirm`
+- quick baseline: `7.92%`
+- quick best (`scalar_l8_sched_cos`): `10.34%` (`+2.42pp`)
+- med baseline: `12.20%`
+- med FS (`scalar_l8_sched_cos`): `14.32%` (**`+2.12pp` vs med baseline**)
+
+2) `punc_restore_seed2_confirm`
+- quick baseline: `6.74%`
+- quick `head_l8`: `6.12%` (`-0.61pp`, pruned)
+- quick `scalar_l8_sched_cos`: `7.13%` (`+0.39pp`)
+- med baseline: `12.78%`
+- med FS (`scalar_l8_sched_cos`): `10.24%` (**`-2.55pp` vs med baseline**)
+
+3) `mbpp_seed2_regrescue`
+- recipe change: reduced FS intensity (`fs_clip=0.7`) + lower note pressure.
+- quick baseline: `39.11%`
+- quick candidates:
+  - `head_l10_clip07`: `42.52%` (`+3.41pp`)
+  - `head_l11_strong`: `40.45%` (`+1.35pp`)
+  - `head_l10_sched_soft`: `40.41%` (`+1.30pp`)
+- med baseline: `46.69%`
+- med FS (`head_l10_clip07`): `48.97%` (**`+2.28pp` vs med baseline**)
+
+Round63 useful-task conclusion:
+- useful: `mbpp` rescue recipe (`head_l10_clip07`) and `punc` seed1 (`scalar_l8_sched_cos`) both showed >`+2pp` med gains.
+- still unstable: `punc` across seeds (seed1 positive, seed2 negative).
+- action: treat `mbpp` as recipe-sensitive but currently high-value; keep `squad` frozen.
