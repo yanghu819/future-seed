@@ -1045,3 +1045,37 @@ Outcomes:
 Round69 conclusion:
 - MBPP seed3 improved from clear regression to near-neutral with `head_l8_nodetach`, but no strong gain yet.
 - SQuAD seed1 remained unrecovered under scalar micro search.
+
+## 2026-02-25 Round70 (squad3+mbpp2, completed)
+
+Script:
+- `scripts/run_round70_squad3_mbpp2.py`
+
+Outputs:
+- `results/_summary_round70_squad3_mbpp2.txt`
+- `results/_round70_squad3_mbpp2_records.jsonl`
+
+Goal:
+- SQuAD seed3: scalar micro rescue follow-up after round68 head failure.
+- MBPP seed2: dual med recheck for `clip07` and `strong` under rescue base.
+
+Outcomes:
+
+1) `squad_seed3_scalar_micro`
+- quick baseline: `14.67%`
+- quick `scalar_l8_train8e5`: `14.41%` (`-0.26pp`)
+- quick `scalar_l8_train1e4_clip07`: `14.08%` (`-0.59pp`, pruned)
+- quick `scalar_l8_train1e4`: `14.06%` (`-0.61pp`, pruned)
+- med skipped (`best_quick -0.26pp < med_gate -0.10pp`)
+
+2) `mbpp_seed2_dualmed_recheck`
+- quick baseline: `39.11%`
+- quick `head_l10_clip07`: `42.52%` (`+3.41pp`)
+- quick `head_l10_strong`: `42.52%` (`+3.41pp`)
+- med baseline: `46.69%`
+- med `head_l10_clip07`: `48.97%` (**`+2.28pp` vs med baseline**)
+- med `head_l10_strong`: `48.97%` (**`+2.28pp` vs med baseline**)
+
+Round70 conclusion:
+- MBPP seed2 strong positive (`+2.28pp`) is repeatable under current pipeline.
+- SQuAD seed3 still not recoverable in this scalar micro neighborhood.

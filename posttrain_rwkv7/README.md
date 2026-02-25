@@ -558,3 +558,39 @@ Current bottom line (real-task branch, after Round69):
 - `mbpp`:
   - strong positives on seed0/seed1, strong negatives on seed2, and near-neutral repaired result on seed3.
   - currently classified as recipe- and seed-sensitive, not yet universally stable.
+
+### Round70 (squad3+mbpp2, completed)
+
+- Script: `scripts/run_round70_squad3_mbpp2.py`
+- Summary: `results/_summary_round70_squad3_mbpp2.txt`
+- Records: `results/_round70_squad3_mbpp2_records.jsonl`
+
+Main outcomes:
+
+- `squad_seed3_scalar_micro`:
+  - quick baseline `14.67%`
+  - best quick `scalar_l8_train8e5`: `14.41%` (`-0.26pp`)
+  - other candidates: `-0.59pp`, `-0.61pp`
+  - med skipped (`best_quick -0.26pp < med_gate -0.10pp`)
+- `mbpp_seed2_dualmed_recheck`:
+  - quick baseline `39.11%`
+  - quick `head_l10_clip07`: `42.52%` (`+3.41pp`)
+  - quick `head_l10_strong`: `42.52%` (`+3.41pp`)
+  - med baseline `46.69%`
+  - med `head_l10_clip07`: `48.97%` (**`+2.28pp` vs med baseline**)
+  - med `head_l10_strong`: `48.97%` (**`+2.28pp` vs med baseline**)
+
+Interpretation:
+
+- MBPP seed2 rescue signal is reproducible and strong under current quick->med protocol.
+- SQuAD seed3 remained negative even after scalar micro tuning.
+
+Current bottom line (real-task branch, after Round70):
+
+- `mbpp`:
+  - confirmed strong med gains on seed0 (`+1.54pp`) and seed2 (`+2.28pp`),
+  - seed3 currently near-neutral best (`+0.05pp`) under rescue,
+  - still seed-sensitive but high-value.
+- `squad`:
+  - positive on seed0/seed2, persistently negative on seed1/seed3 under both head/scalar rescue.
+  - currently useful but not seed-stable.

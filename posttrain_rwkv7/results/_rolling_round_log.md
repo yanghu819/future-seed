@@ -203,3 +203,23 @@ Failed/pruned:
 Next round plan:
 1. SQuAD: attempt seed3 scalar micro rescue with strict prune.
 2. MBPP: recheck seed2 rescue (`clip07` + `strong`) with dual med promotion.
+
+---
+
+## Round70 - squad3+mbpp2 (completed 2026-02-25)
+
+Best config vs baseline:
+- `mbpp_seed2_dualmed_recheck`:
+  - `head_l10_clip07` med `48.97%` vs med baseline `46.69%` (**`+2.28pp`**)
+  - `head_l10_strong` med `48.97%` vs med baseline `46.69%` (**`+2.28pp`**)
+- `squad_seed3_scalar_micro`: best quick `scalar_l8_train8e5` `14.41%` vs quick baseline `14.67%` (**`-0.26pp`**)
+
+Failed/pruned:
+- `squad_seed3_scalar_micro`:
+  - `scalar_l8_train1e4` quick-pruned (`-0.61pp < -0.50pp`)
+  - `scalar_l8_train1e4_clip07` quick-pruned (`-0.59pp < -0.50pp`)
+  - med skipped (`best_quick -0.26pp < med_gate -0.10pp`)
+
+Next round plan:
+1. MBPP: move to seed3 rescue recheck under note-pool-384 base to reduce seed split.
+2. SQuAD: reconfirm seed2 scalar positives and decide whether to freeze seed1/3 rescue branch.
