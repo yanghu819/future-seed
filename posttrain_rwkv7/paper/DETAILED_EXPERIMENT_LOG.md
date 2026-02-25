@@ -981,3 +981,67 @@ Outcomes:
 Round67 conclusion:
 - MBPP seed0 positive signal is reproducible in the current pipeline.
 - SQuAD train1e4 branch remains seed-split: strong on seed0/2 but negative on seed3.
+
+## 2026-02-25 Round68 (squad head rescue, completed)
+
+Script:
+- `scripts/run_round68_squad_head_rescue.py`
+
+Outputs:
+- `results/_summary_round68_squad_head_rescue.txt`
+- `results/_round68_squad_head_rescue_records.jsonl`
+
+Goal:
+- attempt a lightweight head-based rescue for SQuAD negative seeds (`seed1`, `seed3`).
+
+Outcomes:
+
+1) `squad_seed1_head_rescue`
+- quick baseline: `14.83%`
+- quick `head_l8`: `14.07%` (`-0.76pp`, pruned)
+- quick `head_l8_nodetach`: `14.58%` (`-0.25pp`)
+- med skipped (`best_quick -0.25pp < med_gate -0.20pp`)
+
+2) `squad_seed3_head_rescue`
+- quick baseline: `14.67%`
+- quick `head_l8`: `13.32%` (`-1.35pp`, pruned)
+- quick `head_l8_nodetach`: `13.90%` (`-0.76pp`, pruned)
+- med skipped (`best_quick -0.76pp < med_gate -0.20pp`)
+
+Round68 conclusion:
+- head variants failed to recover SQuAD on both negative seeds.
+- this rescue direction is currently low expected value.
+
+## 2026-02-25 Round69 (mbpp+squad rescue, completed)
+
+Script:
+- `scripts/run_round69_mbpp_squad_rescue.py`
+
+Outputs:
+- `results/_summary_round69_mbpp_squad_rescue.txt`
+- `results/_round69_mbpp_squad_rescue_records.jsonl`
+
+Goal:
+- MBPP seed3: test whether quick-positive candidates can survive med using dual-promotion.
+- SQuAD seed1: scalar micro-tuning around train1e4.
+
+Outcomes:
+
+1) `mbpp_seed3_dualmed_rescue`
+- quick baseline: `40.90%`
+- quick `head_l10_strong`: `41.85%` (`+0.95pp`)
+- quick `head_l8_nodetach`: `41.45%` (`+0.56pp`)
+- med baseline: `48.23%`
+- med `head_l8_nodetach`: `48.28%` (**`+0.05pp` vs med baseline**)
+- med `head_l10_strong`: `46.76%` (**`-1.47pp` vs med baseline**)
+
+2) `squad_seed1_scalar_micro`
+- quick baseline: `14.83%`
+- quick `scalar_l8_train1e4`: `14.58%` (`-0.25pp`)
+- quick `scalar_l8_train8e5`: `14.58%` (`-0.25pp`)
+- quick `scalar_l8_train1e4_clip07`: `14.41%` (`-0.42pp`)
+- med skipped (`best_quick -0.25pp < med_gate -0.10pp`)
+
+Round69 conclusion:
+- MBPP seed3 improved from clear regression to near-neutral with `head_l8_nodetach`, but no strong gain yet.
+- SQuAD seed1 remained unrecovered under scalar micro search.

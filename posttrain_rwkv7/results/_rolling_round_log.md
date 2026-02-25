@@ -162,3 +162,44 @@ Failed/pruned:
 Next round plan:
 1. SQuAD: run targeted rescue on seed1/seed3 to reduce seed split (train1e4 neighborhood only).
 2. MBPP: verify whether seed2/seed3 can be repaired or freeze MBPP as seed-conditional positive branch.
+
+---
+
+## Round68 - squad head rescue (completed 2026-02-25)
+
+Best config vs baseline:
+- `squad_seed1_head_rescue`: best quick `head_l8_nodetach` `14.58%` vs quick baseline `14.83%` (**`-0.25pp`**)
+- `squad_seed3_head_rescue`: best quick `head_l8_nodetach` `13.90%` vs quick baseline `14.67%` (**`-0.76pp`**)
+
+Failed/pruned:
+- `squad_seed1_head_rescue`:
+  - `head_l8` quick-pruned (`-0.76pp < -0.50pp`)
+  - med skipped (`best_quick -0.25pp < med_gate -0.20pp`)
+- `squad_seed3_head_rescue`:
+  - `head_l8` quick-pruned (`-1.35pp < -0.50pp`)
+  - `head_l8_nodetach` quick-pruned (`-0.76pp < -0.50pp`)
+  - med skipped (`best_quick -0.76pp < med_gate -0.20pp`)
+
+Next round plan:
+1. Drop SQuAD head rescue direction and try scalar micro adjustments on seed1.
+2. For MBPP seed3, run dual med confirmation to avoid quick-only false positives.
+
+---
+
+## Round69 - mbpp+squad rescue (completed 2026-02-25)
+
+Best config vs baseline:
+- `mbpp_seed3_dualmed_rescue`: `head_l8_nodetach` med `48.28%` vs med baseline `48.23%` (**`+0.05pp`**)
+- `squad_seed1_scalar_micro`: best quick `scalar_l8_train1e4` `14.58%` vs quick baseline `14.83%` (**`-0.25pp`**)
+
+Failed/pruned:
+- `mbpp_seed3_dualmed_rescue`:
+  - `head_l10_strong` med regression (`-1.47pp`)
+  - only `head_l8_nodetach` remained near-neutral positive (`+0.05pp`)
+- `squad_seed1_scalar_micro`:
+  - all scalar micro candidates non-positive (`-0.25pp`, `-0.25pp`, `-0.42pp`)
+  - med skipped (`best_quick -0.25pp < med_gate -0.10pp`)
+
+Next round plan:
+1. SQuAD: attempt seed3 scalar micro rescue with strict prune.
+2. MBPP: recheck seed2 rescue (`clip07` + `strong`) with dual med promotion.

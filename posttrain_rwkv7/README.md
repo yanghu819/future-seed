@@ -498,3 +498,63 @@ Current bottom line (real-task branch, after Round67):
   - conclusion: currently the strongest practical branch, but still seed-split.
 - `punc_restore`:
   - retained as high-variance auxiliary signal; not used as main proof branch.
+
+### Round68 (squad head rescue, completed)
+
+- Script: `scripts/run_round68_squad_head_rescue.py`
+- Summary: `results/_summary_round68_squad_head_rescue.txt`
+- Records: `results/_round68_squad_head_rescue_records.jsonl`
+
+Main outcomes:
+
+- `squad_seed1_head_rescue`:
+  - quick baseline `14.83%`
+  - `head_l8_nodetach`: `14.58%` (`-0.25pp`)
+  - `head_l8`: `14.07%` (`-0.76pp`, pruned)
+  - med skipped (`best_quick -0.25pp < med_gate -0.20pp`)
+- `squad_seed3_head_rescue`:
+  - quick baseline `14.67%`
+  - `head_l8_nodetach`: `13.90%` (`-0.76pp`, pruned)
+  - `head_l8`: `13.32%` (`-1.35pp`, pruned)
+  - med skipped
+
+Interpretation:
+
+- head-based rescue did not recover SQuAD on seed1/seed3.
+- this branch is currently low value under the present budget regime.
+
+### Round69 (mbpp+squad rescue, completed)
+
+- Script: `scripts/run_round69_mbpp_squad_rescue.py`
+- Summary: `results/_summary_round69_mbpp_squad_rescue.txt`
+- Records: `results/_round69_mbpp_squad_rescue_records.jsonl`
+
+Main outcomes:
+
+- `mbpp_seed3_dualmed_rescue`:
+  - quick baseline `40.90%`
+  - quick `head_l10_strong`: `41.85%` (`+0.95pp`)
+  - quick `head_l8_nodetach`: `41.45%` (`+0.56pp`)
+  - med baseline `48.23%`
+  - med `head_l8_nodetach`: `48.28%` (**`+0.05pp` vs med baseline**)
+  - med `head_l10_strong`: `46.76%` (**`-1.47pp` vs med baseline**)
+- `squad_seed1_scalar_micro`:
+  - quick baseline `14.83%`
+  - quick best `scalar_l8_train1e4`/`scalar_l8_train8e5`: `14.58%` (`-0.25pp`)
+  - `scalar_l8_train1e4_clip07`: `14.41%` (`-0.42pp`)
+  - med skipped (`best_quick -0.25pp < med_gate -0.10pp`)
+
+Interpretation:
+
+- MBPP seed3 can be repaired from clear negative to near-neutral (`+0.05pp`) with `head_l8_nodetach`, but still not strong gain.
+- SQuAD seed1 remained negative after scalar micro tuning.
+
+Current bottom line (real-task branch, after Round69):
+
+- `squad`:
+  - stable strong positives seen on seed0 (`+1.73pp`) and seed2 (`+0.71pp`);
+  - seed1/seed3 remained negative across head/scalar rescues.
+  - currently useful but seed-split.
+- `mbpp`:
+  - strong positives on seed0/seed1, strong negatives on seed2, and near-neutral repaired result on seed3.
+  - currently classified as recipe- and seed-sensitive, not yet universally stable.
