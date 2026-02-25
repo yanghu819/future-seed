@@ -1,0 +1,12 @@
+{"task": "mbpp_seed3_regrescue", "stage": "quick", "config": "baseline", "status": "ok", "best_val_loss": 3.759897828102112, "best_val_tok_acc": 0.4311020654304236, "run_dir": "runs/20260225-174455/punc_restore_sft/no_fs"}
+{"task": "mbpp_seed3_regrescue", "stage": "quick", "config": "head_l10_clip07", "status": "ok", "best_val_loss": 3.799326777458191, "best_val_tok_acc": 0.40216984661429106, "run_dir": "runs/20260225-174600/punc_restore_sft/prompt_fs"}
+{"task": "mbpp_seed3_regrescue", "stage": "quick_decision", "config": "head_l10_clip07", "status": "pruned", "reason": "quick_drop -2.89pp < -0.50pp"}
+{"task": "mbpp_seed3_regrescue", "stage": "quick", "config": "head_l10_strong", "status": "ok", "best_val_loss": 3.740751266479492, "best_val_tok_acc": 0.42352630785466605, "run_dir": "runs/20260225-174706/punc_restore_sft/prompt_fs"}
+{"task": "mbpp_seed3_regrescue", "stage": "quick_decision", "config": "head_l10_strong", "status": "pruned", "reason": "quick_drop -0.76pp < -0.50pp"}
+{"task": "mbpp_seed3_regrescue", "stage": "med_decision", "config": "head_l10_strong", "status": "pruned", "reason": "best_quick -0.76pp < med_gate +0.20pp"}
+{"task": "squad_strict_seed2", "stage": "quick", "config": "baseline", "status": "ok", "best_val_loss": 9.697910785675049, "best_val_tok_acc": 0.14575757575757575, "run_dir": "runs/20260225-174818/punc_restore_sft/no_fs"}
+{"task": "squad_strict_seed2", "stage": "quick", "config": "scalar_l8_sched_cos", "status": "ok", "best_val_loss": 9.719756126403809, "best_val_tok_acc": 0.14065361871369514, "run_dir": "runs/20260225-174932/punc_restore_sft/prompt_fs"}
+{"task": "squad_strict_seed2", "stage": "quick_decision", "config": "scalar_l8_sched_cos", "status": "pruned", "reason": "quick_drop -0.51pp < -0.50pp"}
+{"task": "squad_strict_seed2", "stage": "quick", "config": "scalar_l8_train1e4", "status": "ok", "best_val_loss": 9.783334255218506, "best_val_tok_acc": 0.15585858585858586, "run_dir": "runs/20260225-175046/punc_restore_sft/prompt_fs"}
+{"task": "squad_strict_seed2", "stage": "med", "config": "baseline", "status": "ok", "best_val_loss": 8.86489486694336, "best_val_tok_acc": 0.18328373015873015, "run_dir": "runs/20260225-175201/punc_restore_sft/no_fs"}
+{"task": "squad_strict_seed2", "stage": "med", "config": "scalar_l8_train1e4", "status": "ok", "best_val_loss": 8.727908452351889, "best_val_tok_acc": 0.19042370299200898, "run_dir": "runs/20260225-175414/punc_restore_sft/prompt_fs"}

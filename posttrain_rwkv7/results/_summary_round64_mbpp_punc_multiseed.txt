@@ -1,0 +1,35 @@
+================================================================================================================
+Round64 mbpp+punc multiseed summary
+================================================================================================================
+[mbpp_seed0_clip07_confirm]
+  quick baseline: 40.69%
+    head_l10_clip07              d_acc=+0.02pp acc=40.71%
+    head_l10_strong              d_acc=+0.02pp acc=40.71%
+  med skipped: best_quick +0.02pp < med_gate +0.20pp
+  pruned:
+    head_l10_clip07              best_quick +0.02pp < med_gate +0.20pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_seed1_clip07_confirm]
+  quick baseline: 40.86%
+    head_l10_clip07              d_acc=-1.22pp acc=39.64%
+    head_l10_strong              d_acc=-1.22pp acc=39.64%
+  med skipped: best_quick -1.22pp < med_gate +0.20pp
+  pruned:
+    head_l10_clip07              quick_drop -1.22pp < -0.50pp
+    head_l10_strong              quick_drop -1.22pp < -0.50pp
+    head_l10_clip07              best_quick -1.22pp < med_gate +0.20pp
+----------------------------------------------------------------------------------------------------------------
+[punc_seed3_scalar_confirm]
+  quick baseline: 11.76%
+    scalar_l8_sched_cos          d_acc=-1.04pp acc=10.71%
+    head_l8                      d_acc=-1.80pp acc=9.96%
+  med skipped: best_quick -1.04pp < med_gate +0.20pp
+  pruned:
+    scalar_l8_sched_cos          quick_drop -1.04pp < -0.50pp
+    head_l8                      quick_drop -1.80pp < -0.50pp
+    scalar_l8_sched_cos          best_quick -1.04pp < med_gate +0.20pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed0_clip07_confirm        stage=quick cfg=head_l10_clip07          d_acc=+0.02pp
+  punc_seed3_scalar_confirm        stage=quick cfg=scalar_l8_sched_cos      d_acc=-1.04pp
+  mbpp_seed1_clip07_confirm        stage=quick cfg=head_l10_clip07          d_acc=-1.22pp

@@ -366,3 +366,96 @@ Next round plan:
 
 1. MBPP: promote `head_l10_clip07` into seed1/seed0 replay to test whether rescue recipe is consistently better than old strict winner.
 2. PUNC: run one additional seed confirmation (`seed3`) on `scalar_l8_sched_cos` to decide keep-or-freeze.
+
+### Round64 (mbpp+punc multiseed, completed)
+
+- Script: `scripts/run_round64_mbpp_punc_multiseed.py`
+- Summary: `results/_summary_round64_mbpp_punc_multiseed.txt`
+- Records: `results/_round64_mbpp_punc_multiseed_records.jsonl`
+
+Main outcomes:
+
+- `mbpp_seed0_clip07_confirm`:
+  - quick baseline `40.69%`
+  - `head_l10_clip07`: `40.71%` (`+0.02pp`)
+  - `head_l10_strong`: `40.71%` (`+0.02pp`)
+  - med skipped (`best_quick +0.02pp < +0.20pp gate`)
+- `mbpp_seed1_clip07_confirm`:
+  - quick baseline `40.86%`
+  - `head_l10_clip07`: `39.64%` (`-1.22pp`, pruned)
+  - `head_l10_strong`: `39.64%` (`-1.22pp`, pruned)
+  - med skipped
+- `punc_seed3_scalar_confirm`:
+  - quick baseline `11.76%`
+  - `scalar_l8_sched_cos`: `10.71%` (`-1.04pp`, pruned)
+  - `head_l8`: `9.96%` (`-1.80pp`, pruned)
+  - med skipped
+
+Interpretation:
+
+- MBPP rescue recipe did not transfer to seed1 and was near-neutral on seed0.
+- PUNC branch remained unstable and was fully pruned on seed3.
+
+### Round65 (mbpp+squad seed2/seed3, completed)
+
+- Script: `scripts/run_round65_mbpp_squad_seed23.py`
+- Summary: `results/_summary_round65_mbpp_squad_seed23.txt`
+- Records: `results/_round65_mbpp_squad_seed23_records.jsonl`
+
+Main outcomes:
+
+- `mbpp_seed3_regrescue`:
+  - quick baseline `43.11%`
+  - `head_l10_strong`: `42.35%` (`-0.76pp`)
+  - `head_l10_clip07`: `40.22%` (`-2.89pp`)
+  - med skipped
+- `squad_strict_seed2`:
+  - quick baseline `14.58%`
+  - `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+  - `scalar_l8_sched_cos`: `14.07%` (`-0.51pp`, pruned)
+  - med baseline `18.33%`
+  - med FS (`scalar_l8_train1e4`) `19.04%` (**`+0.71pp` vs med baseline**)
+
+Interpretation:
+
+- SQuAD regained a clear positive branch with `scalar_l8_train1e4` on seed2.
+- MBPP remained seed-sensitive and failed on seed3 under rescue setting.
+
+### Round66 (squad+mbpp frontier, completed)
+
+- Script: `scripts/run_round66_squad_mbpp_frontier.py`
+- Summary: `results/_summary_round66_squad_mbpp_frontier.txt`
+- Records: `results/_round66_squad_mbpp_frontier_records.jsonl`
+
+Main outcomes:
+
+- `squad_seed0_train1e4_confirm`:
+  - quick baseline `13.33%`
+  - quick `scalar_l8_train1e4`: `14.05%` (`+0.72pp`)
+  - quick `scalar_l8_sched_cos`: `13.80%` (`+0.47pp`)
+  - med baseline `17.27%`
+  - med FS (`scalar_l8_train1e4`) `19.00%` (**`+1.73pp` vs med baseline**)
+- `mbpp_strict_seed3_alt`:
+  - quick baseline `40.90%`
+  - quick `head_l10_strong`: `41.85%` (`+0.95pp`)
+  - quick `head_l8_nodetach`: `41.45%` (`+0.56pp`)
+  - med baseline `48.23%`
+  - med FS (`head_l10_strong`) `46.76%` (**`-1.47pp` vs med baseline**)
+
+Interpretation:
+
+- SQuAD `scalar_l8_train1e4` now shows repeatable med positives on seed0 and seed2.
+- MBPP still exhibits quick-positive/med-negative reversal risk on seed3.
+
+Current bottom line (real-task branch, after Round66):
+
+- `squad`:
+  - seed0 med `+1.73pp`
+  - seed2 med `+0.71pp`
+  - seed1 remained negative in prior strict frontier
+  - currently the strongest practical branch.
+- `mbpp`:
+  - still recipe- and seed-sensitive, with recent seed3 med regression (`-1.47pp`).
+  - requires additional seed-level reconfirmation before any stable-gain claim.
+- `punc_restore`:
+  - high variance across seeds (strong positives and strong negatives), currently deprioritized.

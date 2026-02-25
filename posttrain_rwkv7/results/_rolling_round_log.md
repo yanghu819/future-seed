@@ -81,3 +81,64 @@ Failed/pruned:
 Next round plan:
 1. MBPP: validate rescue winner (`head_l10_clip07`) on additional seeds.
 2. PUNC: run one extra seed confirmation before deciding to keep or freeze the branch.
+
+---
+
+## Round64 - mbpp+punc multiseed (completed 2026-02-25)
+
+Best config vs baseline:
+- `mbpp_seed0_clip07_confirm`: best quick `head_l10_clip07` `40.71%` vs quick baseline `40.69%` (**`+0.02pp`**)
+- `mbpp_seed1_clip07_confirm`: best quick `head_l10_clip07` `39.64%` vs quick baseline `40.86%` (**`-1.22pp`**)
+- `punc_seed3_scalar_confirm`: best quick `scalar_l8_sched_cos` `10.71%` vs quick baseline `11.76%` (**`-1.04pp`**)
+
+Failed/pruned:
+- `mbpp_seed0_clip07_confirm`: med skipped (`best_quick +0.02pp < +0.20pp gate`)
+- `mbpp_seed1_clip07_confirm`:
+  - `head_l10_clip07` quick-pruned (`-1.22pp < -0.50pp`)
+  - `head_l10_strong` quick-pruned (`-1.22pp < -0.50pp`)
+  - med skipped
+- `punc_seed3_scalar_confirm`:
+  - `scalar_l8_sched_cos` quick-pruned (`-1.04pp < -0.50pp`)
+  - `head_l8` quick-pruned (`-1.80pp < -0.50pp`)
+  - med skipped
+
+Next round plan:
+1. Shift focus from PUNC to real-task SQuAD branch for higher practical value.
+2. Continue MBPP only with strict early prune and no broad seed expansion.
+
+---
+
+## Round65 - mbpp+squad seed2/seed3 (completed 2026-02-25)
+
+Best config vs baseline:
+- `squad_strict_seed2`: `scalar_l8_train1e4` med `19.04%` vs med baseline `18.33%` (**`+0.71pp`**)
+- `mbpp_seed3_regrescue`: best quick `head_l10_strong` `42.35%` vs quick baseline `43.11%` (**`-0.76pp`**)
+
+Failed/pruned:
+- `mbpp_seed3_regrescue`:
+  - `head_l10_clip07` quick-pruned (`-2.89pp < -0.50pp`)
+  - `head_l10_strong` quick-pruned (`-0.76pp < -0.50pp`)
+  - med skipped
+- `squad_strict_seed2`:
+  - `scalar_l8_sched_cos` quick-pruned (`-0.51pp < -0.50pp`)
+
+Next round plan:
+1. Reconfirm SQuAD train1e4 on another seed to test stability.
+2. Retry MBPP seed3 using strict-base alternatives to check if quick-positive can survive med.
+
+---
+
+## Round66 - squad+mbpp frontier (completed 2026-02-25)
+
+Best config vs baseline:
+- `squad_seed0_train1e4_confirm`: `scalar_l8_train1e4` med `19.00%` vs med baseline `17.27%` (**`+1.73pp`**)
+- `mbpp_strict_seed3_alt`: `head_l10_strong` med `46.76%` vs med baseline `48.23%` (**`-1.47pp`**)
+
+Failed/pruned:
+- `mbpp_strict_seed3_alt`:
+  - no quick prune (`head_l10_strong +0.95pp`, `head_l8_nodetach +0.56pp`)
+  - med regression (`head_l10_strong -1.47pp`)
+
+Next round plan:
+1. Extend SQuAD train1e4 to seed3 to test whether med gains continue.
+2. Reconfirm MBPP strict on seed0 to compare against seed3 failure pattern.

@@ -1,0 +1,22 @@
+================================================================================================================
+Round66 squad+mbpp frontier summary
+================================================================================================================
+[mbpp_strict_seed3_alt]
+  quick baseline: 40.90%
+    head_l10_strong              d_acc=+0.95pp acc=41.85%
+    head_l8_nodetach             d_acc=+0.56pp acc=41.45%
+  med:
+    baseline                     acc=48.23%
+    head_l10_strong              d_acc_vs_med=-1.47pp acc=46.76%
+----------------------------------------------------------------------------------------------------------------
+[squad_seed0_train1e4_confirm]
+  quick baseline: 13.33%
+    scalar_l8_train1e4           d_acc=+0.72pp acc=14.05%
+    scalar_l8_sched_cos          d_acc=+0.47pp acc=13.80%
+  med:
+    baseline                     acc=17.27%
+    scalar_l8_train1e4           d_acc_vs_med=+1.73pp acc=19.00%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  squad_seed0_train1e4_confirm     stage=med   cfg=scalar_l8_train1e4       d_acc=+1.73pp
+  mbpp_strict_seed3_alt            stage=med   cfg=head_l10_strong          d_acc=-1.47pp

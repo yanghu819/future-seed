@@ -848,3 +848,104 @@ Round63 useful-task conclusion:
 - useful: `mbpp` rescue recipe (`head_l10_clip07`) and `punc` seed1 (`scalar_l8_sched_cos`) both showed >`+2pp` med gains.
 - still unstable: `punc` across seeds (seed1 positive, seed2 negative).
 - action: treat `mbpp` as recipe-sensitive but currently high-value; keep `squad` frozen.
+
+## 2026-02-25 Round64 (mbpp+punc multiseed, completed)
+
+Script:
+- `scripts/run_round64_mbpp_punc_multiseed.py`
+
+Outputs:
+- `results/_summary_round64_mbpp_punc_multiseed.txt`
+- `results/_round64_mbpp_punc_multiseed_records.jsonl`
+
+Goal:
+- verify whether the Round63 useful configs transfer to new seeds.
+- keep strict quick pruning (`quick drop < -0.50pp`) and skip low-value med.
+
+Outcomes:
+
+1) `mbpp_seed0_clip07_confirm`
+- quick baseline: `40.69%`
+- quick `head_l10_clip07`: `40.71%` (`+0.02pp`)
+- quick `head_l10_strong`: `40.71%` (`+0.02pp`)
+- med skipped (`best_quick +0.02pp < +0.20pp`)
+
+2) `mbpp_seed1_clip07_confirm`
+- quick baseline: `40.86%`
+- quick `head_l10_clip07`: `39.64%` (`-1.22pp`, pruned)
+- quick `head_l10_strong`: `39.64%` (`-1.22pp`, pruned)
+- med skipped
+
+3) `punc_seed3_scalar_confirm`
+- quick baseline: `11.76%`
+- quick `scalar_l8_sched_cos`: `10.71%` (`-1.04pp`, pruned)
+- quick `head_l8`: `9.96%` (`-1.80pp`, pruned)
+- med skipped
+
+Round64 conclusion:
+- MBPP rescue signal did not transfer cleanly (neutral on seed0, negative on seed1).
+- PUNC branch remained unstable and was fully pruned on seed3.
+
+## 2026-02-25 Round65 (mbpp+squad seed2/seed3, completed)
+
+Script:
+- `scripts/run_round65_mbpp_squad_seed23.py`
+
+Outputs:
+- `results/_summary_round65_mbpp_squad_seed23.txt`
+- `results/_round65_mbpp_squad_seed23_records.jsonl`
+
+Goal:
+- fast branch triage on real tasks under strict quick->med runtime.
+
+Outcomes:
+
+1) `mbpp_seed3_regrescue`
+- quick baseline: `43.11%`
+- quick `head_l10_strong`: `42.35%` (`-0.76pp`)
+- quick `head_l10_clip07`: `40.22%` (`-2.89pp`, pruned)
+- med skipped
+
+2) `squad_strict_seed2`
+- quick baseline: `14.58%`
+- quick `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+- quick `scalar_l8_sched_cos`: `14.07%` (`-0.51pp`, pruned)
+- med baseline: `18.33%`
+- med FS (`scalar_l8_train1e4`): `19.04%` (**`+0.71pp` vs med baseline**)
+
+Round65 conclusion:
+- SQuAD reopened as a useful real-task branch via `scalar_l8_train1e4`.
+- MBPP remained unstable on seed3 under rescue settings.
+
+## 2026-02-25 Round66 (squad+mbpp frontier, completed)
+
+Script:
+- `scripts/run_round66_squad_mbpp_frontier.py`
+
+Outputs:
+- `results/_summary_round66_squad_mbpp_frontier.txt`
+- `results/_round66_squad_mbpp_frontier_records.jsonl`
+
+Goal:
+- verify if SQuAD train1e4 gain is reproducible on another seed.
+- test MBPP seed3 with strict-base alternatives.
+
+Outcomes:
+
+1) `squad_seed0_train1e4_confirm`
+- quick baseline: `13.33%`
+- quick `scalar_l8_train1e4`: `14.05%` (`+0.72pp`)
+- quick `scalar_l8_sched_cos`: `13.80%` (`+0.47pp`)
+- med baseline: `17.27%`
+- med FS (`scalar_l8_train1e4`): `19.00%` (**`+1.73pp` vs med baseline**)
+
+2) `mbpp_strict_seed3_alt`
+- quick baseline: `40.90%`
+- quick `head_l10_strong`: `41.85%` (`+0.95pp`)
+- quick `head_l8_nodetach`: `41.45%` (`+0.56pp`)
+- med baseline: `48.23%`
+- med FS (`head_l10_strong`): `46.76%` (**`-1.47pp` vs med baseline**)
+
+Round66 conclusion:
+- SQuAD `scalar_l8_train1e4` achieved another strong med gain, now positive on seed0 and seed2.
+- MBPP on seed3 showed quick-positive but med-negative reversal; stability remains unresolved.
