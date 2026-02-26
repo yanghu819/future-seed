@@ -1630,3 +1630,32 @@ Round95-98 consolidated conclusion:
 - Negative/low-value branches:
   - `arc_seed3`, `hotpot_seed3`, `mbpp_seed3` (quick negatives),
   - `mbpp_seed1` (quick-positive but med-negative reversal).
+
+## 2026-02-26 Round99 (focus2 queue, completed)
+
+Queue:
+- `results/_search_queue_round99_102_focus2.json`
+
+Outputs:
+- `results/_summary_round99_fastdiscover.txt`
+- `results/_round99_fastdiscover_records.jsonl`
+
+### Round99 (`protein_ss_seed4_discovery` + `mbpp_seed2_headprobe`)
+
+1) `protein_ss_seed4_discovery`
+- quick baseline: `30.30%`
+- quick `scalar_l8_train8e5`: `35.20%` (`+4.90pp`)
+- med baseline: `30.30%`
+- med FS (`scalar_l8_train8e5`): `35.20%` (**`+4.90pp`**)
+- quick-pruned: `scalar_l8_train1e4` (`-1.16pp`), `head_l8` (`-1.01pp`)
+
+2) `mbpp_seed2_headprobe`
+- quick baseline: `39.11%`
+- quick `head_l10_strong`: `42.52%` (`+3.41pp`)
+- med baseline: `46.69%`
+- med FS (`head_l10_strong`): `48.97%` (**`+2.28pp`**)
+
+Round99 conclusion:
+- New strongest useful-task evidence in this sweep: `protein_ss_seed4_discovery` **`+4.90pp`**.
+- `mbpp_seed2_headprobe` also confirms positive transfer at med budget (**`+2.28pp`**).
+- Continuation status: round100-102 still running under same gate/prune rules.

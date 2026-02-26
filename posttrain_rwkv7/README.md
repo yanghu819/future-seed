@@ -863,3 +863,24 @@ Latest bottom line (after Round98):
   - `arc` seed2/seed3 branches (consistent quick negatives).
   - `hotpot` seed2/seed3 branches (quick->med instability or quick negatives).
   - `mbpp` seed1/seed3 branches (quick-positive but med-negative / quick-negative split).
+
+### Round99-102 (focus2 queue, in progress)
+
+- Queue:
+  - `results/_search_queue_round99_102_focus2.json`
+- Completed:
+  - `results/_summary_round99_fastdiscover.txt`
+- Running:
+  - rounds `100-102`
+
+Round99 outcomes:
+
+- `protein_ss_seed4_discovery`:
+  - quick baseline `30.30%`
+  - med baseline `30.30%`
+  - `scalar_l8_train8e5` med `35.20%` (**`+4.90pp`**)
+  - quick-pruned: `scalar_l8_train1e4` (`-1.16pp`), `head_l8` (`-1.01pp`)
+- `mbpp_seed2_headprobe`:
+  - quick baseline `39.11%`
+  - med baseline `46.69%`
+  - `head_l10_strong` med `48.97%` (**`+2.28pp`**)

@@ -601,3 +601,20 @@ Failed/pruned:
 Next round plan:
 1. prioritize high-yield pool (`protein_ss`, `punc_seed1`, `mbpp_seed0`, `squad_seed2`) for compact confirmation.
 2. stop spending budget on `arc_seed2/3` and `hotpot_seed2/3` unless new config family is introduced.
+
+---
+
+## Round99 - focus2 queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed4_discovery`: `scalar_l8_train8e5` med `35.20%` vs med baseline `30.30%` (**`+4.90pp`**)
+- `mbpp_seed2_headprobe`: `head_l10_strong` med `48.97%` vs med baseline `46.69%` (**`+2.28pp`**)
+
+Failed/pruned:
+- `protein_ss_seed4_discovery`:
+  - `scalar_l8_train1e4` quick-pruned (`-1.16pp < -0.50pp`)
+  - `head_l8` quick-pruned (`-1.01pp < -0.50pp`)
+
+Next round plan:
+1. continue round100-102 to expand novel-task hits under same gate policy.
+2. prioritize `protein_ss`-family follow-ups for seed transfer checks if later rounds stall.
