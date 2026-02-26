@@ -618,3 +618,18 @@ Failed/pruned:
 Next round plan:
 1. continue round100-102 to expand novel-task hits under same gate policy.
 2. prioritize `protein_ss`-family follow-ups for seed transfer checks if later rounds stall.
+
+---
+
+## Round100 - focus2 queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_seed1_headprobe`: `scalar_l8_train1e4` med `13.04%` vs med baseline `10.88%` (**`+2.16pp`**)
+- `arc_seed0_headprobe`: `scalar_l8_train8e5` med `12.63%` vs med baseline `12.33%` (**`+0.29pp`**)
+
+Failed/pruned:
+- none (all quick candidates stayed above prune threshold; only top1 promoted to med by gate)
+
+Next round plan:
+1. execute round101 anchor recheck (`squad_seed2`, `punc_seed1`) and keep same quick/med gates.
+2. if anchor rounds flatten, move budget back to new-task pool with protein/hotpot variants.

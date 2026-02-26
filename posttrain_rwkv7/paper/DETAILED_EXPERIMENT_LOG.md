@@ -1659,3 +1659,28 @@ Round99 conclusion:
 - New strongest useful-task evidence in this sweep: `protein_ss_seed4_discovery` **`+4.90pp`**.
 - `mbpp_seed2_headprobe` also confirms positive transfer at med budget (**`+2.28pp`**).
 - Continuation status: round100-102 still running under same gate/prune rules.
+
+## 2026-02-26 Round100 (focus2 queue, completed)
+
+Outputs:
+- `results/_summary_round100_fastdiscover.txt`
+- `results/_round100_fastdiscover_records.jsonl`
+
+### Round100 (`arc_seed0_headprobe` + `hotpot_seed1_headprobe`)
+
+1) `arc_seed0_headprobe`
+- quick baseline: `10.36%`
+- quick best `scalar_l8_train8e5`: `11.36%` (`+1.00pp`)
+- med baseline: `12.33%`
+- med FS (`scalar_l8_train8e5`): `12.63%` (**`+0.29pp`**)
+
+2) `hotpot_seed1_headprobe`
+- quick baseline: `7.92%`
+- quick best `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- med baseline: `10.88%`
+- med FS (`scalar_l8_train1e4`): `13.04%` (**`+2.16pp`**)
+
+Round100 conclusion:
+- `hotpot_seed1_headprobe` enters useful-task pool with stable med gain (**`+2.16pp`**).
+- `arc_seed0_headprobe` is positive but weak (**`+0.29pp`**), lower priority than protein/hotpot branches.
+- Continuation status: round101-102 running.

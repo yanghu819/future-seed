@@ -884,3 +884,14 @@ Round99 outcomes:
   - quick baseline `39.11%`
   - med baseline `46.69%`
   - `head_l10_strong` med `48.97%` (**`+2.28pp`**)
+
+Round100 outcomes:
+
+- `hotpot_seed1_headprobe`:
+  - quick baseline `7.92%`
+  - med baseline `10.88%`
+  - `scalar_l8_train1e4` med `13.04%` (**`+2.16pp`**)
+- `arc_seed0_headprobe`:
+  - quick baseline `10.36%`
+  - med baseline `12.33%`
+  - `scalar_l8_train8e5` med `12.63%` (**`+0.29pp`**)

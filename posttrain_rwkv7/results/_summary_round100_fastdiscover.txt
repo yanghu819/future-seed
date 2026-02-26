@@ -1,0 +1,24 @@
+================================================================================================================
+Round100 fastdiscover summary
+================================================================================================================
+[arc_seed0_headprobe]
+  quick baseline: 10.36%
+    scalar_l8_train8e5           d_acc=+1.00pp acc=11.36%
+    scalar_l8_train1e4           d_acc=+0.68pp acc=11.04%
+    head_l8                      d_acc=+0.59pp acc=10.95%
+  med:
+    baseline                     acc=12.33%
+    scalar_l8_train8e5           d_acc_vs_med=+0.29pp acc=12.63%
+----------------------------------------------------------------------------------------------------------------
+[hotpot_seed1_headprobe]
+  quick baseline: 7.92%
+    scalar_l8_train1e4           d_acc=+5.12pp acc=13.04%
+    scalar_l8_train8e5           d_acc=+0.90pp acc=8.82%
+    head_l8                      d_acc=-0.12pp acc=7.80%
+  med:
+    baseline                     acc=10.88%
+    scalar_l8_train1e4           d_acc_vs_med=+2.16pp acc=13.04%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  hotpot_seed1_headprobe           stage=med   cfg=scalar_l8_train1e4       d_acc=+2.16pp
+  arc_seed0_headprobe              stage=med   cfg=scalar_l8_train8e5       d_acc=+0.29pp
