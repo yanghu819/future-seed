@@ -1079,3 +1079,137 @@ Outcomes:
 Round70 conclusion:
 - MBPP seed2 strong positive (`+2.28pp`) is repeatable under current pipeline.
 - SQuAD seed3 still not recoverable in this scalar micro neighborhood.
+
+## 2026-02-25 Round71 (mbpp3+squad2, completed)
+
+Script:
+- `scripts/run_round71_mbpp3_squad2.py`
+
+Outputs:
+- `results/_summary_round71_mbpp3_squad2.txt`
+- `results/_round71_mbpp3_squad2_records.jsonl`
+
+Goal:
+- MBPP seed3 rescue recheck under note-pool-384 base.
+- SQuAD seed2 reconfirm in scalar train1e4 neighborhood.
+
+Outcomes:
+
+1) `mbpp_seed3_rescue384`
+- quick baseline: `43.11%`
+- quick `head_l10_strong`: `42.35%` (`-0.76pp`, pruned)
+- quick `head_l10_clip07`: `40.22%` (`-2.89pp`, pruned)
+- med skipped (`best_quick -0.76pp < med_gate +0.20pp`)
+
+2) `squad_seed2_scalar_reconfirm`
+- quick baseline: `14.58%`
+- quick `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+- quick `scalar_l8_train8e5`: `15.33%` (`+0.76pp`)
+- quick `scalar_l8_train1e4_clip07`: `13.58%` (`-1.00pp`, pruned)
+- med baseline: `18.33%`
+- med FS (`scalar_l8_train1e4`): `19.04%` (**`+0.71pp` vs med baseline**)
+
+Round71 conclusion:
+- SQuAD seed2 positive signal is stable in current quick->med regime.
+- MBPP seed3 remains negative in this recipe family.
+
+## 2026-02-26 Round72 (mbpp3+squad1 rescue, completed)
+
+Script:
+- `scripts/run_round72_mbpp3_squad1_rescue.py`
+
+Outputs:
+- `results/_summary_round72_mbpp3_squad1_rescue.txt`
+- `results/_round72_mbpp3_squad1_rescue_records.jsonl`
+
+Goal:
+- try no-detach MBPP seed3 rescue.
+- low-pressure SQuAD seed1 rescue around train1e4.
+
+Outcomes:
+
+1) `mbpp_seed3_nodetach_rescue384`
+- quick baseline: `43.11%`
+- quick `head_l10_nodetach_clip07`: `41.35%` (`-1.76pp`, pruned)
+- quick `head_l8_nodetach`: `41.10%` (`-2.01pp`, pruned)
+- med skipped
+
+2) `squad_seed1_lowpressure_rescue`
+- quick baseline: `14.83%`
+- quick `scalar_l8_train1e4`: `14.83%` (`-0.00pp`)
+- quick `scalar_l8_train8e5`: `14.58%` (`-0.25pp`)
+- quick `scalar_l8_train1e4_clip07`: `14.16%` (`-0.67pp`, pruned)
+- med baseline: `19.38%`
+- med FS (`scalar_l8_train1e4`): `19.20%` (**`-0.18pp` vs med baseline**)
+
+Round72 conclusion:
+- no-detach did not recover MBPP seed3.
+- SQuAD seed1 remained non-positive at med; rescue branch stays low priority.
+
+## 2026-02-26 Round73 (mbpp1+squad0 recheck, completed)
+
+Script:
+- `scripts/run_round73_mbpp1_squad0_recheck.py`
+
+Outputs:
+- `results/_summary_round73_mbpp1_squad0_recheck.txt`
+- `results/_round73_mbpp1_squad0_recheck_records.jsonl`
+
+Goal:
+- reconfirm known positive real-task seeds under strict quick->med gating.
+
+Outcomes:
+
+1) `mbpp_seed1_strict_recheck`
+- quick baseline: `40.43%`
+- quick `head_l10_strong`: `43.86%` (`+3.43pp`)
+- quick `head_l10_clip07`: `43.86%` (`+3.43pp`)
+- quick `head_l10_sched_cos`: `41.10%` (`+0.67pp`)
+- med baseline: `46.67%`
+- med FS (`head_l10_strong`): `47.01%` (**`+0.35pp` vs med baseline**)
+
+2) `squad_seed0_frontier_recheck`
+- quick baseline: `13.33%`
+- quick `scalar_l8_train1e4`: `14.05%` (`+0.72pp`)
+- quick `scalar_l8_sched_cos`: `13.80%` (`+0.47pp`)
+- quick `scalar_l8_train8e5`: `13.58%` (`+0.25pp`)
+- med baseline: `17.27%`
+- med FS (`scalar_l8_train1e4`): `19.00%` (**`+1.73pp` vs med baseline**)
+
+Round73 conclusion:
+- positive med deltas on both tasks reproduced cleanly.
+- this round strengthens non-toy practical signal for Future-Seed on MBPP/SQuAD branches.
+
+## 2026-02-26 Round74 (punc1+squad2 frontier, completed)
+
+Script:
+- `scripts/run_round74_punc1_squad2_frontier.py`
+
+Outputs:
+- `results/_summary_round74_punc1_squad2_frontier.txt`
+- `results/_round74_punc1_squad2_frontier_records.jsonl`
+
+Goal:
+- expand useful-task coverage with one additional real-task branch (`punc_restore`) while reconfirming SQuAD seed2.
+
+Outcomes:
+
+1) `punc_seed1_frontier_recheck`
+- quick baseline: `7.92%`
+- quick `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- quick `scalar_l8_sched_cos`: `10.34%` (`+2.42pp`)
+- quick `head_l8`: `7.80%` (`-0.12pp`)
+- med baseline: `12.20%`
+- med FS (`scalar_l8_train1e4`): `13.04%` (**`+0.84pp` vs med baseline**)
+
+2) `squad_seed2_frontier_recheck`
+- quick baseline: `14.58%`
+- quick `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+- quick `scalar_l8_train8e5`: `15.33%` (`+0.76pp`)
+- quick `scalar_l8_sched_cos`: `14.07%` (`-0.51pp`, pruned)
+- med baseline: `18.33%`
+- med FS (`scalar_l8_train1e4`): `19.04%` (**`+0.71pp` vs med baseline**)
+
+Round74 conclusion:
+- `scalar_l8_train1e4` became the highest-value common recipe across PUNC and SQuAD in this round.
+- practical branch now has repeated med positives across multiple real tasks, but seed-level variance still exists.

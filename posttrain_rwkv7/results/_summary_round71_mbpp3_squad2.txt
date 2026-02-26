@@ -1,0 +1,27 @@
+================================================================================================================
+Round71 mbpp3+squad2 summary
+================================================================================================================
+[mbpp_seed3_rescue384]
+  quick baseline: 43.11%
+    head_l10_strong              d_acc=-0.76pp acc=42.35%
+    head_l10_clip07              d_acc=-2.89pp acc=40.22%
+  med skipped: best_quick -0.76pp < med_gate +0.20pp
+  pruned:
+    head_l10_clip07              quick_drop -2.89pp < -0.50pp
+    head_l10_strong              quick_drop -0.76pp < -0.50pp
+    head_l10_strong              best_quick -0.76pp < med_gate +0.20pp
+----------------------------------------------------------------------------------------------------------------
+[squad_seed2_scalar_reconfirm]
+  quick baseline: 14.58%
+    scalar_l8_train1e4           d_acc=+1.01pp acc=15.59%
+    scalar_l8_train8e5           d_acc=+0.76pp acc=15.33%
+    scalar_l8_train1e4_clip07    d_acc=-1.00pp acc=13.58%
+  med:
+    baseline                     acc=18.33%
+    scalar_l8_train1e4           d_acc_vs_med=+0.71pp acc=19.04%
+  pruned:
+    scalar_l8_train1e4_clip07    quick_drop -1.00pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  squad_seed2_scalar_reconfirm     stage=med   cfg=scalar_l8_train1e4       d_acc=+0.71pp
+  mbpp_seed3_rescue384             stage=quick cfg=head_l10_strong          d_acc=-0.76pp

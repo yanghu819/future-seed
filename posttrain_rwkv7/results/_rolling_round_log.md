@@ -223,3 +223,76 @@ Failed/pruned:
 Next round plan:
 1. MBPP: move to seed3 rescue recheck under note-pool-384 base to reduce seed split.
 2. SQuAD: reconfirm seed2 scalar positives and decide whether to freeze seed1/3 rescue branch.
+
+---
+
+## Round71 - mbpp3+squad2 (completed 2026-02-25)
+
+Best config vs baseline:
+- `squad_seed2_scalar_reconfirm`: `scalar_l8_train1e4` med `19.04%` vs med baseline `18.33%` (**`+0.71pp`**)
+- `mbpp_seed3_rescue384`: best quick `head_l10_strong` `42.35%` vs quick baseline `43.11%` (**`-0.76pp`**, med pruned)
+
+Failed/pruned:
+- `mbpp_seed3_rescue384`:
+  - `head_l10_clip07` quick-pruned (`-2.89pp < -0.50pp`)
+  - `head_l10_strong` quick-pruned (`-0.76pp < -0.50pp`)
+  - med skipped (`best_quick -0.76pp < med_gate +0.20pp`)
+- `squad_seed2_scalar_reconfirm`:
+  - `scalar_l8_train1e4_clip07` quick-pruned (`-1.00pp < -0.50pp`)
+
+Next round plan:
+1. keep SQuAD seed2/seed0 as positive anchor branch.
+2. attempt MBPP seed3 nodetach rescue to test whether detach setting caused collapse.
+
+---
+
+## Round72 - mbpp3+squad1 rescue (completed 2026-02-26)
+
+Best config vs baseline:
+- `squad_seed1_lowpressure_rescue`: `scalar_l8_train1e4` med `19.20%` vs med baseline `19.38%` (**`-0.18pp`**)
+- `mbpp_seed3_nodetach_rescue384`: best quick `head_l10_nodetach_clip07` `41.35%` vs quick baseline `43.11%` (**`-1.76pp`**, med pruned)
+
+Failed/pruned:
+- `mbpp_seed3_nodetach_rescue384`:
+  - `head_l8_nodetach` quick-pruned (`-2.01pp < -0.50pp`)
+  - `head_l10_nodetach_clip07` quick-pruned (`-1.76pp < -0.50pp`)
+  - med skipped (`best_quick -1.76pp < med_gate +0.00pp`)
+- `squad_seed1_lowpressure_rescue`:
+  - `scalar_l8_train1e4_clip07` quick-pruned (`-0.67pp < -0.50pp`)
+
+Next round plan:
+1. return to confirmed positive seeds to maintain useful-task hit-rate.
+2. run strict reconfirm pairs (MBPP seed1 + SQuAD seed0) for stronger stability evidence.
+
+---
+
+## Round73 - mbpp1+squad0 recheck (completed 2026-02-26)
+
+Best config vs baseline:
+- `squad_seed0_frontier_recheck`: `scalar_l8_train1e4` med `19.00%` vs med baseline `17.27%` (**`+1.73pp`**)
+- `mbpp_seed1_strict_recheck`: `head_l10_strong` med `47.01%` vs med baseline `46.67%` (**`+0.35pp`**)
+
+Failed/pruned:
+- no quick/med prune in this round; both tasks passed quick gates and produced positive med deltas.
+
+Next round plan:
+1. expand beyond MBPP/SQuAD with one additional real-task branch (`punc_restore`) while keeping strict prune.
+2. reconfirm SQuAD seed2 under same frontier to check cross-round consistency.
+
+---
+
+## Round74 - punc1+squad2 frontier (completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed1_frontier_recheck`: `scalar_l8_train1e4` med `13.04%` vs med baseline `12.20%` (**`+0.84pp`**)
+- `squad_seed2_frontier_recheck`: `scalar_l8_train1e4` med `19.04%` vs med baseline `18.33%` (**`+0.71pp`**)
+
+Failed/pruned:
+- `squad_seed2_frontier_recheck`:
+  - `scalar_l8_sched_cos` quick-pruned (`-0.51pp < -0.50pp`)
+- `punc_seed1_frontier_recheck`:
+  - `head_l8` quick under baseline (`-0.12pp`), not promoted
+
+Next round plan:
+1. continue high-value branch around `scalar_l8_train1e4` for SQuAD/PUNC, test minimal LR/clip perturbations only.
+2. launch one targeted MBPP seed3 rescue with strict quick gate; stop immediately if quick < baseline by `0.5pp`.
