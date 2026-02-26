@@ -1433,3 +1433,108 @@ Round77-82 consolidated conclusion:
 - Primary blockers were operational:
   - `wikitext` unavailable in offline mode.
   - `protein_contact` validation target too large for sampled build constraints.
+
+## 2026-02-26 Round89-94 (fastdiscover continuation, completed)
+
+Queue:
+- `results/_search_queue_round89_94_nowiki.json`
+
+Outputs:
+- `results/_summary_round89_fastdiscover.txt`
+- `results/_summary_round90_fastdiscover.txt`
+- `results/_summary_round91_fastdiscover.txt`
+- `results/_summary_round92_fastdiscover.txt`
+- `results/_summary_round93_fastdiscover.txt`
+- `results/_summary_round94_fastdiscover.txt`
+- `results/_round89_fastdiscover_records.jsonl`
+- `results/_round90_fastdiscover_records.jsonl`
+- `results/_round91_fastdiscover_records.jsonl`
+- `results/_round92_fastdiscover_records.jsonl`
+- `results/_round93_fastdiscover_records.jsonl`
+- `results/_round94_fastdiscover_records.jsonl`
+
+Policy:
+- keep strict quick prune (`< -0.50pp`) and strict promotion (`>= +0.80pp`) unchanged.
+- remove `wiki` from continuation queue after repeated network/cache failures.
+
+### Round89-90 (protein_contact fixes, seed0/seed1)
+
+1) `protein_contact_seed0_discovery_fix` / `protein_contact_seed1_discovery_fix`
+- quick baseline: `96.88%`
+- all candidate quick deltas: `+0.00pp`
+- med skipped by gate
+
+Conclusion:
+- contact-pair branch in this setup is metric-saturated and low-yield for FS search.
+
+### Round91 (hotpot_seed2 + arc_seed2)
+
+1) `hotpot_seed2_discovery`
+- quick baseline: `6.74%`
+- quick best `scalar_l8_train8e5`: `7.83%` (`+1.10pp`)
+- med baseline: `12.78%`
+- med FS (`scalar_l8_train8e5`): `10.05%` (**`-2.74pp`**)
+- `scalar_l8_train1e4` quick-pruned (`-4.18pp`)
+
+2) `arc_seed2_discovery`
+- quick baseline: `9.09%`
+- all quick candidates negative (`-0.51pp`, `-0.82pp`, `-1.65pp`)
+- med skipped
+
+Conclusion:
+- both branches are currently negative-value under this recipe family.
+
+### Round92 (protein_ss_seed1 + arc_easy_seed0)
+
+1) `protein_ss_seed1_discovery`
+- quick baseline: `25.23%`
+- quick `head_l8`: `34.62%` (`+9.39pp`)
+- med baseline: `32.23%`
+- med FS (`head_l8`): `34.62%` (**`+2.39pp`**)
+
+2) `arc_easy_seed0_discovery`
+- baseline failed during quick stage (current trainer/data path mismatch)
+
+Conclusion:
+- protein sequence-labeling branch remains the strongest new-task discovery direction.
+
+### Round93 (anchor: squad_seed3 + mbpp_seed0)
+
+1) `mbpp_seed0_anchor`
+- quick baseline: `40.69%`
+- quick best `scalar_l8_train8e5`: `43.55%` (`+2.86pp`)
+- med baseline: `48.07%`
+- med FS (`scalar_l8_train8e5`): `50.10%` (**`+2.03pp`**)
+
+2) `squad_seed3_anchor`
+- quick baseline: `14.67%`
+- best quick: `-0.26pp`
+- med skipped
+
+Conclusion:
+- MBPP anchor positive is reinforced; SQuAD seed3 remains negative.
+
+### Round94 (anchor: squad_seed1 + punc_seed0)
+
+1) `punc_seed0_anchor`
+- quick baseline: `8.44%`
+- quick best `scalar_l8_train8e5`: `10.36%` (`+1.92pp`)
+- med baseline: `10.48%`
+- med FS (`scalar_l8_train8e5`): `10.36%` (**`-0.12pp`**)
+
+2) `squad_seed1_anchor`
+- quick baseline: `14.83%`
+- best quick: `-0.25pp`
+- med skipped
+
+Conclusion:
+- `punc_seed0` showed quick-positive/med-negative reversal.
+- SQuAD seed1 remains negative under current scalar family.
+
+Round89-94 consolidated conclusion:
+- New useful-task addition: `protein_ss_seed1_discovery` **`+2.39pp`** (med, `head_l8`).
+- Strong anchor confirmation: `mbpp_seed0_anchor` **`+2.03pp`** (med, `scalar_l8_train8e5`).
+- Branches to deprioritize for next search pack:
+  - `protein_contact` (quick tie ceiling),
+  - `arc_seed2`/`squad_seed1|3` (consistent quick negatives),
+  - `hotpot_seed2` and `punc_seed0` (quick-positive but med-negative).

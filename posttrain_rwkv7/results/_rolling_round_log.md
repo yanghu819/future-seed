@@ -431,3 +431,104 @@ Failed/pruned:
 Next round plan:
 1. Launch round83-88 queue with failure-fix paths (`wiki` online mode, `protein_contact` n_val fix).
 2. Expand to new seeds (`hotpot/arc/protein_ss`) while keeping 70/30 new-vs-anchor mix.
+
+---
+
+## Round89 - fastdiscover continuation (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_contact_seed0_discovery_fix`: best quick `+0.00pp`, med skipped (`< +0.80pp gate`)
+
+Failed/pruned:
+- no crash failures.
+- all FS quick scores tied baseline; no candidate reached med promotion gate.
+
+Next round plan:
+1. run seed1 contact fix once to confirm whether tie ceiling persists.
+2. if still tied, reduce budget on protein_contact branch.
+
+---
+
+## Round90 - fastdiscover continuation (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_contact_seed1_discovery_fix`: best quick `+0.00pp`, med skipped (`< +0.80pp gate`)
+
+Failed/pruned:
+- no crash failures.
+- same tie ceiling as seed0 (`96.88%` baseline and FS all tied).
+
+Next round plan:
+1. mark protein_contact as low-value in this setup.
+2. shift budget to hotpot/arc/protein_ss new-seed tasks.
+
+---
+
+## Round91 - fastdiscover continuation (completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_seed2_discovery`: best quick `scalar_l8_train8e5` `+1.10pp`, but med `-2.74pp` vs med baseline
+- `arc_seed2_discovery`: best quick `-0.51pp`, med skipped
+
+Failed/pruned:
+- `hotpot_seed2_discovery`:
+  - `scalar_l8_train1e4` quick-pruned (`-4.18pp < -0.50pp`)
+  - promoted candidate failed med confirmation (`-2.74pp`) and flagged strong negative
+- `arc_seed2_discovery`:
+  - all candidates quick-pruned (`-0.51pp`, `-0.82pp`, `-1.65pp`)
+
+Next round plan:
+1. deprioritize hotpot/arc seed2 neighborhood due strong negatives.
+2. prioritize protein_ss seed1 + anchor checks.
+
+---
+
+## Round92 - fastdiscover continuation (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed1_discovery`: `head_l8` med `34.62%` vs med baseline `32.23%` (**`+2.39pp`**)
+
+Failed/pruned:
+- `arc_easy_seed0_discovery` baseline failed (current trainer/data path incompatibility).
+- `protein_ss_seed1_discovery`:
+  - `scalar_l8_train8e5` quick `-0.24pp` (not promoted)
+
+Next round plan:
+1. keep protein_ss branch as highest-value new-task direction.
+2. continue anchor calibration on MBPP/SQuAD.
+
+---
+
+## Round93 - fastdiscover continuation (completed 2026-02-26)
+
+Best config vs baseline:
+- `mbpp_seed0_anchor`: `scalar_l8_train8e5` med `50.10%` vs med baseline `48.07%` (**`+2.03pp`**)
+- `squad_seed3_anchor`: best quick `-0.26pp`, med skipped
+
+Failed/pruned:
+- `squad_seed3_anchor`:
+  - quick-pruned: `scalar_l8_train1e4` (`-0.61pp`), `scalar_l8_sched_cos` (`-0.84pp`)
+  - med skipped (`best_quick -0.26pp < +0.80pp gate`)
+
+Next round plan:
+1. finalize round94 anchor check (`squad_seed1`, `punc_seed0`).
+2. freeze squad seed3 branch unless new hypotheses appear.
+
+---
+
+## Round94 - fastdiscover continuation (completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed0_anchor`: best quick `scalar_l8_train8e5` `+1.92pp`, med `-0.12pp` vs med baseline
+- `squad_seed1_anchor`: best quick `-0.25pp`, med skipped
+
+Failed/pruned:
+- `punc_seed0_anchor`:
+  - quick-positive/med-negative reversal (`+1.92pp` -> `-0.12pp`)
+- `squad_seed1_anchor`:
+  - `scalar_l8_sched_cos` quick-pruned (`-0.75pp < -0.50pp`)
+  - med skipped (`best_quick -0.25pp < +0.80pp gate`)
+
+Next round plan:
+1. keep MBPP + protein_ss as primary high-yield branches.
+2. deprioritize protein_contact/arc_seed2/squad_seed1|3 and only revisit with new recipe class.

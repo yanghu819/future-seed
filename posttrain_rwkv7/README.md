@@ -787,3 +787,43 @@ Fastdiscover bottom line (after Round82):
 - Main blockers to fix next:
   - `wikitext` blocked by offline-mode cache miss.
   - `protein_contact` blocked by over-large `n_val` target for available data.
+
+### Round89-94 (fastdiscover continuation, completed)
+
+- Script: `scripts/run_round77_82_fastdiscover.py`
+- Queues:
+  - `results/_search_queue_round89_94_nowiki.json` (active continuation queue)
+- Summaries:
+  - `results/_summary_round89_fastdiscover.txt`
+  - `results/_summary_round90_fastdiscover.txt`
+  - `results/_summary_round91_fastdiscover.txt`
+  - `results/_summary_round92_fastdiscover.txt`
+  - `results/_summary_round93_fastdiscover.txt`
+  - `results/_summary_round94_fastdiscover.txt`
+
+Main outcomes:
+
+- Round89-90 (`protein_contact` seed0/seed1 fix):
+  - baseline and all FS quick were exact ties (`+0.00pp`), med skipped by gate.
+  - interpretation: current contact-pair setup is saturated; low search value.
+- Round91 (`hotpot_seed2_discovery`, `arc_seed2_discovery`):
+  - `hotpot_seed2_discovery`: quick best `+1.10pp`, but med `-2.74pp` (failed confirmation).
+  - `arc_seed2_discovery`: all quick candidates negative (`-0.51pp` to `-1.65pp`), all pruned.
+- Round92 (`protein_ss_seed1_discovery`, `arc_easy_seed0_discovery`):
+  - `protein_ss_seed1_discovery`: med `head_l8` **`+2.39pp`**.
+  - `arc_easy_seed0_discovery`: baseline failed (dataset split incompatibility in current trainer/data path).
+- Round93 (`squad_seed3_anchor`, `mbpp_seed0_anchor`):
+  - `mbpp_seed0_anchor`: med `scalar_l8_train8e5` **`+2.03pp`**.
+  - `squad_seed3_anchor`: quick best `-0.26pp`, med skipped.
+- Round94 (`squad_seed1_anchor`, `punc_seed0_anchor`):
+  - `punc_seed0_anchor`: quick best `+1.92pp`, med `-0.12pp` (failed confirmation).
+  - `squad_seed1_anchor`: quick best `-0.25pp`, med skipped.
+
+Fastdiscover continuation bottom line (after Round94):
+
+- New useful-task gain found: `protein_ss_seed1_discovery` **`+2.39pp`** (med, `head_l8`).
+- Anchor gain reconfirmed: `mbpp_seed0_anchor` **`+2.03pp`** (med, `scalar_l8_train8e5`).
+- Low-value branches to deprioritize:
+  - `protein_contact` (quick tie ceiling).
+  - `arc_seed2`/`squad_seed1|3` (consistent quick negatives).
+  - `hotpot_seed2` and `punc_seed0` (quick-positive but med-negative reversal).

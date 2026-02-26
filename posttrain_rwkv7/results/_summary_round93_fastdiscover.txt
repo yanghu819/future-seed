@@ -1,0 +1,25 @@
+================================================================================================================
+Round93 fastdiscover summary
+================================================================================================================
+[mbpp_seed0_anchor]
+  quick baseline: 40.69%
+    scalar_l8_train8e5           d_acc=+2.86pp acc=43.55%
+    scalar_l8_train1e4           d_acc=+2.17pp acc=42.85%
+    scalar_l8_sched_cos          d_acc=+1.43pp acc=42.12%
+  med:
+    baseline                     acc=48.07%
+    scalar_l8_train8e5           d_acc_vs_med=+2.03pp acc=50.10%
+----------------------------------------------------------------------------------------------------------------
+[squad_seed3_anchor]
+  quick baseline: 14.67%
+    scalar_l8_train8e5           d_acc=-0.26pp acc=14.41%
+    scalar_l8_train1e4           d_acc=-0.61pp acc=14.06%
+    scalar_l8_sched_cos          d_acc=-0.84pp acc=13.83%
+  med skipped: best_quick scalar_l8_train8e5 -0.26pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -0.61pp < -0.50pp
+    scalar_l8_sched_cos          quick_drop -0.84pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed0_anchor                stage=med   cfg=scalar_l8_train8e5       d_acc=+2.03pp
+  squad_seed3_anchor               stage=quick cfg=scalar_l8_train8e5       d_acc=-0.26pp
