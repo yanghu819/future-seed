@@ -987,8 +987,33 @@ Round106 outcomes:
 
 - Queue:
   - `results/_search_queue_round107_112_newtasks.json`
+- Completed:
+  - `results/_summary_round107_fastdiscover.txt`
+  - `results/_summary_round108_fastdiscover.txt`
 - Running:
-  - round `107` (`hotpot_longctx_seed0_discovery`, `arc_mc_seed0_discovery`)
+  - round `109` (`hotpot_seed6_discovery`, `arc_seed6_discovery`)
+
+Round107 outcomes:
+
+- `hotpot_longctx_seed0_discovery`:
+  - quick baseline `8.89%`
+  - all FS quick ties (`+0.00pp`)
+  - med skipped (`+0.00pp < +0.80pp gate`)
+- `arc_mc_seed0_discovery`:
+  - quick baseline `37.50%`
+  - all FS quick `33.33%` (`-4.17pp`)
+  - all candidates quick-pruned / med skipped
+
+Round108 outcomes:
+
+- `mbpp_longctx_seed0_discovery`:
+  - quick baseline failed
+  - reason: insufficient buildable examples for current long-context filter (`built 374 < wanted 600`)
+  - med skipped
+- `protein_ss_seed7_discovery`:
+  - quick baseline `32.91%`
+  - quick best `head_l8` `30.35%` (`-2.56pp`)
+  - all candidates quick-pruned / med skipped
 
 Planned expansion highlights:
 

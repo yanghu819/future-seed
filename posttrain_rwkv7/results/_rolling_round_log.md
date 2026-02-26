@@ -727,3 +727,35 @@ Failed/pruned:
 Next round plan:
 1. expand to new task families (`arc_mc`, `hotpot_longctx`, `mbpp_longctx`) to avoid local optimum loops.
 2. keep a light anchor lane (`squad_seed4`, `punc_seed2`) while prioritizing fresh-seed discovery.
+
+---
+
+## Round107 - new-task expansion (completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_longctx_seed0_discovery`: best quick `scalar_l8_train1e4` `8.89%` vs baseline `8.89%` (**`+0.00pp`**, med skipped)
+- `arc_mc_seed0_discovery`: best quick `scalar_l8_train1e4` `33.33%` vs baseline `37.50%` (**`-4.17pp`**, med skipped)
+
+Failed/pruned:
+- `arc_mc_seed0_discovery`: all candidates quick-pruned (`-4.17pp`, `-4.17pp`, `-4.17pp`)
+- `hotpot_longctx_seed0_discovery`: no gain (all candidates `+0.00pp`), failed promote gate
+
+Next round plan:
+1. continue queue to round108/109 while keeping strict quick-prune.
+2. watch `mbpp_longctx` data-build feasibility and cut failing configs quickly.
+
+---
+
+## Round108 - new-task expansion (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed7_discovery`: best quick `head_l8` `30.35%` vs baseline `32.91%` (**`-2.56pp`**, med skipped)
+- `mbpp_longctx_seed0_discovery`: quick baseline failed (med skipped)
+
+Failed/pruned:
+- `mbpp_longctx_seed0_discovery`: baseline failed (`Only built 374 examples (wanted 600)`)
+- `protein_ss_seed7_discovery`: all candidates quick-pruned (`-2.56pp`, `-3.02pp`, `-4.91pp`)
+
+Next round plan:
+1. continue round109 (`hotpot_seed6`, `arc_seed6`) and keep aggressive pruning.
+2. reduce or replace unstable longctx MBPP settings in next queue package.

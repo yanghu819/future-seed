@@ -1,0 +1,19 @@
+================================================================================================================
+Round108 fastdiscover summary
+================================================================================================================
+[mbpp_longctx_seed0_discovery]
+  quick baseline failed
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed7_discovery]
+  quick baseline: 32.91%
+    head_l8                      d_acc=-2.56pp acc=30.35%
+    scalar_l8_train8e5           d_acc=-3.02pp acc=29.89%
+    scalar_l8_train1e4           d_acc=-4.91pp acc=28.00%
+  med skipped: best_quick head_l8 -2.56pp < promote_gate +0.80pp
+  pruned:
+    head_l8                      quick_drop -2.56pp < -0.50pp
+    scalar_l8_train1e4           quick_drop -4.91pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -3.02pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  protein_ss_seed7_discovery       stage=quick cfg=head_l8                  d_acc=-2.56pp

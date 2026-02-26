@@ -1855,3 +1855,54 @@ Design:
 Execution status:
 - Started after Round106 completion.
 - Running round107 baseline (`hotpot_longctx_seed0_discovery`) on remote single 4090.
+
+## 2026-02-26 Round107 (new-task expansion queue, completed)
+
+Outputs:
+- `results/_summary_round107_fastdiscover.txt`
+- `results/_round107_fastdiscover_records.jsonl`
+
+### Round107 (`hotpot_longctx_seed0_discovery` + `arc_mc_seed0_discovery`)
+
+1) `hotpot_longctx_seed0_discovery`
+- quick baseline: `8.89%`
+- all FS quick variants: `8.89%` (`+0.00pp`)
+- med skipped (`best_quick +0.00pp < +0.80pp promote gate`)
+
+2) `arc_mc_seed0_discovery`
+- quick baseline: `37.50%`
+- all FS quick variants: `33.33%` (`-4.17pp`)
+- all candidates quick-pruned; med skipped
+
+Round107 conclusion:
+- `hotpot_longctx` under current setup behaves as no-op.
+- `arc_mc` under current setup is strongly negative and should stay deprioritized until recipe changes.
+
+## 2026-02-26 Round108 (new-task expansion queue, completed)
+
+Outputs:
+- `results/_summary_round108_fastdiscover.txt`
+- `results/_round108_fastdiscover_records.jsonl`
+
+### Round108 (`mbpp_longctx_seed0_discovery` + `protein_ss_seed7_discovery`)
+
+1) `mbpp_longctx_seed0_discovery`
+- quick baseline failed during data build
+- failure detail: `Only built 374 examples (wanted 600). Try lowering --min_prompt_tokens or --n_*`
+- med skipped (`quick_baseline_failed`)
+
+2) `protein_ss_seed7_discovery`
+- quick baseline: `32.91%`
+- quick candidates: `head_l8 30.35%` (`-2.56pp`), `scalar_l8_train8e5 29.89%` (`-3.02pp`), `scalar_l8_train1e4 28.00%` (`-4.91pp`)
+- all candidates quick-pruned; med skipped
+
+Round108 conclusion:
+- No new useful task found in this round.
+- `mbpp_longctx` requires feasibility-aware parameter repair before further use.
+- `protein_ss` can fail sharply on some seeds; keep seed-diverse pruning.
+
+## 2026-02-26 Round109-112 status (running)
+
+Execution status:
+- Queue still running on single 4090.
+- Current task: `round109 hotpot_seed6_discovery` quick stage.
