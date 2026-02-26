@@ -1931,3 +1931,92 @@ Execution status:
 - Queue still running on single 4090.
 - Current task: `round110 mbpp_seed6_headprobe` quick stage.
 - Continuity guard: queued `results/_search_queue_round113_120_iter.json` and installed remote chainer to auto-start after round112.
+
+## 2026-02-26 Round110 (new-task expansion queue, completed)
+
+Outputs:
+- `results/_summary_round110_fastdiscover.txt`
+- `results/_round110_fastdiscover_records.jsonl`
+
+### Round110 (`mbpp_seed6_headprobe` + `squad_seed4_anchor`)
+
+1) `mbpp_seed6_headprobe`
+- quick baseline: `42.61%`
+- quick best `scalar_l8_sched_cos`: `42.54%` (`-0.07pp`)
+- med skipped (`best_quick -0.07pp < +0.80pp promote gate`)
+- quick-pruned: `head_l10_strong -1.89pp`, `head_l10_clip07 -2.42pp`
+
+2) `squad_seed4_anchor`
+- quick baseline failed; med skipped
+
+Round110 conclusion:
+- No useful-task addition.
+- MBPP head variants at seed6 are strongly negative in quick stage.
+
+## 2026-02-26 Round111 (iter queue, completed)
+
+Outputs:
+- `results/_summary_round111_fastdiscover.txt`
+- `results/_round111_fastdiscover_records.jsonl`
+
+### Round111 (`punc_seed2_anchor` + `arc_mc_seed1_discovery`)
+
+1) `punc_seed2_anchor`
+- quick baseline: `9.16%`
+- best quick: `8.54%` (`-0.63pp`)
+- all candidates quick-pruned; med skipped
+
+2) `arc_mc_seed1_discovery`
+- quick baseline: `33.33%`
+- all candidates tie baseline (`+0.00pp`)
+- med skipped
+
+Round111 conclusion:
+- No useful-task addition.
+- `arc_mc` remains low-value under this recipe family.
+
+## 2026-02-26 Round112 (iter queue, completed)
+
+Outputs:
+- `results/_summary_round112_fastdiscover.txt`
+- `results/_round112_fastdiscover_records.jsonl`
+
+### Round112 (`hotpot_longctx_seed1_discovery` + `mbpp_longctx_seed1_discovery`)
+
+1) `hotpot_longctx_seed1_discovery`
+- quick baseline: `6.67%`
+- quick best `scalar_l8_train1e4`: `8.89%` (`+2.22pp`)
+- med baseline: `6.67%`
+- med FS (`scalar_l8_train1e4`): `8.89%` (**`+2.22pp`**)
+
+2) `mbpp_longctx_seed1_discovery`
+- quick baseline failed (longctx example build failure); med skipped
+
+Round112 conclusion:
+- Added useful-task evidence on `hotpot_longctx` (+2.22pp) with current budget.
+- `mbpp_longctx` still blocked by data-build feasibility and needs repaired constraints.
+
+## 2026-02-26 Round113 (iter queue, completed)
+
+Outputs:
+- `results/_summary_round113_fastdiscover.txt`
+- `results/_round113_fastdiscover_records.jsonl`
+
+### Round113 (`hotpot_seed7_discovery` + `protein_ss_seed8_discovery`)
+
+1) `hotpot_seed7_discovery`
+- quick baseline: `9.31%`
+- all candidates tie baseline (`+0.00pp`); med skipped
+
+2) `protein_ss_seed8_discovery`
+- quick baseline: `29.13%`
+- all candidates tie baseline (`+0.00pp`); med skipped
+
+Round113 conclusion:
+- No useful-task addition; both tasks are effectively no-op under this seed/config.
+
+## 2026-02-26 Round114-120 status (running)
+
+Execution status:
+- Queue `results/_search_queue_round113_120_iter.json` is active.
+- Current task at capture time: `round114 arc_seed7_discovery` med baseline.

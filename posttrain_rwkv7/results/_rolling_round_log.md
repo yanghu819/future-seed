@@ -779,3 +779,66 @@ Failed/pruned:
 Next round plan:
 1. continue round110 (`mbpp_seed6_headprobe`, `squad_seed4_anchor`) with same quick->med gates.
 2. keep longctx lines in repaired configuration only (`mbpp_longctx_*_repair`) for queued round116/120.
+
+---
+
+## Round110 - new-task expansion (completed 2026-02-26)
+
+Best config vs baseline:
+- `mbpp_seed6_headprobe`: best quick `scalar_l8_sched_cos` `42.54%` vs baseline `42.61%` (**`-0.07pp`**, med skipped)
+- `squad_seed4_anchor`: quick baseline failed, med skipped
+
+Failed/pruned:
+- `mbpp_seed6_headprobe`: `head_l10_strong` and `head_l10_clip07` quick-pruned (`-1.89pp`, `-2.42pp`)
+- `squad_seed4_anchor`: baseline run failed (task skipped)
+
+Next round plan:
+1. proceed to round111 anchor check (`punc_seed2`, `arc_mc_seed1`) for quick filtering.
+2. keep MBPP headprobe on new seeds only if quick passes +0.80pp gate.
+
+---
+
+## Round111 - iter queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `arc_mc_seed1_discovery`: best quick tie (`+0.00pp`), med skipped
+- `punc_seed2_anchor`: best quick `-0.63pp`, med skipped
+
+Failed/pruned:
+- `punc_seed2_anchor`: all candidates quick-pruned (`-0.63pp`, `-0.69pp`, `-0.70pp`)
+- `arc_mc_seed1_discovery`: no gain (all candidates `+0.00pp`)
+
+Next round plan:
+1. continue round112 longctx check (`hotpot_longctx_seed1`, `mbpp_longctx_seed1`).
+2. keep only longctx variants that pass buildability + quick gate.
+
+---
+
+## Round112 - iter queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_longctx_seed1_discovery`: `scalar_l8_train1e4` med `8.89%` vs med baseline `6.67%` (**`+2.22pp`**)
+- `mbpp_longctx_seed1_discovery`: quick baseline failed (med skipped)
+
+Failed/pruned:
+- `hotpot_longctx_seed1_discovery`: `scalar_l8_train8e5` and `scalar_l8_sched_cos` quick-pruned (`-1.11pp`)
+- `mbpp_longctx_seed1_discovery`: baseline failed under longctx example-build constraints
+
+Next round plan:
+1. continue iter queue round113 (`hotpot_seed7`, `protein_ss_seed8`) and prune aggressively.
+2. keep `mbpp_longctx_*_repair` only in later rounds (116/120) with reduced build pressure.
+
+---
+
+## Round113 - iter queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_seed7_discovery`: best quick tie (`+0.00pp`), med skipped
+- `protein_ss_seed8_discovery`: best quick tie (`+0.00pp`), med skipped
+
+Failed/pruned:
+- none by quick-prune threshold, but both tasks failed promote gate (no deltas)
+
+Next round plan:
+1. run round114 (`mbpp_seed7_headprobe`, `arc_seed7_discovery`) and keep top1 med policy.
+2. continue nonstop iteration to round120 via active chainer.

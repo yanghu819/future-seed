@@ -983,7 +983,7 @@ Round106 outcomes:
   - quick best `scalar_l8_train1e4` `7.13%` (`-1.28pp`)
   - all candidates quick-pruned, med skipped
 
-### Round107-112 (new-task expansion queue, in progress)
+### Round107-112 (new-task expansion queue, completed)
 
 - Queue:
   - `results/_search_queue_round107_112_newtasks.json`
@@ -991,11 +991,13 @@ Round106 outcomes:
   - `results/_summary_round107_fastdiscover.txt`
   - `results/_summary_round108_fastdiscover.txt`
   - `results/_summary_round109_fastdiscover.txt`
-- Running:
-  - round `110` (`mbpp_seed6_headprobe`, `squad_seed4_anchor`)
-- Auto-next queued:
+- `results/_summary_round110_fastdiscover.txt`
+- `results/_summary_round111_fastdiscover.txt`
+- `results/_summary_round112_fastdiscover.txt`
+
+Execution continuity:
   - `results/_search_queue_round113_120_iter.json`
-  - remote chainer: waits for `107-112` completion, then launches `113-120` automatically
+  - remote chainer triggered after round112 and launched `113-120`
 
 Round107 outcomes:
 
@@ -1030,6 +1032,50 @@ Round109 outcomes:
   - quick baseline `9.02%`
   - quick best `head_l8` `9.26%` (`+0.24pp`)
   - med skipped (`+0.24pp < +0.80pp gate`)
+
+Round110 outcomes:
+
+- `mbpp_seed6_headprobe`:
+  - quick baseline `42.61%`
+  - quick best `scalar_l8_sched_cos` `42.54%` (`-0.07pp`)
+  - med skipped (`-0.07pp < +0.80pp gate`)
+- `squad_seed4_anchor`:
+  - quick baseline failed (run error), med skipped
+
+Round111 outcomes:
+
+- `punc_seed2_anchor`:
+  - quick baseline `9.16%`
+  - all candidates negative (`-0.63pp` to `-0.70pp`)
+  - all quick-pruned / med skipped
+- `arc_mc_seed1_discovery`:
+  - quick baseline `33.33%`
+  - all candidates tie (`+0.00pp`)
+  - med skipped
+
+Round112 outcomes:
+
+- `hotpot_longctx_seed1_discovery`:
+  - quick baseline `6.67%`
+  - quick best `scalar_l8_train1e4` `8.89%` (`+2.22pp`)
+  - med baseline `6.67%`
+  - med FS `scalar_l8_train1e4` `8.89%` (**`+2.22pp`**)
+- `mbpp_longctx_seed1_discovery`:
+  - quick baseline failed (same longctx buildability issue), med skipped
+
+### Round113-120 (iter queue, in progress)
+
+- Queue:
+  - `results/_search_queue_round113_120_iter.json`
+- Completed:
+  - `results/_summary_round113_fastdiscover.txt`
+- Running:
+  - round `114` (`mbpp_seed7_headprobe`, `arc_seed7_discovery`)
+
+Round113 outcomes:
+
+- `hotpot_seed7_discovery`: all quick ties (`+0.00pp`), med skipped.
+- `protein_ss_seed8_discovery`: all quick ties (`+0.00pp`), med skipped.
 
 Planned expansion highlights:
 
