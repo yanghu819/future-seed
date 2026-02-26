@@ -2020,3 +2020,34 @@ Round113 conclusion:
 Execution status:
 - Queue `results/_search_queue_round113_120_iter.json` is active.
 - Current task at capture time: `round114 arc_seed7_discovery` med baseline.
+
+## 2026-02-26 Round121 (fastloop queue, completed)
+
+Outputs:
+- `results/_summary_round121_fastdiscover.txt`
+- `results/_round121_fastdiscover_records.jsonl`
+
+### Round121 (`hotpot_seed13_discovery` + `protein_ss_seed10_discovery`)
+
+1) `hotpot_seed13_discovery`
+- quick baseline: `5.56%`
+- quick best `scalar_l8_train1e4`: `10.97%` (`+5.41pp`)
+- med baseline: `9.40%`
+- med FS (`scalar_l8_train1e4`): `10.97%` (**`+1.57pp`**)
+
+2) `protein_ss_seed10_discovery`
+- quick baseline: `23.93%`
+- quick best `scalar_l8_train8e5`: `33.62%` (`+9.69pp`)
+- med baseline: `27.66%`
+- med FS (`scalar_l8_train8e5`): `33.62%` (**`+5.96pp`**)
+
+Round121 conclusion:
+- Added two positive med confirmations in one round, including a strong protein gain (+5.96pp).
+- Queue `round121-128` remains active; current execution has moved to round122.
+
+## 2026-02-26 Round129-136 status (chained)
+
+Execution status:
+- Prepared queue: `results/_search_queue_round129_136_fastloop.json`
+- Remote auto-chainer is active and will launch round129 immediately after round128 completion.
+- Task mix expands to `arc_mc`, `protein_contact`, `hotpot`, `protein_ss`, `mbpp_headprobe` with light anchor calibration.

@@ -842,3 +842,18 @@ Failed/pruned:
 Next round plan:
 1. run round114 (`mbpp_seed7_headprobe`, `arc_seed7_discovery`) and keep top1 med policy.
 2. continue nonstop iteration to round120 via active chainer.
+
+---
+
+## Round121 - fastloop queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed10_discovery`: `scalar_l8_train8e5` med `33.62%` vs med baseline `27.66%` (**`+5.96pp`**)
+- `hotpot_seed13_discovery`: `scalar_l8_train1e4` med `10.97%` vs med baseline `9.40%` (**`+1.57pp`**)
+
+Failed/pruned:
+- none (both tasks passed quick gates and produced positive med gains)
+
+Next round plan:
+1. continue round122-128 on the active queue (`hotpot/protein_ss + longctx + anchors`).
+2. auto-chain into round129-136 without idle time for broader task discovery.

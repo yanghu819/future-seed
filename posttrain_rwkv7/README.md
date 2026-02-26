@@ -1087,3 +1087,32 @@ Planned expansion highlights:
   - `protein_ss_seed7_discovery`, `mbpp_seed6_headprobe`, `hotpot_seed6_discovery`, `arc_seed6_discovery`
 - Keep anchor calibration light:
   - `squad_seed4_anchor`, `punc_seed2_anchor`
+
+### Round121-128 (fastloop queue, running)
+
+- Queue:
+  - `results/_search_queue_round121_128_fastloop.json`
+- Completed:
+  - `results/_summary_round121_fastdiscover.txt`
+- Running:
+  - round `122` (`hotpot_seed14_discovery`, `protein_ss_seed11_discovery`)
+
+Round121 outcomes:
+
+- `hotpot_seed13_discovery`:
+  - quick baseline `5.56%`
+  - med baseline `9.40%`
+  - `scalar_l8_train1e4` med `10.97%` (**`+1.57pp`**)
+- `protein_ss_seed10_discovery`:
+  - quick baseline `23.93%`
+  - med baseline `27.66%`
+  - `scalar_l8_train8e5` med `33.62%` (**`+5.96pp`**)
+
+### Round129-136 (next fastloop queue, chained)
+
+- Queue prepared:
+  - `results/_search_queue_round129_136_fastloop.json`
+- Remote chaining:
+  - auto-chainer waits for round128 completion then launches round129-136 automatically
+- Search intent:
+  - broaden tasks beyond repeated lines (`arc_mc`, `protein_contact`, `hotpot`, `protein_ss`, `mbpp_headprobe`) while keeping light anchors (`punc`, `mbpp`).

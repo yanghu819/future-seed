@@ -1,0 +1,17 @@
+================================================================================================================
+Round119 fastdiscover summary
+================================================================================================================
+[punc_seed1_anchor_recheck3]
+  quick baseline: 8.61%
+    head_l8                      d_acc=+0.86pp acc=9.47%
+    scalar_l8_train1e4           d_acc=+0.34pp acc=8.95%
+    scalar_l8_train8e5           d_acc=-0.08pp acc=8.53%
+  med:
+    baseline                     acc=10.21%
+    head_l8                      d_acc_vs_med=-0.74pp acc=9.47%
+----------------------------------------------------------------------------------------------------------------
+[squad_seed0_anchor_recheck3]
+  quick baseline failed
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  punc_seed1_anchor_recheck3       stage=med   cfg=head_l8                  d_acc=-0.74pp
