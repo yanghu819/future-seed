@@ -692,3 +692,24 @@ Current bottom line (real-task branch, after Round74):
   - seed3 remains unresolved/mostly negative.
 - `punc_restore`:
   - still variance-sensitive, but round74 added a positive med confirmation (`+0.84pp`).
+
+### Round75 (mbpp3+punc0 targeted, completed)
+
+- Script: `scripts/run_round75_mbpp3_punc0_targeted.py`
+- Summary: `results/_summary_round75_mbpp3_punc0_targeted.txt`
+- Records: `results/_round75_mbpp3_punc0_targeted_records.jsonl`
+
+Main outcomes:
+
+- `mbpp_seed3_l8_refine`:
+  - med baseline `48.23%`
+  - med FS (`head_l8_nodetach`) `48.28%` (**`+0.05pp`**)
+- `punc_seed0_frontier_recheck`:
+  - quick `scalar_l8_train1e4` severe drop (`-4.17pp`, pruned)
+  - med baseline `10.59%`
+  - med FS (`head_l8`) `11.09%` (**`+0.51pp`**)
+
+Interpretation:
+
+- MBPP seed3 stays near-neutral under current budget and recipe.
+- PUNC seed0 keeps a small positive path with `head_l8`; scalar train1e4 is seed-sensitive.

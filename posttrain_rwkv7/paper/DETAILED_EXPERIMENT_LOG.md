@@ -1213,3 +1213,38 @@ Outcomes:
 Round74 conclusion:
 - `scalar_l8_train1e4` became the highest-value common recipe across PUNC and SQuAD in this round.
 - practical branch now has repeated med positives across multiple real tasks, but seed-level variance still exists.
+
+## 2026-02-26 Round75 (mbpp3+punc0 targeted, completed)
+
+Script:
+- `scripts/run_round75_mbpp3_punc0_targeted.py`
+
+Outputs:
+- `results/_summary_round75_mbpp3_punc0_targeted.txt`
+- `results/_round75_mbpp3_punc0_targeted_records.jsonl`
+
+Goal:
+- MBPP seed3: targeted `l8_nodetach` refinement to test whether near-neutral signal can be stabilized.
+- PUNC seed0: quick frontier recheck to find usable positive branch.
+
+Outcomes:
+
+1) `mbpp_seed3_l8_refine`
+- quick baseline: `40.90%`
+- quick `head_l8_nodetach`: `41.45%` (`+0.56pp`)
+- quick `head_l8_nodetach_clip07`: `41.45%` (`+0.56pp`)
+- quick `head_l8_nodetach_midlr`: `40.67%` (`-0.23pp`)
+- med baseline: `48.23%`
+- med FS (`head_l8_nodetach`): `48.28%` (**`+0.05pp` vs med baseline**)
+
+2) `punc_seed0_frontier_recheck`
+- quick baseline: `8.44%`
+- quick `head_l8`: `10.10%` (`+1.66pp`)
+- quick `scalar_l8_sched_cos`: `8.18%` (`-0.26pp`)
+- quick `scalar_l8_train1e4`: `4.27%` (`-4.17pp`, pruned)
+- med baseline: `10.59%`
+- med FS (`head_l8`): `11.09%` (**`+0.51pp` vs med baseline**)
+
+Round75 conclusion:
+- MBPP seed3 remains near-neutral even after targeted refinement.
+- PUNC seed0 retains a modest positive branch via `head_l8`, while `scalar_l8_train1e4` is unstable across seeds.

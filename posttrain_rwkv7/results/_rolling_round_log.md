@@ -296,3 +296,22 @@ Failed/pruned:
 Next round plan:
 1. continue high-value branch around `scalar_l8_train1e4` for SQuAD/PUNC, test minimal LR/clip perturbations only.
 2. launch one targeted MBPP seed3 rescue with strict quick gate; stop immediately if quick < baseline by `0.5pp`.
+
+---
+
+## Round75 - mbpp3+punc0 targeted (completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed0_frontier_recheck`: `head_l8` med `11.09%` vs med baseline `10.59%` (**`+0.51pp`**)
+- `mbpp_seed3_l8_refine`: `head_l8_nodetach` med `48.28%` vs med baseline `48.23%` (**`+0.05pp`**)
+
+Failed/pruned:
+- `punc_seed0_frontier_recheck`:
+  - `scalar_l8_train1e4` quick-pruned (`-4.17pp < -0.50pp`)
+  - `scalar_l8_sched_cos` quick `-0.26pp`, not promoted
+- `mbpp_seed3_l8_refine`:
+  - `head_l8_nodetach_midlr` quick `-0.23pp` (not promoted)
+
+Next round plan:
+1. keep `head_l8_nodetach` as MBPP seed3 near-neutral fallback, but reduce further budget on this branch.
+2. prioritize higher-yield SQuAD/PUNC positive branches for useful-task discovery speed.

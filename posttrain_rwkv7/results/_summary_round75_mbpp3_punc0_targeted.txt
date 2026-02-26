@@ -1,0 +1,26 @@
+================================================================================================================
+Round75 mbpp3+punc0 targeted summary
+================================================================================================================
+[mbpp_seed3_l8_refine]
+  quick baseline: 40.90%
+    head_l8_nodetach             d_acc=+0.56pp acc=41.45%
+    head_l8_nodetach_clip07      d_acc=+0.56pp acc=41.45%
+    head_l8_nodetach_midlr       d_acc=-0.23pp acc=40.67%
+  med:
+    baseline                     acc=48.23%
+    head_l8_nodetach             d_acc_vs_med=+0.05pp acc=48.28%
+----------------------------------------------------------------------------------------------------------------
+[punc_seed0_frontier_recheck]
+  quick baseline: 8.44%
+    head_l8                      d_acc=+1.66pp acc=10.10%
+    scalar_l8_sched_cos          d_acc=-0.26pp acc=8.18%
+    scalar_l8_train1e4           d_acc=-4.17pp acc=4.27%
+  med:
+    baseline                     acc=10.59%
+    head_l8                      d_acc_vs_med=+0.51pp acc=11.09%
+  pruned:
+    scalar_l8_train1e4           quick_drop -4.17pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  punc_seed0_frontier_recheck      stage=med   cfg=head_l8                  d_acc=+0.51pp
+  mbpp_seed3_l8_refine             stage=med   cfg=head_l8_nodetach         d_acc=+0.05pp
