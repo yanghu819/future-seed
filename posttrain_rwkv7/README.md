@@ -992,6 +992,9 @@ Round106 outcomes:
   - `results/_summary_round108_fastdiscover.txt`
 - Running:
   - round `109` (`hotpot_seed6_discovery`, `arc_seed6_discovery`)
+- Auto-next queued:
+  - `results/_search_queue_round113_120_iter.json`
+  - remote chainer: waits for `107-112` completion, then launches `113-120` automatically
 
 Round107 outcomes:
 

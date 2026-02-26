@@ -1906,3 +1906,4 @@ Round108 conclusion:
 Execution status:
 - Queue still running on single 4090.
 - Current task: `round109 hotpot_seed6_discovery` quick stage.
+- Continuity guard: queued `results/_search_queue_round113_120_iter.json` and installed remote chainer to auto-start after round112.

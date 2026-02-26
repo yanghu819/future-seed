@@ -759,3 +759,6 @@ Failed/pruned:
 Next round plan:
 1. continue round109 (`hotpot_seed6`, `arc_seed6`) and keep aggressive pruning.
 2. reduce or replace unstable longctx MBPP settings in next queue package.
+
+Execution continuity:
+- queued `results/_search_queue_round113_120_iter.json` and deployed remote auto-chainer so next queue starts immediately after round112.
