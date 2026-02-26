@@ -762,3 +762,20 @@ Next round plan:
 
 Execution continuity:
 - queued `results/_search_queue_round113_120_iter.json` and deployed remote auto-chainer so next queue starts immediately after round112.
+
+---
+
+## Round109 - new-task expansion (completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_seed6_discovery`: `scalar_l8_train1e4` med `12.59%` vs med baseline `9.01%` (**`+3.59pp`**)
+- `arc_seed6_discovery`: best quick `head_l8` `9.26%` vs baseline `9.02%` (**`+0.24pp`**, med skipped)
+
+Failed/pruned:
+- `arc_seed6_discovery`:
+  - `scalar_l8_train8e5` quick-pruned (`-0.76pp < -0.50pp`)
+  - med skipped (`best_quick +0.24pp < +0.80pp gate`)
+
+Next round plan:
+1. continue round110 (`mbpp_seed6_headprobe`, `squad_seed4_anchor`) with same quick->med gates.
+2. keep longctx lines in repaired configuration only (`mbpp_longctx_*_repair`) for queued round116/120.

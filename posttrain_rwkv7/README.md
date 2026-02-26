@@ -990,8 +990,9 @@ Round106 outcomes:
 - Completed:
   - `results/_summary_round107_fastdiscover.txt`
   - `results/_summary_round108_fastdiscover.txt`
+  - `results/_summary_round109_fastdiscover.txt`
 - Running:
-  - round `109` (`hotpot_seed6_discovery`, `arc_seed6_discovery`)
+  - round `110` (`mbpp_seed6_headprobe`, `squad_seed4_anchor`)
 - Auto-next queued:
   - `results/_search_queue_round113_120_iter.json`
   - remote chainer: waits for `107-112` completion, then launches `113-120` automatically
@@ -1017,6 +1018,18 @@ Round108 outcomes:
   - quick baseline `32.91%`
   - quick best `head_l8` `30.35%` (`-2.56pp`)
   - all candidates quick-pruned / med skipped
+
+Round109 outcomes:
+
+- `hotpot_seed6_discovery`:
+  - quick baseline `7.10%`
+  - quick best `scalar_l8_train1e4` `9.96%` (`+2.86pp`)
+  - med baseline `9.01%`
+  - med FS `scalar_l8_train1e4` `12.59%` (**`+3.59pp`**)
+- `arc_seed6_discovery`:
+  - quick baseline `9.02%`
+  - quick best `head_l8` `9.26%` (`+0.24pp`)
+  - med skipped (`+0.24pp < +0.80pp gate`)
 
 Planned expansion highlights:
 

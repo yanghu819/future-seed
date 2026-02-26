@@ -1901,9 +1901,33 @@ Round108 conclusion:
 - `mbpp_longctx` requires feasibility-aware parameter repair before further use.
 - `protein_ss` can fail sharply on some seeds; keep seed-diverse pruning.
 
-## 2026-02-26 Round109-112 status (running)
+## 2026-02-26 Round109 (new-task expansion queue, completed)
+
+Outputs:
+- `results/_summary_round109_fastdiscover.txt`
+- `results/_round109_fastdiscover_records.jsonl`
+
+### Round109 (`hotpot_seed6_discovery` + `arc_seed6_discovery`)
+
+1) `hotpot_seed6_discovery`
+- quick baseline: `7.10%`
+- quick best `scalar_l8_train1e4`: `9.96%` (`+2.86pp`)
+- med baseline: `9.01%`
+- med FS (`scalar_l8_train1e4`): `12.59%` (**`+3.59pp`**)
+
+2) `arc_seed6_discovery`
+- quick baseline: `9.02%`
+- quick best `head_l8`: `9.26%` (`+0.24pp`)
+- med skipped (`best_quick +0.24pp < +0.80pp promote gate`)
+- quick-pruned: `scalar_l8_train8e5` (`-0.76pp`)
+
+Round109 conclusion:
+- New useful-task gain added: `hotpot_seed6_discovery` **`+3.59pp`** at med budget.
+- `arc_seed6` remains weak under current family and stays low priority.
+
+## 2026-02-26 Round110-112 status (running)
 
 Execution status:
 - Queue still running on single 4090.
-- Current task: `round109 hotpot_seed6_discovery` quick stage.
+- Current task: `round110 mbpp_seed6_headprobe` quick stage.
 - Continuity guard: queued `results/_search_queue_round113_120_iter.json` and installed remote chainer to auto-start after round112.
