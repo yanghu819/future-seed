@@ -695,3 +695,19 @@ Failed/pruned:
 Next round plan:
 1. continue new-task expansion, prioritizing `arc + scalar_l8_train1e4` and `mbpp + scalar_l8_sched_cos` on fresh seeds.
 2. keep `protein_ss + head_l8` as primary branch and reduce budget on near-threshold hotpot lines.
+
+---
+
+## Round105 - expand2 queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed6_discovery`: best quick `scalar_l8_train1e4` `31.82%` vs baseline `31.37%` (**`+0.44pp`**, med skipped)
+- `arc_seed5_discovery`: best quick `scalar_l8_train1e4` `8.54%` vs baseline `10.72%` (**`-2.19pp`**, med skipped)
+
+Failed/pruned:
+- `arc_seed5_discovery`: all candidates quick-pruned (`-2.19pp`, `-2.25pp`, `-3.42pp`)
+- `protein_ss_seed6_discovery`: `scalar_l8_train8e5` quick-pruned (`-3.50pp`)
+
+Next round plan:
+1. complete round106 (`mbpp_seed5_headprobe`, `hotpot_seed5_discovery`) and check if scalar cosine remains robust.
+2. freeze arc seed5 route under current recipe family (strong negative quick).

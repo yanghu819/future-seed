@@ -1789,3 +1789,30 @@ Round104 conclusion:
 - Both tasks delivered positive med gains; `arc_seed4` produced the strongest round gain (**`+2.73pp`**).
 - Head variants for `mbpp_seed4` are currently weak; scalar cosine remains the better branch.
 - Queue `round103-104` finished successfully and produced two new useful-task confirmations.
+
+## 2026-02-26 Round105 (expand2 queue, completed)
+
+Queue:
+- `results/_search_queue_round105_106_expand2.json`
+
+Outputs:
+- `results/_summary_round105_fastdiscover.txt`
+- `results/_round105_fastdiscover_records.jsonl`
+
+### Round105 (`protein_ss_seed6_discovery` + `arc_seed5_discovery`)
+
+1) `protein_ss_seed6_discovery`
+- quick baseline: `31.37%`
+- quick best `scalar_l8_train1e4`: `31.82%` (`+0.44pp`)
+- med skipped (`+0.44pp < +0.80pp promote gate`)
+- quick-pruned: `scalar_l8_train8e5` (`-3.50pp`)
+
+2) `arc_seed5_discovery`
+- quick baseline: `10.72%`
+- quick candidates: `8.54%` (`-2.19pp`), `8.47%` (`-2.25pp`), `7.30%` (`-3.42pp`)
+- all quick-pruned, med skipped
+
+Round105 conclusion:
+- This round produced no useful-task addition (`med > baseline` none).
+- Strong negative evidence to freeze `arc_seed5` with current config family.
+- Continuation status: round106 running.
