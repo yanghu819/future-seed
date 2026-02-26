@@ -1,0 +1,27 @@
+================================================================================================================
+Round126 fastdiscover summary
+================================================================================================================
+[hotpot_seed16_discovery]
+  quick baseline: 6.14%
+    scalar_l8_train1e4           d_acc=-0.02pp acc=6.12%
+    scalar_l8_train8e5           d_acc=-0.64pp acc=5.50%
+    head_l8                      d_acc=-1.41pp acc=4.73%
+  med skipped: best_quick scalar_l8_train1e4 -0.02pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train8e5           quick_drop -0.64pp < -0.50pp
+    head_l8                      quick_drop -1.41pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed13_discovery]
+  quick baseline: 25.78%
+    scalar_l8_train8e5           d_acc=-2.50pp acc=23.29%
+    scalar_l8_train1e4           d_acc=-3.14pp acc=22.64%
+    head_l8                      d_acc=-3.38pp acc=22.41%
+  med skipped: best_quick scalar_l8_train8e5 -2.50pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -3.14pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -2.50pp < -0.50pp
+    head_l8                      quick_drop -3.38pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  hotpot_seed16_discovery          stage=quick cfg=scalar_l8_train1e4       d_acc=-0.02pp
+  protein_ss_seed13_discovery      stage=quick cfg=scalar_l8_train8e5       d_acc=-2.50pp

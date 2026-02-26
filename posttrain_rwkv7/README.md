@@ -1116,3 +1116,26 @@ Round121 outcomes:
   - auto-chainer waits for round128 completion then launches round129-136 automatically
 - Search intent:
   - broaden tasks beyond repeated lines (`arc_mc`, `protein_contact`, `hotpot`, `protein_ss`, `mbpp_headprobe`) while keeping light anchors (`punc`, `mbpp`).
+
+### Round122-136 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed3_discovery`: `scalar_l8_sched_cos` **`+12.50pp`** (new best)
+- `mbpp_seed11_anchor`: `scalar_l8_sched_cos` **`+3.68pp`**
+- `mbpp_longctx_seed2_repair`: `scalar_l8_train1e4` **`+1.32pp`**
+- `punc_seed7_anchor`: `scalar_l8_train1e4` **`+1.13pp`**
+- `punc_seed4_anchor`: `scalar_l8_train8e5` **`+0.80pp`**
+
+Main pruned/negative patterns:
+- `hotpot_longctx` seeds mostly `+0.00pp` (failed promote gate)
+- `protein_ss` seeds `11/12/13/14/15` mostly negative quick (med skipped)
+- several `hotpot` fresh seeds stayed below promote gate (`<= +0.78pp`)
+
+### Round137-144 (fastloop queue, running)
+
+- Queue:
+  - `results/_search_queue_round137_144_fastloop.json`
+- Running:
+  - round `137` (`arc_mc_seed4_discovery`, `mbpp_seed12_anchor`)
+- Search focus:
+  - leverage new high-value branch (`arc_mc + scalar_l8_sched_cos`) while keeping broad discovery (`protein_ss/hotpot/mbpp_longctx/arc`).

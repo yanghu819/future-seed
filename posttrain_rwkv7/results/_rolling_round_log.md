@@ -857,3 +857,23 @@ Failed/pruned:
 Next round plan:
 1. continue round122-128 on the active queue (`hotpot/protein_ss + longctx + anchors`).
 2. auto-chain into round129-136 without idle time for broader task discovery.
+
+---
+
+## Round122-136 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed3_discovery`: `scalar_l8_sched_cos` med **`+12.50pp`**
+- `mbpp_seed11_anchor`: `scalar_l8_sched_cos` med **`+3.68pp`**
+- `mbpp_longctx_seed2_repair`: `scalar_l8_train1e4` med **`+1.32pp`**
+- `punc_seed7_anchor`: `scalar_l8_train1e4` med **`+1.13pp`**
+- `punc_seed4_anchor`: `scalar_l8_train8e5` med **`+0.80pp`**
+
+Failed/pruned highlights:
+- `hotpot_longctx_seed7/8/9/10`: mostly quick `+0.00pp` or strong negative, med skipped.
+- `protein_ss_seed11/12/13/14/15`: quick mostly negative, med skipped.
+- multiple fresh `hotpot_seed14/15/16/17/18/19/20` failed promote gate under strict `+0.80pp`.
+
+Next round plan:
+1. run `round137-144` immediately, prioritizing `arc_mc` transfer on new seeds.
+2. keep broad 70/30 mix with limited anchors and strict quick prune/promo gating.

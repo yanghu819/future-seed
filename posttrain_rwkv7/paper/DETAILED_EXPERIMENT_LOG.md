@@ -2051,3 +2051,31 @@ Execution status:
 - Prepared queue: `results/_search_queue_round129_136_fastloop.json`
 - Remote auto-chainer is active and will launch round129 immediately after round128 completion.
 - Task mix expands to `arc_mc`, `protein_contact`, `hotpot`, `protein_ss`, `mbpp_headprobe` with light anchor calibration.
+
+## 2026-02-27 Round122-136 (fastloop queues, completed)
+
+Outputs:
+- `results/_summary_round122_fastdiscover.txt` ... `results/_summary_round136_fastdiscover.txt`
+- `results/_round122_fastdiscover_records.jsonl` ... `results/_round136_fastdiscover_records.jsonl`
+
+Major positive findings (med vs baseline):
+- `arc_mc_seed3_discovery` + `scalar_l8_sched_cos`: **`+12.50pp`**
+- `mbpp_seed11_anchor` + `scalar_l8_sched_cos`: **`+3.68pp`**
+- `mbpp_longctx_seed2_repair` + `scalar_l8_train1e4`: **`+1.32pp`**
+- `punc_seed7_anchor` + `scalar_l8_train1e4`: **`+1.13pp`**
+- `punc_seed4_anchor` + `scalar_l8_train8e5`: **`+0.80pp`**
+
+Negative/flat regions:
+- `hotpot_longctx` family mostly flat (`+0.00pp`) in quick stage.
+- `protein_ss` fresh seeds in this window mostly failed quick gate.
+- many hotpot fresh seeds stayed below strict promote gate.
+
+Conclusion:
+- Broad-search produced a new strong real-task branch (`arc_mc`) with large gain, validating the value of continuing new-task exploration beyond prior repeated lanes.
+
+## 2026-02-27 Round137-144 status (running)
+
+Execution status:
+- Queue active: `results/_search_queue_round137_144_fastloop.json`
+- Current round: `137` (`arc_mc_seed4_discovery`, `mbpp_seed12_anchor`)
+- Objective: transfer `arc_mc` winner pattern while scanning new seeds in `mbpp/protein_ss/hotpot/arc`.

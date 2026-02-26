@@ -1,0 +1,28 @@
+================================================================================================================
+Round134 fastdiscover summary
+================================================================================================================
+[mbpp_seed11_anchor]
+  quick baseline: 42.01%
+    scalar_l8_sched_cos          d_acc=+0.85pp acc=42.86%
+    scalar_l8_train1e4           d_acc=+0.75pp acc=42.76%
+    scalar_l8_train8e5           d_acc=-1.18pp acc=40.83%
+  med:
+    baseline                     acc=46.07%
+    scalar_l8_sched_cos          d_acc_vs_med=+3.68pp acc=49.75%
+  pruned:
+    scalar_l8_train8e5           quick_drop -1.18pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[punc_seed7_anchor]
+  quick baseline: 7.75%
+    scalar_l8_train1e4           d_acc=+1.10pp acc=8.85%
+    scalar_l8_train8e5           d_acc=+1.04pp acc=8.80%
+    head_l8                      d_acc=-0.53pp acc=7.22%
+  med:
+    baseline                     acc=9.77%
+    scalar_l8_train1e4           d_acc_vs_med=+1.13pp acc=10.90%
+  pruned:
+    head_l8                      quick_drop -0.53pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed11_anchor               stage=med   cfg=scalar_l8_sched_cos      d_acc=+3.68pp
+  punc_seed7_anchor                stage=med   cfg=scalar_l8_train1e4       d_acc=+1.13pp
