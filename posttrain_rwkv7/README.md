@@ -872,8 +872,9 @@ Latest bottom line (after Round98):
   - `results/_summary_round99_fastdiscover.txt`
   - `results/_summary_round100_fastdiscover.txt`
   - `results/_summary_round101_fastdiscover.txt`
+  - `results/_summary_round102_fastdiscover.txt`
 - Running:
-  - round `102`
+  - none (queue finished)
 
 Round99 outcomes:
 
@@ -908,3 +909,14 @@ Round101 outcomes:
   - quick baseline `14.58%`
   - med baseline `18.33%`
   - `scalar_l8_train1e4` med `19.04%` (**`+0.71pp`**)
+
+Round102 outcomes:
+
+- `protein_ss_seed1_anchor_recheck`:
+  - quick baseline `25.23%`
+  - med baseline `32.23%`
+  - `head_l8` med `34.62%` (**`+2.39pp`**)
+- `mbpp_seed0_anchor_recheck2`:
+  - quick baseline `40.69%`
+  - med baseline `48.07%`
+  - `scalar_l8_sched_cos` med `49.26%` (**`+1.20pp`**)

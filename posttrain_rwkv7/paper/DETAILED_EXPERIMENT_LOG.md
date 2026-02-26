@@ -1709,3 +1709,28 @@ Round101 conclusion:
 - Anchor positives are stable across repeated checks (`punc` **`+2.16pp`**, `squad` **`+0.71pp`**).
 - No quick-prune was triggered in this round; ranking still favors `punc`/`protein_ss` over `arc`.
 - Continuation status: round102 running.
+
+## 2026-02-26 Round102 (focus2 queue, completed)
+
+Outputs:
+- `results/_summary_round102_fastdiscover.txt`
+- `results/_round102_fastdiscover_records.jsonl`
+
+### Round102 (`mbpp_seed0_anchor_recheck2` + `protein_ss_seed1_anchor_recheck`)
+
+1) `mbpp_seed0_anchor_recheck2`
+- quick baseline: `40.69%`
+- quick best `scalar_l8_sched_cos`: `42.12%` (`+1.43pp`)
+- med baseline: `48.07%`
+- med FS (`scalar_l8_sched_cos`): `49.26%` (**`+1.20pp`**)
+
+2) `protein_ss_seed1_anchor_recheck`
+- quick baseline: `25.23%`
+- quick best `head_l8`: `34.62%` (`+9.39pp`)
+- med baseline: `32.23%`
+- med FS (`head_l8`): `34.62%` (**`+2.39pp`**)
+
+Round102 conclusion:
+- Queue `round99-102` fully completed; both tasks in round102 delivered positive med gains.
+- `protein_ss` remains the strongest stable family (again above `+2pp` in med).
+- `mbpp` gained from cosine-scheduled scalar FS in this anchor recheck (`+1.20pp`).

@@ -648,3 +648,18 @@ Failed/pruned:
 Next round plan:
 1. finish round102 (`mbpp_seed0_anchor_recheck2`, `protein_ss_seed1_anchor_recheck`) and close this queue.
 2. promote high-yield branches (`protein_ss`, `hotpot/punc`) for next discovery package.
+
+---
+
+## Round102 - focus2 queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed1_anchor_recheck`: `head_l8` med `34.62%` vs med baseline `32.23%` (**`+2.39pp`**)
+- `mbpp_seed0_anchor_recheck2`: `scalar_l8_sched_cos` med `49.26%` vs med baseline `48.07%` (**`+1.20pp`**)
+
+Failed/pruned:
+- `protein_ss_seed1_anchor_recheck`: `scalar_l8_train8e5` quick `-0.24pp` (non-winning, not promoted)
+
+Next round plan:
+1. build next discovery queue around high-yield families (`protein_ss` + `head_l8`, `mbpp` + `scalar_l8_sched_cos`).
+2. keep 30% anchor calibration and spend 70% on new tasks to expand useful-task pool.
