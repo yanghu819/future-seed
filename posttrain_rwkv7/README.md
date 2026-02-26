@@ -713,3 +713,25 @@ Interpretation:
 
 - MBPP seed3 stays near-neutral under current budget and recipe.
 - PUNC seed0 keeps a small positive path with `head_l8`; scalar train1e4 is seed-sensitive.
+
+### Round76 (punc1+squad0 dualmed, completed)
+
+- Script: `scripts/run_round76_punc1_squad0_dualmed.py`
+- Summary: `results/_summary_round76_punc1_squad0_dualmed.txt`
+- Records: `results/_round76_punc1_squad0_dualmed_records.jsonl`
+
+Main outcomes:
+
+- `punc_seed1_dualmed_compare`:
+  - med baseline `10.88%`
+  - med `scalar_l8_train1e4` `13.04%` (**`+2.16pp`**)
+  - med `scalar_l8_sched_cos` `10.47%` (**`-0.41pp`**)
+- `squad_seed0_dualmed_compare`:
+  - med baseline `17.27%`
+  - med `scalar_l8_train1e4` `19.00%` (**`+1.73pp`**)
+  - med `scalar_l8_sched_cos` `17.47%` (**`+0.20pp`**)
+
+Interpretation:
+
+- `scalar_l8_train1e4` is now the most reliable high-value branch across current SQuAD/PUNC settings.
+- dual-med protocol proved useful by exposing quick/med ranking reversals.

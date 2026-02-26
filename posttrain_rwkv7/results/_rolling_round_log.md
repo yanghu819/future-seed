@@ -315,3 +315,22 @@ Failed/pruned:
 Next round plan:
 1. keep `head_l8_nodetach` as MBPP seed3 near-neutral fallback, but reduce further budget on this branch.
 2. prioritize higher-yield SQuAD/PUNC positive branches for useful-task discovery speed.
+
+---
+
+## Round76 - punc1+squad0 dualmed (completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed1_dualmed_compare`: `scalar_l8_train1e4` med `13.04%` vs med baseline `10.88%` (**`+2.16pp`**)
+- `squad_seed0_dualmed_compare`: `scalar_l8_train1e4` med `19.00%` vs med baseline `17.27%` (**`+1.73pp`**)
+
+Failed/pruned:
+- `punc_seed1_dualmed_compare`:
+  - `head_l8` quick `-0.12pp` (not promoted)
+  - `scalar_l8_sched_cos` med `-0.41pp` vs med baseline
+- `squad_seed0_dualmed_compare`:
+  - `scalar_l8_train8e5` quick `+0.25pp` but未进入 top2 med
+
+Next round plan:
+1. freeze `scalar_l8_train1e4` as PUNC/SQuAD default high-yield recipe under current budget.
+2. continue only one低优先 MBPP seed3 near-neutral track，主预算转向高收益任务。

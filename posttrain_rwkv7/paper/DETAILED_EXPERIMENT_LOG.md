@@ -1248,3 +1248,39 @@ Outcomes:
 Round75 conclusion:
 - MBPP seed3 remains near-neutral even after targeted refinement.
 - PUNC seed0 retains a modest positive branch via `head_l8`, while `scalar_l8_train1e4` is unstable across seeds.
+
+## 2026-02-26 Round76 (punc1+squad0 dualmed, completed)
+
+Script:
+- `scripts/run_round76_punc1_squad0_dualmed.py`
+
+Outputs:
+- `results/_summary_round76_punc1_squad0_dualmed.txt`
+- `results/_round76_punc1_squad0_dualmed_records.jsonl`
+
+Goal:
+- validate quick->med ranking consistency with dual-med promotion on two high-value tasks.
+
+Outcomes:
+
+1) `punc_seed1_dualmed_compare`
+- quick baseline: `7.92%`
+- quick `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- quick `scalar_l8_sched_cos`: `10.34%` (`+2.42pp`)
+- quick `head_l8`: `7.80%` (`-0.12pp`)
+- med baseline: `10.88%`
+- med `scalar_l8_train1e4`: `13.04%` (**`+2.16pp`**)
+- med `scalar_l8_sched_cos`: `10.47%` (**`-0.41pp`**)
+
+2) `squad_seed0_dualmed_compare`
+- quick baseline: `13.33%`
+- quick `scalar_l8_train1e4`: `14.05%` (`+0.72pp`)
+- quick `scalar_l8_sched_cos`: `13.80%` (`+0.47pp`)
+- quick `scalar_l8_train8e5`: `13.58%` (`+0.25pp`)
+- med baseline: `17.27%`
+- med `scalar_l8_train1e4`: `19.00%` (**`+1.73pp`**)
+- med `scalar_l8_sched_cos`: `17.47%` (**`+0.20pp`**)
+
+Round76 conclusion:
+- dual-med confirmed that `scalar_l8_train1e4` is the dominant high-yield recipe for current PUNC/SQuAD settings.
+- quick-only ranking can mislead (`sched_cos` looked strong in quick for PUNC but lost at med).
