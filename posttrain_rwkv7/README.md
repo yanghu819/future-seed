@@ -953,14 +953,13 @@ Round104 outcomes:
   - med baseline `47.53%`
   - `scalar_l8_sched_cos` med `48.82%` (**`+1.29pp`**)
 
-### Round105-106 (expand2 queue, in progress)
+### Round105-106 (expand2 queue, completed)
 
 - Queue:
   - `results/_search_queue_round105_106_expand2.json`
 - Completed:
   - `results/_summary_round105_fastdiscover.txt`
-- Running:
-  - round `106`
+  - `results/_summary_round106_fastdiscover.txt`
 
 Round105 outcomes:
 
@@ -972,3 +971,32 @@ Round105 outcomes:
   - quick baseline `10.72%`
   - best quick `scalar_l8_train1e4` `8.54%` (`-2.19pp`)
   - all candidates quick-pruned / med skipped
+
+Round106 outcomes:
+
+- `mbpp_seed5_headprobe`:
+  - quick baseline `41.36%`
+  - quick best `head_l10_strong` `40.35%` (`-1.01pp`)
+  - all candidates quick-pruned, med skipped
+- `hotpot_seed5_discovery`:
+  - quick baseline `8.41%`
+  - quick best `scalar_l8_train1e4` `7.13%` (`-1.28pp`)
+  - all candidates quick-pruned, med skipped
+
+### Round107-112 (new-task expansion queue, in progress)
+
+- Queue:
+  - `results/_search_queue_round107_112_newtasks.json`
+- Running:
+  - round `107` (`hotpot_longctx_seed0_discovery`, `arc_mc_seed0_discovery`)
+
+Planned expansion highlights:
+
+- Introduce new trainer/task families:
+  - `train_hotpot_longctx_sft.py` (`hotpot_longctx_seed0/1`)
+  - `train_mbpp_longctx_sft.py` (`mbpp_longctx_seed0/1`)
+  - `train_arc_mc_sft.py` (`arc_mc_seed0/1`)
+- Keep fresh-seed discovery on known real-task winners:
+  - `protein_ss_seed7_discovery`, `mbpp_seed6_headprobe`, `hotpot_seed6_discovery`, `arc_seed6_discovery`
+- Keep anchor calibration light:
+  - `squad_seed4_anchor`, `punc_seed2_anchor`

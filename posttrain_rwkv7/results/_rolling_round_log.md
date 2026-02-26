@@ -711,3 +711,19 @@ Failed/pruned:
 Next round plan:
 1. complete round106 (`mbpp_seed5_headprobe`, `hotpot_seed5_discovery`) and check if scalar cosine remains robust.
 2. freeze arc seed5 route under current recipe family (strong negative quick).
+
+---
+
+## Round106 - expand2 queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `mbpp_seed5_headprobe`: best quick `head_l10_strong` `40.35%` vs baseline `41.36%` (**`-1.01pp`**, med skipped)
+- `hotpot_seed5_discovery`: best quick `scalar_l8_train1e4` `7.13%` vs baseline `8.41%` (**`-1.28pp`**, med skipped)
+
+Failed/pruned:
+- `mbpp_seed5_headprobe`: all candidates quick-pruned (`-1.01pp`, `-1.01pp`, `-1.27pp`)
+- `hotpot_seed5_discovery`: all candidates quick-pruned (`-1.28pp`, `-1.37pp`, `-1.57pp`)
+
+Next round plan:
+1. expand to new task families (`arc_mc`, `hotpot_longctx`, `mbpp_longctx`) to avoid local optimum loops.
+2. keep a light anchor lane (`squad_seed4`, `punc_seed2`) while prioritizing fresh-seed discovery.

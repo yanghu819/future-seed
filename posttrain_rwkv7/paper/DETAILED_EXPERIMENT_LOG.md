@@ -1816,3 +1816,42 @@ Round105 conclusion:
 - This round produced no useful-task addition (`med > baseline` none).
 - Strong negative evidence to freeze `arc_seed5` with current config family.
 - Continuation status: round106 running.
+
+## 2026-02-26 Round106 (expand2 queue, completed)
+
+Outputs:
+- `results/_summary_round106_fastdiscover.txt`
+- `results/_round106_fastdiscover_records.jsonl`
+
+### Round106 (`mbpp_seed5_headprobe` + `hotpot_seed5_discovery`)
+
+1) `mbpp_seed5_headprobe`
+- quick baseline: `41.36%`
+- quick best `head_l10_strong`: `40.35%` (`-1.01pp`)
+- all candidates quick-pruned (`-1.01pp`, `-1.01pp`, `-1.27pp`)
+- med skipped (`best_quick -1.01pp < +0.80pp promote gate`)
+
+2) `hotpot_seed5_discovery`
+- quick baseline: `8.41%`
+- quick best `scalar_l8_train1e4`: `7.13%` (`-1.28pp`)
+- all candidates quick-pruned (`-1.28pp`, `-1.37pp`, `-1.57pp`)
+- med skipped (`best_quick -1.28pp < +0.80pp promote gate`)
+
+Round106 conclusion:
+- No useful-task addition in this round.
+- Both tasks entered strong-negative quick regime under current recipe.
+- Search should pivot to genuinely new task families instead of repeating local neighborhoods.
+
+## 2026-02-26 Round107-112 (new-task expansion queue, launched)
+
+Queue:
+- `results/_search_queue_round107_112_newtasks.json`
+
+Design:
+- New families: `train_hotpot_longctx_sft.py`, `train_mbpp_longctx_sft.py`, `train_arc_mc_sft.py`.
+- Fresh-seed discoveries: `protein_ss_seed7`, `hotpot_seed6`, `arc_seed6`, `mbpp_seed6`.
+- Light anchors: `squad_seed4_anchor`, `punc_seed2_anchor`.
+
+Execution status:
+- Started after Round106 completion.
+- Running round107 baseline (`hotpot_longctx_seed0_discovery`) on remote single 4090.
