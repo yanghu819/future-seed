@@ -633,3 +633,18 @@ Failed/pruned:
 Next round plan:
 1. execute round101 anchor recheck (`squad_seed2`, `punc_seed1`) and keep same quick/med gates.
 2. if anchor rounds flatten, move budget back to new-task pool with protein/hotpot variants.
+
+---
+
+## Round101 - focus2 queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed1_anchor_recheck2`: `scalar_l8_train1e4` med `13.04%` vs med baseline `10.88%` (**`+2.16pp`**)
+- `squad_seed2_anchor_recheck2`: `scalar_l8_train1e4` med `19.04%` vs med baseline `18.33%` (**`+0.71pp`**)
+
+Failed/pruned:
+- none (all quick candidates above prune threshold; top1 promoted by gate)
+
+Next round plan:
+1. finish round102 (`mbpp_seed0_anchor_recheck2`, `protein_ss_seed1_anchor_recheck`) and close this queue.
+2. promote high-yield branches (`protein_ss`, `hotpot/punc`) for next discovery package.

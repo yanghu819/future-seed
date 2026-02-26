@@ -1684,3 +1684,28 @@ Round100 conclusion:
 - `hotpot_seed1_headprobe` enters useful-task pool with stable med gain (**`+2.16pp`**).
 - `arc_seed0_headprobe` is positive but weak (**`+0.29pp`**), lower priority than protein/hotpot branches.
 - Continuation status: round101-102 running.
+
+## 2026-02-26 Round101 (focus2 queue, completed)
+
+Outputs:
+- `results/_summary_round101_fastdiscover.txt`
+- `results/_round101_fastdiscover_records.jsonl`
+
+### Round101 (`squad_seed2_anchor_recheck2` + `punc_seed1_anchor_recheck2`)
+
+1) `squad_seed2_anchor_recheck2`
+- quick baseline: `14.58%`
+- quick best `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+- med baseline: `18.33%`
+- med FS (`scalar_l8_train1e4`): `19.04%` (**`+0.71pp`**)
+
+2) `punc_seed1_anchor_recheck2`
+- quick baseline: `7.92%`
+- quick best `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- med baseline: `10.88%`
+- med FS (`scalar_l8_train1e4`): `13.04%` (**`+2.16pp`**)
+
+Round101 conclusion:
+- Anchor positives are stable across repeated checks (`punc` **`+2.16pp`**, `squad` **`+0.71pp`**).
+- No quick-prune was triggered in this round; ranking still favors `punc`/`protein_ss` over `arc`.
+- Continuation status: round102 running.

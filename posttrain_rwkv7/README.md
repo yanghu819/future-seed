@@ -870,8 +870,10 @@ Latest bottom line (after Round98):
   - `results/_search_queue_round99_102_focus2.json`
 - Completed:
   - `results/_summary_round99_fastdiscover.txt`
+  - `results/_summary_round100_fastdiscover.txt`
+  - `results/_summary_round101_fastdiscover.txt`
 - Running:
-  - rounds `100-102`
+  - round `102`
 
 Round99 outcomes:
 
@@ -895,3 +897,14 @@ Round100 outcomes:
   - quick baseline `10.36%`
   - med baseline `12.33%`
   - `scalar_l8_train8e5` med `12.63%` (**`+0.29pp`**)
+
+Round101 outcomes:
+
+- `punc_seed1_anchor_recheck2`:
+  - quick baseline `7.92%`
+  - med baseline `10.88%`
+  - `scalar_l8_train1e4` med `13.04%` (**`+2.16pp`**)
+- `squad_seed2_anchor_recheck2`:
+  - quick baseline `14.58%`
+  - med baseline `18.33%`
+  - `scalar_l8_train1e4` med `19.04%` (**`+0.71pp`**)
