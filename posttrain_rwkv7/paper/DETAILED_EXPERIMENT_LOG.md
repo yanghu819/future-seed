@@ -1734,3 +1734,31 @@ Round102 conclusion:
 - Queue `round99-102` fully completed; both tasks in round102 delivered positive med gains.
 - `protein_ss` remains the strongest stable family (again above `+2pp` in med).
 - `mbpp` gained from cosine-scheduled scalar FS in this anchor recheck (`+1.20pp`).
+
+## 2026-02-26 Round103 (expand queue, completed)
+
+Queue:
+- `results/_search_queue_round103_104_expand.json`
+
+Outputs:
+- `results/_summary_round103_fastdiscover.txt`
+- `results/_round103_fastdiscover_records.jsonl`
+
+### Round103 (`hotpot_seed4_discovery` + `protein_ss_seed5_discovery`)
+
+1) `hotpot_seed4_discovery`
+- quick baseline: `8.78%`
+- quick best `scalar_l8_train1e4`: `9.57%` (`+0.79pp`)
+- med skipped (`+0.79pp < +0.80pp promote gate`)
+- quick-pruned: `scalar_l8_train8e5` (`-0.75pp`)
+
+2) `protein_ss_seed5_discovery`
+- quick baseline: `23.08%`
+- quick best `head_l8`: `28.30%` (`+5.22pp`)
+- med baseline: `26.68%`
+- med FS (`head_l8`): `28.30%` (**`+1.62pp`**)
+
+Round103 conclusion:
+- `protein_ss` continues to produce positive med gains on unseen seed (`seed5`).
+- `hotpot_seed4` is near-threshold but failed strict promote gate by `0.01pp`.
+- Continuation status: round104 running.

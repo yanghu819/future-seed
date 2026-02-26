@@ -920,3 +920,23 @@ Round102 outcomes:
   - quick baseline `40.69%`
   - med baseline `48.07%`
   - `scalar_l8_sched_cos` med `49.26%` (**`+1.20pp`**)
+
+### Round103-104 (expand queue, in progress)
+
+- Queue:
+  - `results/_search_queue_round103_104_expand.json`
+- Completed:
+  - `results/_summary_round103_fastdiscover.txt`
+- Running:
+  - round `104`
+
+Round103 outcomes:
+
+- `protein_ss_seed5_discovery`:
+  - quick baseline `23.08%`
+  - med baseline `26.68%`
+  - `head_l8` med `28.30%` (**`+1.62pp`**)
+- `hotpot_seed4_discovery`:
+  - quick baseline `8.78%`
+  - quick best `scalar_l8_train1e4` `9.57%` (`+0.79pp`)
+  - med skipped (`+0.79pp < +0.80pp gate`)

@@ -663,3 +663,19 @@ Failed/pruned:
 Next round plan:
 1. build next discovery queue around high-yield families (`protein_ss` + `head_l8`, `mbpp` + `scalar_l8_sched_cos`).
 2. keep 30% anchor calibration and spend 70% on new tasks to expand useful-task pool.
+
+---
+
+## Round103 - expand queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed5_discovery`: `head_l8` med `28.30%` vs med baseline `26.68%` (**`+1.62pp`**)
+
+Failed/pruned:
+- `hotpot_seed4_discovery`:
+  - `scalar_l8_train8e5` quick-pruned (`-0.75pp < -0.50pp`)
+  - med skipped: best quick `+0.79pp` below promote gate `+0.80pp`
+
+Next round plan:
+1. complete round104 (`arc_seed4_discovery`, `mbpp_seed4_headprobe`) under same gate/prune policy.
+2. keep `protein_ss + head_l8` as primary positive branch for new-task expansion.
