@@ -1762,3 +1762,30 @@ Round103 conclusion:
 - `protein_ss` continues to produce positive med gains on unseen seed (`seed5`).
 - `hotpot_seed4` is near-threshold but failed strict promote gate by `0.01pp`.
 - Continuation status: round104 running.
+
+## 2026-02-26 Round104 (expand queue, completed)
+
+Outputs:
+- `results/_summary_round104_fastdiscover.txt`
+- `results/_round104_fastdiscover_records.jsonl`
+
+### Round104 (`arc_seed4_discovery` + `mbpp_seed4_headprobe`)
+
+1) `arc_seed4_discovery`
+- quick baseline: `9.07%`
+- quick best `scalar_l8_train1e4`: `11.91%` (`+2.83pp`)
+- med baseline: `10.34%`
+- med FS (`scalar_l8_train1e4`): `13.07%` (**`+2.73pp`**)
+- quick-pruned: `head_l8` (`-0.86pp`)
+
+2) `mbpp_seed4_headprobe`
+- quick baseline: `40.61%`
+- quick best `scalar_l8_sched_cos`: `42.86%` (`+2.25pp`)
+- med baseline: `47.53%`
+- med FS (`scalar_l8_sched_cos`): `48.82%` (**`+1.29pp`**)
+- quick-pruned: `head_l10_strong` (`-0.51pp`), `head_l10_clip07` (`-0.51pp`)
+
+Round104 conclusion:
+- Both tasks delivered positive med gains; `arc_seed4` produced the strongest round gain (**`+2.73pp`**).
+- Head variants for `mbpp_seed4` are currently weak; scalar cosine remains the better branch.
+- Queue `round103-104` finished successfully and produced two new useful-task confirmations.

@@ -679,3 +679,19 @@ Failed/pruned:
 Next round plan:
 1. complete round104 (`arc_seed4_discovery`, `mbpp_seed4_headprobe`) under same gate/prune policy.
 2. keep `protein_ss + head_l8` as primary positive branch for new-task expansion.
+
+---
+
+## Round104 - expand queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `arc_seed4_discovery`: `scalar_l8_train1e4` med `13.07%` vs med baseline `10.34%` (**`+2.73pp`**)
+- `mbpp_seed4_headprobe`: `scalar_l8_sched_cos` med `48.82%` vs med baseline `47.53%` (**`+1.29pp`**)
+
+Failed/pruned:
+- `arc_seed4_discovery`: `head_l8` quick-pruned (`-0.86pp < -0.50pp`)
+- `mbpp_seed4_headprobe`: `head_l10_strong` and `head_l10_clip07` quick-pruned (`-0.51pp`)
+
+Next round plan:
+1. continue new-task expansion, prioritizing `arc + scalar_l8_train1e4` and `mbpp + scalar_l8_sched_cos` on fresh seeds.
+2. keep `protein_ss + head_l8` as primary branch and reduce budget on near-threshold hotpot lines.

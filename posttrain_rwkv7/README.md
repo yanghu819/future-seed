@@ -927,8 +927,9 @@ Round102 outcomes:
   - `results/_search_queue_round103_104_expand.json`
 - Completed:
   - `results/_summary_round103_fastdiscover.txt`
+  - `results/_summary_round104_fastdiscover.txt`
 - Running:
-  - round `104`
+  - none (queue finished)
 
 Round103 outcomes:
 
@@ -940,3 +941,14 @@ Round103 outcomes:
   - quick baseline `8.78%`
   - quick best `scalar_l8_train1e4` `9.57%` (`+0.79pp`)
   - med skipped (`+0.79pp < +0.80pp gate`)
+
+Round104 outcomes:
+
+- `arc_seed4_discovery`:
+  - quick baseline `9.07%`
+  - med baseline `10.34%`
+  - `scalar_l8_train1e4` med `13.07%` (**`+2.73pp`**)
+- `mbpp_seed4_headprobe`:
+  - quick baseline `40.61%`
+  - med baseline `47.53%`
+  - `scalar_l8_sched_cos` med `48.82%` (**`+1.29pp`**)
