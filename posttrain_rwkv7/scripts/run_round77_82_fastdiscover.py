@@ -68,13 +68,14 @@ class HistoryIndex:
 
 def env() -> dict:
     e = os.environ.copy()
-    e["TORCH_EXTENSIONS_DIR"] = "/root/autodl-tmp/torch_extensions"
-    e["HF_HOME"] = "/root/autodl-tmp/hf"
-    e["HF_DATASETS_CACHE"] = "/root/autodl-tmp/hf_datasets"
-    e["TRANSFORMERS_CACHE"] = "/root/autodl-tmp/hf_transformers"
-    e["HF_ENDPOINT"] = "https://huggingface.co"
-    e["HF_DATASETS_OFFLINE"] = "1"
-    e["HF_HUB_OFFLINE"] = "1"
+    e["TORCH_EXTENSIONS_DIR"] = os.environ.get("TORCH_EXTENSIONS_DIR", "/root/autodl-tmp/torch_extensions")
+    e["HF_HOME"] = os.environ.get("HF_HOME", "/root/autodl-tmp/hf")
+    e["HF_DATASETS_CACHE"] = os.environ.get("HF_DATASETS_CACHE", "/root/autodl-tmp/hf_datasets")
+    e["TRANSFORMERS_CACHE"] = os.environ.get("TRANSFORMERS_CACHE", "/root/autodl-tmp/hf_transformers")
+    e["HF_ENDPOINT"] = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
+    # Default to offline mode, but allow round-level override via shell env.
+    e["HF_DATASETS_OFFLINE"] = os.environ.get("HF_DATASETS_OFFLINE", "1")
+    e["HF_HUB_OFFLINE"] = os.environ.get("HF_HUB_OFFLINE", "1")
     e["PYTHONUNBUFFERED"] = "1"
     e["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
     e["TORCH_CUDA_ARCH_LIST"] = "8.9"

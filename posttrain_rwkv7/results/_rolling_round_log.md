@@ -334,3 +334,100 @@ Failed/pruned:
 Next round plan:
 1. freeze `scalar_l8_train1e4` as PUNC/SQuAD default high-yield recipe under current budget.
 2. continue only one低优先 MBPP seed3 near-neutral track，主预算转向高收益任务。
+
+---
+
+## Round77 - fastdiscover (new tasks, completed 2026-02-26)
+
+Best config vs baseline:
+- `arc_seed0_discovery`: `scalar_l8_train8e5` med `12.63%` vs med baseline `12.33%` (**`+0.29pp`**)
+- `hotpot_seed0_discovery`: `scalar_l8_train8e5` med `10.36%` vs med baseline `10.48%` (**`-0.12pp`**)
+
+Failed/pruned:
+- `hotpot_seed0_discovery`:
+  - `scalar_l8_train1e4` quick-pruned (`-4.17pp < -0.50pp`)
+  - promoted candidate failed med confirmation (`-0.12pp`)
+
+Next round plan:
+1. Continue broad search with protein and wiki branches.
+2. Keep strict quick prune and single-top1 med promotion.
+
+---
+
+## Round78 - fastdiscover (new tasks, completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed0_discovery`: `scalar_l8_train1e4` med `30.77%` vs med baseline `27.17%` (**`+3.60pp`**)
+
+Failed/pruned:
+- `wiki_seed0_discovery` baseline failed (offline dataset cache miss).
+- `protein_ss_seed0_discovery`:
+  - `scalar_l8_train8e5` quick-pruned (`-1.64pp < -0.50pp`)
+
+Next round plan:
+1. Keep protein branch expansion (new seeds).
+2. Investigate wiki/protein_contact failure causes and patch queue/env.
+
+---
+
+## Round79 - fastdiscover (new tasks, completed 2026-02-26)
+
+Best config vs baseline:
+- `hotpot_seed1_discovery`: `scalar_l8_train1e4` med `13.04%` vs med baseline `10.88%` (**`+2.16pp`**)
+
+Failed/pruned:
+- `protein_contact_seed0_discovery` baseline failed:
+  - dataset built only `168` val examples vs requested `200`.
+
+Next round plan:
+1. Run ARC seed extension with same quick->med policy.
+2. Patch `protein_contact` `n_val` to a feasible value.
+
+---
+
+## Round80 - fastdiscover (new tasks, completed 2026-02-26)
+
+Best config vs baseline:
+- `arc_seed1_discovery`: best quick `scalar_l8_sched_cos` `9.49%` vs quick baseline `9.09%` (**`+0.41pp`**, med skipped)
+
+Failed/pruned:
+- `arc_seed1_discovery`:
+  - `scalar_l8_train1e4` quick-pruned (`-1.45pp < -0.50pp`)
+  - `scalar_l8_train8e5` quick-pruned (`-1.16pp < -0.50pp`)
+  - med skipped (`best_quick +0.41pp < +0.80pp`)
+- `wiki_seed1_discovery` baseline failed (offline dataset cache miss).
+
+Next round plan:
+1. Start 30% anchor calibration block.
+2. Preserve strict +0.8pp promotion to control wasted med budget.
+
+---
+
+## Round81 - fastdiscover (anchor calibration, completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed1_anchor`: `scalar_l8_train1e4` med `13.04%` vs med baseline `10.88%` (**`+2.16pp`**)
+- `squad_seed2_anchor`: `scalar_l8_train1e4` med `19.04%` vs med baseline `18.33%` (**`+0.71pp`**)
+
+Failed/pruned:
+- `squad_seed2_anchor`:
+  - `scalar_l8_sched_cos` quick-pruned (`-0.51pp < -0.50pp`)
+
+Next round plan:
+1. Continue anchor calibration with MBPP/SQuAD seed0.
+2. Keep new-task expansion as main budget after anchor check.
+
+---
+
+## Round82 - fastdiscover (anchor calibration, completed 2026-02-26)
+
+Best config vs baseline:
+- `mbpp_seed2_anchor`: `scalar_l8_sched_cos` med `47.58%` vs med baseline `46.69%` (**`+0.89pp`**)
+- `squad_seed0_anchor`: best quick `scalar_l8_train1e4` `14.05%` vs quick baseline `13.33%` (**`+0.72pp`**, med skipped)
+
+Failed/pruned:
+- `squad_seed0_anchor` med skipped (`best_quick +0.72pp < +0.80pp promote gate`).
+
+Next round plan:
+1. Launch round83-88 queue with failure-fix paths (`wiki` online mode, `protein_contact` n_val fix).
+2. Expand to new seeds (`hotpot/arc/protein_ss`) while keeping 70/30 new-vs-anchor mix.

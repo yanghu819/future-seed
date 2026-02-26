@@ -735,3 +735,55 @@ Interpretation:
 
 - `scalar_l8_train1e4` is now the most reliable high-value branch across current SQuAD/PUNC settings.
 - dual-med protocol proved useful by exposing quick/med ranking reversals.
+
+### Round77-82 (fastdiscover broad search, completed)
+
+- Script: `scripts/run_round77_82_fastdiscover.py`
+- Queue: `results/_search_queue_round77_82.json`
+- Summaries:
+  - `results/_summary_round77_fastdiscover.txt`
+  - `results/_summary_round78_fastdiscover.txt`
+  - `results/_summary_round79_fastdiscover.txt`
+  - `results/_summary_round80_fastdiscover.txt`
+  - `results/_summary_round81_fastdiscover.txt`
+  - `results/_summary_round82_fastdiscover.txt`
+- Records:
+  - `results/_round77_fastdiscover_records.jsonl`
+  - `results/_round78_fastdiscover_records.jsonl`
+  - `results/_round79_fastdiscover_records.jsonl`
+  - `results/_round80_fastdiscover_records.jsonl`
+  - `results/_round81_fastdiscover_records.jsonl`
+  - `results/_round82_fastdiscover_records.jsonl`
+
+Main outcomes:
+
+- Round77 (`hotpot_seed0_discovery`, `arc_seed0_discovery`):
+  - `arc_seed0_discovery`: med `scalar_l8_train8e5` **`+0.29pp`**.
+  - `hotpot_seed0_discovery`: med `scalar_l8_train8e5` **`-0.12pp`**.
+  - prune: `hotpot scalar_l8_train1e4` quick **`-4.17pp`**.
+- Round78 (`wiki_seed0_discovery`, `protein_ss_seed0_discovery`):
+  - `protein_ss_seed0_discovery`: med `scalar_l8_train1e4` **`+3.60pp`**.
+  - `wiki_seed0_discovery`: baseline failed (offline dataset not cached).
+  - prune: `protein_ss scalar_l8_train8e5` quick **`-1.64pp`**.
+- Round79 (`hotpot_seed1_discovery`, `protein_contact_seed0_discovery`):
+  - `hotpot_seed1_discovery`: med `scalar_l8_train1e4` **`+2.16pp`**.
+  - `protein_contact_seed0_discovery`: baseline failed (`n_val=200` exceeded buildable examples).
+- Round80 (`arc_seed1_discovery`, `wiki_seed1_discovery`):
+  - `arc_seed1_discovery`: best quick `scalar_l8_sched_cos` **`+0.41pp`**, med skipped (`< +0.80pp gate`).
+  - `wiki_seed1_discovery`: baseline failed (offline dataset not cached).
+  - prune: `arc scalar_l8_train1e4` **`-1.45pp`**, `scalar_l8_train8e5` **`-1.16pp`**.
+- Round81 (`squad_seed2_anchor`, `punc_seed1_anchor`):
+  - `squad_seed2_anchor`: med `scalar_l8_train1e4` **`+0.71pp`**.
+  - `punc_seed1_anchor`: med `scalar_l8_train1e4` **`+2.16pp`**.
+  - prune: `squad scalar_l8_sched_cos` quick **`-0.51pp`**.
+- Round82 (`squad_seed0_anchor`, `mbpp_seed2_anchor`):
+  - `mbpp_seed2_anchor`: med `scalar_l8_sched_cos` **`+0.89pp`**.
+  - `squad_seed0_anchor`: best quick `scalar_l8_train1e4` **`+0.72pp`**, med skipped (`< +0.80pp gate`).
+
+Fastdiscover bottom line (after Round82):
+
+- Highest new-task gain in this pack: `protein_ss_seed0_discovery` **`+3.60pp`** (med).
+- Additional useful-task entries (`med > baseline`): `hotpot_seed1_discovery` **`+2.16pp`**, `punc_seed1_anchor` **`+2.16pp`**, `mbpp_seed2_anchor` **`+0.89pp`**, `squad_seed2_anchor` **`+0.71pp`**, `arc_seed0_discovery` **`+0.29pp`**.
+- Main blockers to fix next:
+  - `wikitext` blocked by offline-mode cache miss.
+  - `protein_contact` blocked by over-large `n_val` target for available data.

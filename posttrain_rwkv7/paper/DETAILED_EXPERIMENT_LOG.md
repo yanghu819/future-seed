@@ -1284,3 +1284,152 @@ Outcomes:
 Round76 conclusion:
 - dual-med confirmed that `scalar_l8_train1e4` is the dominant high-yield recipe for current PUNC/SQuAD settings.
 - quick-only ranking can mislead (`sched_cos` looked strong in quick for PUNC but lost at med).
+
+## 2026-02-26 Round77-82 (fastdiscover broad search, completed)
+
+Script:
+- `scripts/run_round77_82_fastdiscover.py`
+
+Queue:
+- `results/_search_queue_round77_82.json`
+
+Outputs:
+- `results/_summary_round77_fastdiscover.txt`
+- `results/_summary_round78_fastdiscover.txt`
+- `results/_summary_round79_fastdiscover.txt`
+- `results/_summary_round80_fastdiscover.txt`
+- `results/_summary_round81_fastdiscover.txt`
+- `results/_summary_round82_fastdiscover.txt`
+- `results/_round77_fastdiscover_records.jsonl`
+- `results/_round78_fastdiscover_records.jsonl`
+- `results/_round79_fastdiscover_records.jsonl`
+- `results/_round80_fastdiscover_records.jsonl`
+- `results/_round81_fastdiscover_records.jsonl`
+- `results/_round82_fastdiscover_records.jsonl`
+
+Policy:
+- 70% budget on new-task discovery, 30% on anchor calibration.
+- quick prune: `< baseline -0.50pp`.
+- med promotion: `quick >= baseline +0.80pp` and only top1.
+- useful task criterion: `med > baseline` (pp).
+
+### Round77 (hotpot_seed0 + arc_seed0)
+
+1) `hotpot_seed0_discovery`
+- quick baseline: `8.44%`
+- quick `scalar_l8_train8e5`: `10.36%` (`+1.92pp`)
+- quick `scalar_l8_sched_cos`: `8.18%` (`-0.26pp`)
+- quick `scalar_l8_train1e4`: `4.27%` (`-4.17pp`, pruned)
+- med baseline: `10.48%`
+- med FS (`scalar_l8_train8e5`): `10.36%` (**`-0.12pp`**)
+
+2) `arc_seed0_discovery`
+- quick baseline: `10.36%`
+- quick `scalar_l8_train8e5`: `11.36%` (`+1.00pp`)
+- med baseline: `12.33%`
+- med FS (`scalar_l8_train8e5`): `12.63%` (**`+0.29pp`**)
+
+Round77 conclusion:
+- ARC seed0 gave a small but positive med gain.
+- Hotpot seed0 showed quick-positive but med-negative reversal.
+
+### Round78 (wiki_seed0 + protein_ss_seed0)
+
+1) `wiki_seed0_discovery`
+- baseline failed before quick comparison.
+- failure cause: offline mode + missing local cache for `wikitext`.
+
+2) `protein_ss_seed0_discovery`
+- quick baseline: `27.17%`
+- quick `scalar_l8_train1e4`: `30.77%` (`+3.60pp`)
+- quick `head_l8`: `29.72%` (`+2.55pp`)
+- quick `scalar_l8_train8e5`: `25.53%` (`-1.64pp`, pruned)
+- med baseline: `27.17%`
+- med FS (`scalar_l8_train1e4`): `30.77%` (**`+3.60pp`**)
+
+Round78 conclusion:
+- protein sequence labeling became the strongest new-task positive branch in this pack.
+- wiki remained blocked by data-access mode.
+
+### Round79 (hotpot_seed1 + protein_contact_seed0)
+
+1) `hotpot_seed1_discovery`
+- quick baseline: `7.92%`
+- quick `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- med baseline: `10.88%`
+- med FS (`scalar_l8_train1e4`): `13.04%` (**`+2.16pp`**)
+
+2) `protein_contact_seed0_discovery`
+- baseline failed.
+- failure cause: only `168` val examples were buildable while `n_val=200`.
+
+Round79 conclusion:
+- hotpot seed1 is a clear useful task under current recipe.
+- protein_contact requires queue fix (`n_val` reduction) before fair comparison.
+
+### Round80 (arc_seed1 + wiki_seed1)
+
+1) `arc_seed1_discovery`
+- quick baseline: `9.09%`
+- quick `scalar_l8_sched_cos`: `9.49%` (`+0.41pp`)
+- quick `scalar_l8_train8e5`: `7.93%` (`-1.16pp`, pruned)
+- quick `scalar_l8_train1e4`: `7.64%` (`-1.45pp`, pruned)
+- med skipped (`+0.41pp < +0.80pp` gate)
+
+2) `wiki_seed1_discovery`
+- baseline failed.
+- failure cause: same as seed0 (`wikitext` cache missing in offline mode).
+
+Round80 conclusion:
+- ARC seed1 did not reach med gate.
+- wiki remained blocked by environment, not by model quality.
+
+### Round81 (anchor: squad_seed2 + punc_seed1)
+
+1) `squad_seed2_anchor`
+- quick baseline: `14.58%`
+- quick `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+- quick `scalar_l8_train8e5`: `15.33%` (`+0.76pp`)
+- quick `scalar_l8_sched_cos`: `14.07%` (`-0.51pp`, pruned)
+- med baseline: `18.33%`
+- med FS (`scalar_l8_train1e4`): `19.04%` (**`+0.71pp`**)
+
+2) `punc_seed1_anchor`
+- quick baseline: `7.92%`
+- quick `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- med baseline: `10.88%`
+- med FS (`scalar_l8_train1e4`): `13.04%` (**`+2.16pp`**)
+
+Round81 conclusion:
+- anchor calibration confirmed both SQuAD and PUNC practical positives.
+
+### Round82 (anchor: squad_seed0 + mbpp_seed2)
+
+1) `squad_seed0_anchor`
+- quick baseline: `13.33%`
+- quick `scalar_l8_train1e4`: `14.05%` (`+0.72pp`)
+- quick `scalar_l8_sched_cos`: `13.80%` (`+0.47pp`)
+- quick `scalar_l8_train8e5`: `13.58%` (`+0.25pp`)
+- med skipped (`best_quick +0.72pp < +0.80pp`)
+
+2) `mbpp_seed2_anchor`
+- quick baseline: `39.11%`
+- quick `scalar_l8_sched_cos`: `41.19%` (`+2.08pp`)
+- med baseline: `46.69%`
+- med FS (`scalar_l8_sched_cos`): `47.58%` (**`+0.89pp`**)
+
+Round82 conclusion:
+- MBPP seed2 remained a useful task at med.
+- SQuAD seed0 was positive in quick but below strict promote gate.
+
+Round77-82 consolidated conclusion:
+- Useful-task pool added/confirmed with med positives:
+  - `protein_ss_seed0_discovery`: **`+3.60pp`**
+  - `hotpot_seed1_discovery`: **`+2.16pp`**
+  - `punc_seed1_anchor`: **`+2.16pp`**
+  - `mbpp_seed2_anchor`: **`+0.89pp`**
+  - `squad_seed2_anchor`: **`+0.71pp`**
+  - `arc_seed0_discovery`: **`+0.29pp`**
+- Primary blockers were operational:
+  - `wikitext` unavailable in offline mode.
+  - `protein_contact` validation target too large for sampled build constraints.
