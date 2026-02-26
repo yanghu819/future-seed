@@ -827,3 +827,39 @@ Fastdiscover continuation bottom line (after Round94):
   - `protein_contact` (quick tie ceiling).
   - `arc_seed2`/`squad_seed1|3` (consistent quick negatives).
   - `hotpot_seed2` and `punc_seed0` (quick-positive but med-negative reversal).
+
+### Round95-98 (focus queue, completed)
+
+- Queue: `results/_search_queue_round95_98_focus.json`
+- Summaries:
+  - `results/_summary_round95_fastdiscover.txt`
+  - `results/_summary_round96_fastdiscover.txt`
+  - `results/_summary_round97_fastdiscover.txt`
+  - `results/_summary_round98_fastdiscover.txt`
+
+Main outcomes:
+
+- Round95:
+  - `mbpp_seed1_anchor`: quick best `+2.25pp`, but med `-1.51pp` (failed confirmation).
+  - `protein_ss_seed2_discovery`: all quick non-positive, med skipped.
+- Round96:
+  - `protein_ss_seed3_discovery`: med `scalar_l8_train1e4` **`+1.68pp`**.
+  - `mbpp_seed3_anchor`: all quick negative, med skipped.
+- Round97:
+  - `squad_seed2_anchor_recheck`: med `scalar_l8_train1e4` **`+0.71pp`** (reconfirmed).
+  - `hotpot_seed3_discovery`: all quick negative, med skipped.
+- Round98:
+  - `punc_seed1_anchor_recheck`: med `scalar_l8_train1e4` **`+2.16pp`** (reconfirmed).
+  - `arc_seed3_discovery`: all quick negative, med skipped.
+
+Latest bottom line (after Round98):
+
+- High-yield useful tasks:
+  - `protein_ss`: seed0 **`+3.60pp`**, seed1 **`+2.39pp`**, seed3 **`+1.68pp`**.
+  - `punc_seed1`: **`+2.16pp`** (reconfirmed).
+  - `mbpp_seed0`: **`+2.03pp`** (anchor reconfirmed).
+  - `squad_seed2`: **`+0.71pp`** (reconfirmed).
+- Prune/freeze candidates:
+  - `arc` seed2/seed3 branches (consistent quick negatives).
+  - `hotpot` seed2/seed3 branches (quick->med instability or quick negatives).
+  - `mbpp` seed1/seed3 branches (quick-positive but med-negative / quick-negative split).

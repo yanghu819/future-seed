@@ -1538,3 +1538,95 @@ Round89-94 consolidated conclusion:
   - `protein_contact` (quick tie ceiling),
   - `arc_seed2`/`squad_seed1|3` (consistent quick negatives),
   - `hotpot_seed2` and `punc_seed0` (quick-positive but med-negative).
+
+## 2026-02-26 Round95-98 (focus queue, completed)
+
+Queue:
+- `results/_search_queue_round95_98_focus.json`
+
+Outputs:
+- `results/_summary_round95_fastdiscover.txt`
+- `results/_summary_round96_fastdiscover.txt`
+- `results/_summary_round97_fastdiscover.txt`
+- `results/_summary_round98_fastdiscover.txt`
+- `results/_round95_fastdiscover_records.jsonl`
+- `results/_round96_fastdiscover_records.jsonl`
+- `results/_round97_fastdiscover_records.jsonl`
+- `results/_round98_fastdiscover_records.jsonl`
+
+### Round95 (`protein_ss_seed2_discovery` + `mbpp_seed1_anchor`)
+
+1) `protein_ss_seed2_discovery`
+- quick baseline: `26.45%`
+- best quick: `scalar_l8_train1e4` `26.20%` (`-0.25pp`)
+- med skipped
+
+2) `mbpp_seed1_anchor`
+- quick baseline: `40.86%`
+- quick `scalar_l8_train8e5`: `43.11%` (`+2.25pp`)
+- med baseline: `47.56%`
+- med FS (`scalar_l8_train8e5`): `46.05%` (**`-1.51pp`**)
+
+Round95 conclusion:
+- MBPP seed1 again shows quick-positive/med-negative reversal.
+- protein_ss seed2 is non-positive under this budget.
+
+### Round96 (`protein_ss_seed3_discovery` + `mbpp_seed3_anchor`)
+
+1) `protein_ss_seed3_discovery`
+- quick baseline: `31.29%`
+- quick `scalar_l8_train1e4`: `32.97%` (`+1.68pp`)
+- med baseline: `31.29%`
+- med FS (`scalar_l8_train1e4`): `32.97%` (**`+1.68pp`**)
+
+2) `mbpp_seed3_anchor`
+- quick baseline: `43.11%`
+- all quick candidates negative (`-0.51pp`, `-1.12pp`, `-3.01pp`)
+- med skipped
+
+Round96 conclusion:
+- protein_ss remains a stable useful-task direction across seeds.
+- MBPP seed3 branch stays negative.
+
+### Round97 (`hotpot_seed3_discovery` + `squad_seed2_anchor_recheck`)
+
+1) `hotpot_seed3_discovery`
+- quick baseline: `11.76%`
+- all quick candidates negative (`-0.52pp`, `-1.04pp`, `-1.43pp`)
+- med skipped
+
+2) `squad_seed2_anchor_recheck`
+- quick baseline: `14.58%`
+- quick `scalar_l8_train1e4`: `15.59%` (`+1.01pp`)
+- med baseline: `18.33%`
+- med FS (`scalar_l8_train1e4`): `19.04%` (**`+0.71pp`**)
+
+Round97 conclusion:
+- SQuAD seed2 positive signal is reconfirmed.
+- hotpot seed3 is negative under current recipe.
+
+### Round98 (`arc_seed3_discovery` + `punc_seed1_anchor_recheck`)
+
+1) `arc_seed3_discovery`
+- quick baseline: `10.63%`
+- all quick candidates negative (`-0.51pp`, `-0.87pp`, `-1.92pp`)
+- med skipped
+
+2) `punc_seed1_anchor_recheck`
+- quick baseline: `7.92%`
+- quick `scalar_l8_train1e4`: `13.04%` (`+5.12pp`)
+- med baseline: `10.88%`
+- med FS (`scalar_l8_train1e4`): `13.04%` (**`+2.16pp`**)
+
+Round98 conclusion:
+- punc seed1 strong positive is reconfirmed.
+- arc seed3 branch should be frozen in this config family.
+
+Round95-98 consolidated conclusion:
+- Useful-task confirmations:
+  - `protein_ss_seed3_discovery`: **`+1.68pp`**
+  - `squad_seed2_anchor_recheck`: **`+0.71pp`**
+  - `punc_seed1_anchor_recheck`: **`+2.16pp`**
+- Negative/low-value branches:
+  - `arc_seed3`, `hotpot_seed3`, `mbpp_seed3` (quick negatives),
+  - `mbpp_seed1` (quick-positive but med-negative reversal).

@@ -532,3 +532,72 @@ Failed/pruned:
 Next round plan:
 1. keep MBPP + protein_ss as primary high-yield branches.
 2. deprioritize protein_contact/arc_seed2/squad_seed1|3 and only revisit with new recipe class.
+
+---
+
+## Round95 - focus queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `mbpp_seed1_anchor`: best quick `scalar_l8_train8e5` `+2.25pp`, but med `-1.51pp` vs med baseline
+- `protein_ss_seed2_discovery`: best quick `-0.25pp`, med skipped
+
+Failed/pruned:
+- `mbpp_seed1_anchor`:
+  - quick-positive/med-negative reversal (`+2.25pp -> -1.51pp`)
+- `protein_ss_seed2_discovery`:
+  - `scalar_l8_train8e5` quick-pruned (`-1.34pp < -0.50pp`)
+  - `head_l8` quick-pruned (`-2.02pp < -0.50pp`)
+
+Next round plan:
+1. continue protein_ss new-seed discovery to test whether seed2 is outlier.
+2. probe MBPP seed3 quickly and prune on first negative signal.
+
+---
+
+## Round96 - focus queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `protein_ss_seed3_discovery`: `scalar_l8_train1e4` med `32.97%` vs med baseline `31.29%` (**`+1.68pp`**)
+
+Failed/pruned:
+- `mbpp_seed3_anchor`:
+  - all quick candidates negative (`-0.51pp`, `-1.12pp`, `-3.01pp`), all pruned
+- `protein_ss_seed3_discovery`:
+  - `scalar_l8_train8e5` quick-pruned (`-1.60pp < -0.50pp`)
+
+Next round plan:
+1. run anchor reconfirm pair (`squad_seed2`, `hotpot_seed3`) for stability map.
+2. keep protein_ss as top discovery branch.
+
+---
+
+## Round97 - focus queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `squad_seed2_anchor_recheck`: `scalar_l8_train1e4` med `19.04%` vs med baseline `18.33%` (**`+0.71pp`**)
+
+Failed/pruned:
+- `hotpot_seed3_discovery`:
+  - all quick candidates negative (`-0.52pp`, `-1.04pp`, `-1.43pp`), med skipped
+- `squad_seed2_anchor_recheck`:
+  - `scalar_l8_sched_cos` quick-pruned (`-0.51pp < -0.50pp`)
+
+Next round plan:
+1. run final anchor round (`arc_seed3`, `punc_seed1`) to close this queue.
+2. freeze hotpot seed3 branch under current recipe family.
+
+---
+
+## Round98 - focus queue (completed 2026-02-26)
+
+Best config vs baseline:
+- `punc_seed1_anchor_recheck`: `scalar_l8_train1e4` med `13.04%` vs med baseline `10.88%` (**`+2.16pp`**)
+- `arc_seed3_discovery`: best quick `-0.51pp`, med skipped
+
+Failed/pruned:
+- `arc_seed3_discovery`:
+  - all quick candidates negative (`-0.51pp`, `-0.87pp`, `-1.92pp`), all pruned
+
+Next round plan:
+1. prioritize high-yield pool (`protein_ss`, `punc_seed1`, `mbpp_seed0`, `squad_seed2`) for compact confirmation.
+2. stop spending budget on `arc_seed2/3` and `hotpot_seed2/3` unless new config family is introduced.

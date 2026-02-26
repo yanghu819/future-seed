@@ -1,0 +1,26 @@
+================================================================================================================
+Round98 fastdiscover summary
+================================================================================================================
+[arc_seed3_discovery]
+  quick baseline: 10.63%
+    scalar_l8_sched_cos          d_acc=-0.51pp acc=10.13%
+    scalar_l8_train1e4           d_acc=-0.87pp acc=9.77%
+    scalar_l8_train8e5           d_acc=-1.92pp acc=8.71%
+  med skipped: best_quick scalar_l8_sched_cos -0.51pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -0.87pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -1.92pp < -0.50pp
+    scalar_l8_sched_cos          quick_drop -0.51pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[punc_seed1_anchor_recheck]
+  quick baseline: 7.92%
+    scalar_l8_train1e4           d_acc=+5.12pp acc=13.04%
+    scalar_l8_train8e5           d_acc=+0.90pp acc=8.82%
+    head_l8                      d_acc=-0.12pp acc=7.80%
+  med:
+    baseline                     acc=10.88%
+    scalar_l8_train1e4           d_acc_vs_med=+2.16pp acc=13.04%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  punc_seed1_anchor_recheck        stage=med   cfg=scalar_l8_train1e4       d_acc=+2.16pp
+  arc_seed3_discovery              stage=quick cfg=scalar_l8_sched_cos      d_acc=-0.51pp
