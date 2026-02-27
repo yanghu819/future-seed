@@ -1297,3 +1297,21 @@ Main pruned/negative patterns:
 Current status:
 - active queue remains `209-216`, currently in `round215`.
 - downstream chain is armed continuously through `round248`.
+
+### Round215-227 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `mbpp_longctx_seed13_repair`: `scalar_l8_train8e5` **`+10.00pp`**
+- `protein_ss_seed60_discovery`: `head_l8` **`+5.42pp`**
+- `protein_ss_seed56_discovery`: `scalar_l8_train1e4` **`+4.75pp`**
+- `mbpp_seed45_headprobe`: `head_l10_strong` **`+4.64pp`**
+- `arc_mc_seed45_discovery`: `scalar_l8_train1e4` **`+4.17pp`**
+- `arc_mc_seed47_discovery`: `scalar_l8_sched_cos` **`+4.17pp`**
+
+Main pruned/negative patterns:
+- multiple anchor rounds (`215/217/218/220`) failed promote gate and were med-skipped.
+- `hotpot` remains unstable, with many rounds not converting to med-positive gains.
+
+Current status:
+- active queue has moved to `225-232` and is currently in `round228`.
+- downstream chain remains armed through `round248` (and staged templates continue beyond).

@@ -1,0 +1,20 @@
+================================================================================================================
+Round220 fastdiscover summary
+================================================================================================================
+[mbpp_seed43_anchor]
+  quick baseline: 42.16%
+    head_l10_strong              d_acc=+0.79pp acc=42.95%
+    scalar_l8_sched_cos          d_acc=+0.69pp acc=42.85%
+    scalar_l8_train8e5           d_acc=+0.07pp acc=42.23%
+  med skipped: best_quick head_l10_strong +0.79pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[punc_seed29_anchor]
+  quick baseline: 9.02%
+    scalar_l8_train8e5           d_acc=+0.18pp acc=9.20%
+    scalar_l8_train1e4           d_acc=-0.34pp acc=8.68%
+    head_l8                      d_acc=-0.42pp acc=8.60%
+  med skipped: best_quick scalar_l8_train8e5 +0.18pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed43_anchor               stage=quick cfg=head_l10_strong          d_acc=+0.79pp
+  punc_seed29_anchor               stage=quick cfg=scalar_l8_train8e5       d_acc=+0.18pp

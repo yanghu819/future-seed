@@ -1102,6 +1102,27 @@ Next round plan:
 
 ---
 
+## Round215-227 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `mbpp_longctx_seed13_repair`: `scalar_l8_train8e5` med **`+10.00pp`**
+- `protein_ss_seed60_discovery`: `head_l8` med **`+5.42pp`**
+- `protein_ss_seed56_discovery`: `scalar_l8_train1e4` med **`+4.75pp`**
+- `mbpp_seed45_headprobe`: `head_l10_strong` med **`+4.64pp`**
+- `arc_mc_seed45_discovery`: `scalar_l8_train1e4` med **`+4.17pp`**
+- `arc_mc_seed47_discovery`: `scalar_l8_sched_cos` med **`+4.17pp`**
+
+Failed/pruned highlights:
+- several anchor rounds (`215`, `217`, `218`, `220`) failed promote gate and were med-skipped.
+- `hotpot` lines still show inconsistent med transfer; many runs stop at quick stage.
+- `arc_mc` remains high-variance by seed, though positive med transfer continues to appear regularly.
+
+Next round plan:
+1. continue active queue `225-232` (`round228` in progress), then auto-chain into `233-240`.
+2. keep nonstop chain armed through `241-248`; maintain same quick prune/promote gates for throughput.
+
+---
+
 ## Chain Extension (prepared 2026-02-27)
 
 Best config vs baseline:
