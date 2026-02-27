@@ -950,3 +950,20 @@ Failed/pruned:
 Next round plan:
 1. continue `round165-168` with emphasis on discovery tasks (`arc_mc`, `hotpot`, `protein_ss`) over weak anchors.
 2. keep chained queues active: `169-176` -> `177-184` -> `185-192` without manual restart.
+
+---
+
+## Round165 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `hotpot_seed28_discovery`: `scalar_l8_train8e5` med **`+0.57pp`**
+- `arc_mc_seed17_discovery`: best quick `-8.33pp` (all FS candidates tied negative)
+
+Failed/pruned:
+- `arc_mc_seed17_discovery`: `scalar_l8_train1e4`, `scalar_l8_sched_cos`, `scalar_l8_train8e5` all quick-pruned (`-8.33pp` each), med skipped.
+- `hotpot_seed28_discovery`: `head_l8` quick-pruned (`-1.30pp`).
+- `hotpot_seed28_discovery`: med gain exists but magnitude is small (`+0.57pp`) and below strong-promote threshold.
+
+Next round plan:
+1. continue `round166-168` and prioritize discovery tasks with stronger historical hit-rate (`arc_mc`, `protein_ss`).
+2. keep nonstop auto-chain through `169-176`, `177-184`, `185-192`, `193-200`.

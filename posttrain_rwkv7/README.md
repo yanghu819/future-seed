@@ -1191,3 +1191,13 @@ Key outcomes (med vs baseline, pp):
 Current status:
 - active queue has moved to `round165` (`arc_mc_seed17_discovery`, `hotpot_seed28_discovery`).
 - auto-chain is armed for `169-176`, `177-184`, `185-192` with no idle gap.
+
+### Round165 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `hotpot_seed28_discovery`: `scalar_l8_train8e5` **`+0.57pp`** (med positive but below `+0.80pp` quick promote target)
+- `arc_mc_seed17_discovery`: all FS candidates quick **`-8.33pp`** vs baseline; med skipped
+
+Current status:
+- active queue has moved into `round166` (`protein_ss_seed29_discovery`, `mbpp_longctx_seed6_repair`).
+- chained queues remain active and waiting: `169-176`, `177-184`, `185-192`, `193-200`.
