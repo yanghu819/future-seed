@@ -1078,3 +1078,17 @@ Failed/pruned:
 Next round plan:
 1. continue active queue `209-216` with focus on converting quick gains into med-positive gains.
 2. keep nonstop chain ready through `217-224`, `225-232`, `233-240`.
+
+---
+
+## Chain Extension (prepared 2026-02-27)
+
+Best config vs baseline:
+- N/A (orchestration-only update)
+
+Failed/pruned:
+- none; this step only extends queue coverage for nonstop execution.
+
+Next round plan:
+1. run prepared fastloop queues continuously through `round368` (`249-256` ... `361-368`) after existing chain completes.
+2. keep per-round sync cadence unchanged: remote runs -> local snapshot -> README/rolling log -> backup branch push.

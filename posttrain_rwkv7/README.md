@@ -1267,7 +1267,12 @@ Main pruned/negative patterns:
 
 Current status:
 - active queue moved to `209-216` (now running).
-- chained queues remain armed and waiting: `217-224`, `225-232`, `233-240`.
+- chained queues remain armed and waiting: `217-224`, `225-232`, `233-240`, `241-248`.
+
+### Nonstop Extension
+
+- Added pre-queued fastloop blocks through `round368` (`249-256` ... `361-368`).
+- All corresponding remote auto-chainer scripts are started in waiting mode to keep serial execution continuous.
 
 ### Round208 (fastdiscover, completed)
 
