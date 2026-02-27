@@ -1342,3 +1342,9 @@ Current status:
 - Rebuilt fastloop queues from `round233` to `round400` with a broader 75/25 mix (`new`/`anchor`) instead of repeated anchor-heavy loops.
 - Expanded active task mix to include `squad` and `wikitext` discovery lines alongside `arc_mc`, `protein_ss`, `hotpot`, `mbpp`, and `mbpp_longctx`.
 - Hot-swapped queue files in-place (`results/_search_queue_round233_240_fastloop.json` ... `_round393_400_fastloop.json`) so existing remote autochain scripts continue without restart.
+
+### Queue Rebalance (2026-02-27, Round241+)
+
+- Applied a second-pass allocation rebalance for `round241-400`: higher share on `protein_ss` + `arc_mc`, reduced low-yield loops, and retained periodic `squad/wikitext` calibration.
+- New queue profile tag: `75_new_25_anchor_rebalance_v2`.
+- Seed continuity was explicitly advanced (`arc:54`, `protein_ss:66`, `mbpp:50`, `hotpot:47`, `mbpp_longctx:17`, `squad:8`, `wiki:4`) to avoid overlap with active `round233-240` block.

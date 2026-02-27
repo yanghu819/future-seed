@@ -453,7 +453,7 @@ SEED_START = {
 }
 
 
-CYCLE: List[Tuple[str, Tuple[str, str]]] = [
+CYCLE_BROAD_V1: List[Tuple[str, Tuple[str, str]]] = [
     ("new", ("arc_mc", "protein_ss")),
     ("new", ("mbpp", "hotpot")),
     ("new", ("squad", "wiki")),
@@ -465,6 +465,30 @@ CYCLE: List[Tuple[str, Tuple[str, str]]] = [
 ]
 
 
+CYCLE_REBALANCE_V2: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("protein_ss", "arc_mc")),
+    ("new", ("mbpp", "protein_ss")),
+    ("new", ("squad", "wiki")),
+    ("anchor", ("mbpp_longctx", "protein_ss")),
+    ("new", ("arc_mc", "mbpp")),
+    ("new", ("protein_ss", "hotpot")),
+    ("anchor", ("squad", "mbpp_longctx")),
+    ("new", ("protein_ss", "arc_mc")),
+]
+
+
+PROFILES: Dict[str, Dict[str, object]] = {
+    "broad_v1": {
+        "cycle": CYCLE_BROAD_V1,
+        "search_mix": "75_new_25_anchor_broad",
+    },
+    "rebalance_v2": {
+        "cycle": CYCLE_REBALANCE_V2,
+        "search_mix": "75_new_25_anchor_rebalance_v2",
+    },
+}
+
+
 def build_task(task_key: str, seed: int, novelty_tier: str) -> dict:
     fn = BUILDERS[task_key]
     if task_key in {"mbpp", "squad", "wiki"}:
@@ -472,13 +496,16 @@ def build_task(task_key: str, seed: int, novelty_tier: str) -> dict:
     return fn(seed)  # type: ignore[misc]
 
 
-def generate(start_round: int, end_round: int, block_size: int) -> None:
-    seed_ctr = dict(SEED_START)
+def generate(start_round: int, end_round: int, block_size: int, profile: str, seed_start: Dict[str, int]) -> None:
+    profile_conf = PROFILES[profile]
+    cycle: List[Tuple[str, Tuple[str, str]]] = profile_conf["cycle"]  # type: ignore[assignment]
+    search_mix = str(profile_conf["search_mix"])
+    seed_ctr = dict(seed_start)
     for block_start in range(start_round, end_round + 1, block_size):
         block_end = min(block_start + block_size - 1, end_round)
         rounds = []
         for rid in range(block_start, block_end + 1):
-            novelty_tier, pair = CYCLE[(rid - start_round) % len(CYCLE)]
+            novelty_tier, pair = cycle[(rid - start_round) % len(cycle)]
             tasks = []
             for task_key in pair:
                 seed = seed_ctr[task_key]
@@ -488,7 +515,7 @@ def generate(start_round: int, end_round: int, block_size: int) -> None:
 
         payload = {
             "strategy": {
-                "search_mix": "75_new_25_anchor_broad",
+                "search_mix": search_mix,
                 "quick_promote_pp": 0.8,
                 "quick_prune_pp": -0.5,
                 "strong_negative_quick_pp": -1.0,
@@ -508,8 +535,25 @@ def main() -> None:
     ap.add_argument("--start_round", type=int, default=233)
     ap.add_argument("--end_round", type=int, default=400)
     ap.add_argument("--block_size", type=int, default=8)
+    ap.add_argument("--profile", choices=sorted(PROFILES.keys()), default="broad_v1")
+    ap.add_argument("--seed_arc_mc", type=int, default=SEED_START["arc_mc"])
+    ap.add_argument("--seed_protein_ss", type=int, default=SEED_START["protein_ss"])
+    ap.add_argument("--seed_hotpot", type=int, default=SEED_START["hotpot"])
+    ap.add_argument("--seed_mbpp", type=int, default=SEED_START["mbpp"])
+    ap.add_argument("--seed_mbpp_longctx", type=int, default=SEED_START["mbpp_longctx"])
+    ap.add_argument("--seed_squad", type=int, default=SEED_START["squad"])
+    ap.add_argument("--seed_wiki", type=int, default=SEED_START["wiki"])
     args = ap.parse_args()
-    generate(args.start_round, args.end_round, args.block_size)
+    seed_start = {
+        "arc_mc": int(args.seed_arc_mc),
+        "protein_ss": int(args.seed_protein_ss),
+        "hotpot": int(args.seed_hotpot),
+        "mbpp": int(args.seed_mbpp),
+        "mbpp_longctx": int(args.seed_mbpp_longctx),
+        "squad": int(args.seed_squad),
+        "wiki": int(args.seed_wiki),
+    }
+    generate(args.start_round, args.end_round, args.block_size, args.profile, seed_start)
 
 
 if __name__ == "__main__":

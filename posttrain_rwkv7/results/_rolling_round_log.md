@@ -1182,3 +1182,19 @@ Notes:
 - Updated `scripts/run_round77_82_fastdiscover.py` signature matching to avoid duplicate med/quick reruns under renamed task aliases.
 - Added `scripts/rebuild_fastloop_queues_broad.py` and regenerated queues `233-400`.
 - Updated remote queue files in place so existing `runs/autochain_roundXXX_YYY.sh` launchers pick up new mixes automatically.
+
+## Queue Rebalance v2 - Round241+ (2026-02-27)
+
+Best config vs baseline:
+- N/A (orchestration change)
+
+Failed/pruned:
+- N/A (no training run in this step)
+
+Next round plan:
+1. Let `round233-240` finish under current run; from `round241` onward execute `rebalance_v2` queue profile.
+2. Track whether higher `protein_ss/arc_mc` share improves med-positive hit-rate per wall-clock hour.
+
+Notes:
+- `results/_search_queue_round241_248_fastloop.json` ... `_round393_400_fastloop.json` updated to profile `75_new_25_anchor_rebalance_v2`.
+- Updated queue generator supports profiles and explicit seed starts (`scripts/rebuild_fastloop_queues_broad.py`).
