@@ -1201,3 +1201,21 @@ Key outcomes (med vs baseline, pp):
 Current status:
 - active queue has moved into `round166` (`protein_ss_seed29_discovery`, `mbpp_longctx_seed6_repair`).
 - chained queues remain active and waiting: `169-176`, `177-184`, `185-192`, `193-200`.
+
+### Round166-176 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed18_discovery`: `scalar_l8_train1e4` **`+8.33pp`**
+- `arc_mc_seed20_discovery`: `scalar_l8_train1e4` **`+8.33pp`**
+- `arc_mc_seed19_discovery`: `scalar_l8_train8e5` **`+4.17pp`**
+- `protein_ss_seed33_discovery`: `scalar_l8_train1e4` **`+1.42pp`**
+- `punc_seed18_anchor`: `head_l8` **`+1.22pp`**
+
+Main pruned/negative patterns:
+- `arc_mc_seed17`/`22` showed strong baseline spike and FS collapse (multiple `-8.33pp` to `-16.67pp` quick drops).
+- `protein_ss_seed30/34` mostly quick negative and med skipped.
+- `mbpp_seed23/25/26` and `mbpp_longctx_seed6` had quick positives but med regressions (`-1.14pp` to `-4.68pp`).
+
+Current status:
+- `169-176` completed and auto-chained into active queue `177-184`.
+- waiting chains remain active for `185-192`, `193-200`, `201-208`.

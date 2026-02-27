@@ -967,3 +967,25 @@ Failed/pruned:
 Next round plan:
 1. continue `round166-168` and prioritize discovery tasks with stronger historical hit-rate (`arc_mc`, `protein_ss`).
 2. keep nonstop auto-chain through `169-176`, `177-184`, `185-192`, `193-200`.
+
+---
+
+## Round166-176 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed18_discovery`: `scalar_l8_train1e4` med **`+8.33pp`**
+- `arc_mc_seed20_discovery`: `scalar_l8_train1e4` med **`+8.33pp`**
+- `arc_mc_seed19_discovery`: `scalar_l8_train8e5` med **`+4.17pp`**
+- `protein_ss_seed33_discovery`: `scalar_l8_train1e4` med **`+1.42pp`**
+- `punc_seed18_anchor`: `head_l8` med **`+1.22pp`**
+
+Failed/pruned highlights:
+- `arc_mc_seed17_discovery`: all FS candidates quick `-8.33pp`, med skipped.
+- `arc_mc_seed22_discovery`: `scalar_l8_train1e4` `-8.33pp`, `scalar_l8_train8e5` `-16.67pp`, med skipped.
+- `protein_ss_seed34_discovery`: all candidates quick negative (`-3.43pp` to `-3.53pp`), med skipped.
+- `mbpp_seed25_anchor`: quick winner (`+1.40pp`) but med large regression **`-4.68pp`**.
+- `mbpp_seed23_headprobe` and `mbpp_seed26_headprobe`: quick positive but med regressions (`-1.32pp`, `-1.50pp`).
+
+Next round plan:
+1. continue active queue `177-184` and keep strict quick prune (`-0.50pp`) and promote (`+0.80pp`) gates.
+2. maintain nonstop chain through `185-192`, `193-200`, `201-208` and extend farther as needed.
