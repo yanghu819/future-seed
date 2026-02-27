@@ -1181,3 +1181,13 @@ Key outcomes (med vs baseline, pp):
 Current status:
 - active queue has moved to `round164`.
 - continuation queue prepared: `results/_search_queue_round185_192_fastloop.json` (auto-start after round184).
+
+### Round164 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `mbpp_seed22_anchor`: `head_l10_strong` quick `+2.15pp` but med **`-0.58pp`** (regression)
+- `punc_seed15_anchor`: best quick `+0.07pp`, below promote gate; med skipped
+
+Current status:
+- active queue has moved to `round165` (`arc_mc_seed17_discovery`, `hotpot_seed28_discovery`).
+- auto-chain is armed for `169-176`, `177-184`, `185-192` with no idle gap.

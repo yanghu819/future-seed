@@ -933,3 +933,20 @@ Failed/pruned:
 Next round plan:
 1. continue `round164-168` and keep quick prune (`-0.50pp`) / promote (`+0.80pp`) gates unchanged.
 2. keep nonstop chain active through `round169-176`, `round177-184`, and prepared `round185-192`.
+
+---
+
+## Round164 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `punc_seed15_anchor`: best quick `head_l8` **`+0.07pp`** (below promote gate; med skipped)
+- `mbpp_seed22_anchor`: quick winner `head_l10_strong` **`+2.15pp`**, but med **`-0.58pp`** vs baseline
+
+Failed/pruned:
+- `mbpp_seed22_anchor`: `scalar_l8_sched_cos` quick-pruned (`-0.52pp < -0.50pp`).
+- `mbpp_seed22_anchor`: head branch showed quick-overfit pattern (quick positive, med negative).
+- `punc_seed15_anchor`: all candidates clustered near baseline; no candidate reached `+0.80pp` promote gate.
+
+Next round plan:
+1. continue `round165-168` with emphasis on discovery tasks (`arc_mc`, `hotpot`, `protein_ss`) over weak anchors.
+2. keep chained queues active: `169-176` -> `177-184` -> `185-192` without manual restart.
