@@ -1062,3 +1062,19 @@ Failed/pruned highlights:
 Next round plan:
 1. finish active queue `201-208` (`round208` in progress) and auto-chain into `209-216`.
 2. keep nonstop chain active through `217-224`, `225-232`, and `233-240`; prioritize `arc_mc/protein_ss` lines with proven med-positive transfer.
+
+---
+
+## Round208 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed38_discovery`: best quick `scalar_l8_train8e5` **`+0.00pp`** (med skipped)
+- `protein_ss_seed50_discovery`: best quick `head_l8` **`+0.00pp`** (med skipped)
+
+Failed/pruned:
+- `arc_mc_seed38_discovery`: `scalar_l8_train1e4` and `scalar_l8_sched_cos` quick-pruned (`-8.33pp`, `-4.17pp`).
+- both tasks failed promote gate (`+0.80pp`) with flat quick deltas, resulting in no med stage.
+
+Next round plan:
+1. continue active queue `209-216` with focus on converting quick gains into med-positive gains.
+2. keep nonstop chain ready through `217-224`, `225-232`, `233-240`.

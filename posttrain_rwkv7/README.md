@@ -1266,5 +1266,11 @@ Main pruned/negative patterns:
 - many rounds from `199-202` were med-skipped by promote gate (weak quick deltas).
 
 Current status:
-- active queue is `201-208`, currently running `round208`.
-- chained queues remain armed and waiting: `209-216`, `217-224`, `225-232`, `233-240`.
+- active queue moved to `209-216` (now running).
+- chained queues remain armed and waiting: `217-224`, `225-232`, `233-240`.
+
+### Round208 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed38_discovery`: best quick `+0.00pp`, med skipped
+- `protein_ss_seed50_discovery`: all quick candidates `+0.00pp`, med skipped
