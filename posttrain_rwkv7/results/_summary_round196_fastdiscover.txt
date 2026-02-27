@@ -1,0 +1,26 @@
+================================================================================================================
+Round196 fastdiscover summary
+================================================================================================================
+[mbpp_seed34_anchor]
+  quick baseline: 40.64%
+    head_l10_strong              d_acc=+0.82pp acc=41.45%
+    scalar_l8_train8e5           d_acc=-0.29pp acc=40.34%
+    scalar_l8_sched_cos          d_acc=-1.71pp acc=38.92%
+  med:
+    baseline                     acc=48.07%
+    head_l10_strong              d_acc_vs_med=-2.16pp acc=45.91%
+  pruned:
+    scalar_l8_sched_cos          quick_drop -1.71pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[punc_seed23_anchor]
+  quick baseline: 8.64%
+    head_l8                      d_acc=+0.83pp acc=9.46%
+    scalar_l8_train8e5           d_acc=+0.14pp acc=8.78%
+    scalar_l8_train1e4           d_acc=-0.07pp acc=8.56%
+  med:
+    baseline                     acc=10.41%
+    head_l8                      d_acc_vs_med=+0.31pp acc=10.72%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  punc_seed23_anchor               stage=med   cfg=head_l8                  d_acc=+0.31pp
+  mbpp_seed34_anchor               stage=med   cfg=head_l10_strong          d_acc=-2.16pp

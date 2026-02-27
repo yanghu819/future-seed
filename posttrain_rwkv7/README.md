@@ -1249,3 +1249,22 @@ Key outcomes (med vs baseline, pp):
 Current status:
 - active queue moved to `round180` (`mbpp_seed28_anchor`, `punc_seed19_anchor`).
 - queued auto-chain remains continuous through `240`.
+
+### Round180-207 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed31_discovery`: `scalar_l8_sched_cos` **`+8.33pp`**
+- `arc_mc_seed32_discovery`: `scalar_l8_sched_cos` **`+8.33pp`**
+- `arc_mc_seed28_discovery`: `scalar_l8_train8e5` **`+4.17pp`**
+- `protein_ss_seed45_discovery`: `scalar_l8_train1e4` **`+3.58pp`**
+- `mbpp_seed37_anchor`: `scalar_l8_sched_cos` **`+2.55pp`**
+- `protein_ss_seed48_discovery`: `scalar_l8_train8e5` **`+2.46pp`**
+
+Main pruned/negative patterns:
+- `arc_mc` has intermittent baseline spikes: some seeds jump strongly positive while others collapse to quick negatives (e.g. `-8.33pp` / `-16.67pp`).
+- several `hotpot/mbpp/longctx` rounds show quick gains that fail to transfer to med (flat or negative med deltas).
+- many rounds from `199-202` were med-skipped by promote gate (weak quick deltas).
+
+Current status:
+- active queue is `201-208`, currently running `round208`.
+- chained queues remain armed and waiting: `209-216`, `217-224`, `225-232`, `233-240`.

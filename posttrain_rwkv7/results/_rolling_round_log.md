@@ -1040,3 +1040,25 @@ Failed/pruned:
 Next round plan:
 1. continue `round180-184`, watch anchor tasks for regression while preserving discovery throughput.
 2. keep nonstop chain active through `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`, `233-240`.
+
+---
+
+## Round180-207 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed31_discovery`: `scalar_l8_sched_cos` med **`+8.33pp`**
+- `arc_mc_seed32_discovery`: `scalar_l8_sched_cos` med **`+8.33pp`**
+- `arc_mc_seed28_discovery`: `scalar_l8_train8e5` med **`+4.17pp`**
+- `protein_ss_seed45_discovery`: `scalar_l8_train1e4` med **`+3.58pp`**
+- `mbpp_seed37_anchor`: `scalar_l8_sched_cos` med **`+2.55pp`**
+- `protein_ss_seed48_discovery`: `scalar_l8_train8e5` med **`+2.46pp`**
+
+Failed/pruned highlights:
+- `arc_mc` remains high-variance across seeds: strong positive rounds mixed with hard quick collapses (`-8.33pp` / `-16.67pp`) and med skips.
+- `hotpot` and `mbpp_longctx` often show quick positives but med regressions (for example `round190` med `-1.59pp`).
+- `round199-202` mostly failed promote gate and were med-skipped due to weak quick deltas.
+- anchor rounds (`mbpp`/`punc`) are frequently near-flat and can consume budget without reliable gains.
+
+Next round plan:
+1. finish active queue `201-208` (`round208` in progress) and auto-chain into `209-216`.
+2. keep nonstop chain active through `217-224`, `225-232`, and `233-240`; prioritize `arc_mc/protein_ss` lines with proven med-positive transfer.
