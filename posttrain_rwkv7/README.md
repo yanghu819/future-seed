@@ -1315,3 +1315,18 @@ Main pruned/negative patterns:
 Current status:
 - active queue has moved to `225-232` and is currently in `round228`.
 - downstream chain remains armed through `round248` (and staged templates continue beyond).
+
+### Round228-229 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `hotpot_seed44_discovery`: `scalar_l8_train1e4` **`+0.69pp`**
+- `arc_mc_seed49_discovery`: best quick `+0.00pp`, med skipped
+
+Main pruned/negative patterns:
+- `mbpp_seed46_anchor`: all candidates quick negative (`-1.39pp` to `-4.35pp`), med skipped.
+- `punc_seed31_anchor`: all candidates quick non-positive (`-0.46pp` to `-1.53pp`), med skipped.
+- `arc_mc_seed49_discovery`: no candidate passed promote gate (`+0.80pp`), med skipped.
+
+Current status:
+- active queue is in `round230` (`protein_ss_seed61_discovery` path running).
+- chained queues remain active through `round248`.

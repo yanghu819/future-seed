@@ -1123,6 +1123,23 @@ Next round plan:
 
 ---
 
+## Round228-229 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `hotpot_seed44_discovery`: `scalar_l8_train1e4` med **`+0.69pp`**
+- `arc_mc_seed49_discovery`: best quick `scalar_l8_train1e4` **`+0.00pp`** (med skipped)
+
+Failed/pruned highlights:
+- `mbpp_seed46_anchor`: all candidates quick negative (`-1.39pp` to `-4.35pp`), med skipped.
+- `punc_seed31_anchor`: all candidates quick non-positive, best `-0.46pp`, med skipped.
+- `arc_mc_seed49_discovery`: no quick candidate passed promote gate; `scalar_l8_sched_cos` quick-pruned (`-4.17pp`).
+
+Next round plan:
+1. continue active queue `225-232` (`round230` in progress), then auto-chain into `233-240`.
+2. keep nonstop chain active through `241-248` and extend further if runtime window permits.
+
+---
+
 ## Chain Extension (prepared 2026-02-27)
 
 Best config vs baseline:
