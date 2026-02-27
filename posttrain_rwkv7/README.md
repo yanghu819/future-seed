@@ -1139,3 +1139,17 @@ Main pruned/negative patterns:
   - round `137` (`arc_mc_seed4_discovery`, `mbpp_seed12_anchor`)
 - Search focus:
   - leverage new high-value branch (`arc_mc + scalar_l8_sched_cos`) while keeping broad discovery (`protein_ss/hotpot/mbpp_longctx/arc`).
+
+### Round151-158 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed13_discovery`: `scalar_l8_train8e5` **`+20.83pp`** (new global best)
+- `protein_ss_seed25_discovery`: `scalar_l8_train8e5` **`+6.04pp`**
+- `hotpot_seed26_discovery`: `scalar_l8_train8e5` **`+4.20pp`**
+- `protein_ss_seed24_discovery`: `scalar_l8_train8e5` **`+3.92pp`**
+- `mbpp_longctx_seed4_repair`: `scalar_l8_train1e4` **`+3.00pp`**
+- `mbpp_seed18_headprobe`: `scalar_l8_sched_cos` **`+2.95pp`**
+
+Running:
+- queue `results/_search_queue_round153_160_fastloop.json` currently in `round159-160`
+- chained queue `results/_search_queue_round161_168_fastloop.json` already prepared and waiting for auto-start after round160.

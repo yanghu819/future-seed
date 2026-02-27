@@ -2079,3 +2079,20 @@ Execution status:
 - Queue active: `results/_search_queue_round137_144_fastloop.json`
 - Current round: `137` (`arc_mc_seed4_discovery`, `mbpp_seed12_anchor`)
 - Objective: transfer `arc_mc` winner pattern while scanning new seeds in `mbpp/protein_ss/hotpot/arc`.
+
+## 2026-02-27 Round151-158 (fastloop queues, completed)
+
+Outputs:
+- `results/_summary_round151_fastdiscover.txt` ... `results/_summary_round158_fastdiscover.txt`
+- `results/_round151_fastdiscover_records.jsonl` ... `results/_round158_fastdiscover_records.jsonl`
+
+Major positive findings (med vs baseline):
+- `arc_mc_seed13_discovery` + `scalar_l8_train8e5`: **`+20.83pp`**
+- `protein_ss_seed25_discovery` + `scalar_l8_train8e5`: **`+6.04pp`**
+- `hotpot_seed26_discovery` + `scalar_l8_train8e5`: **`+4.20pp`**
+- `protein_ss_seed24_discovery` + `scalar_l8_train8e5`: **`+3.92pp`**
+- `mbpp_longctx_seed4_repair` + `scalar_l8_train1e4`: **`+3.00pp`**
+- `mbpp_seed18_headprobe` + `scalar_l8_sched_cos`: **`+2.95pp`**
+
+Conclusion:
+- The search window produced a new strongest real-task gain (`arc_mc_seed13`), while also yielding multiple independent positive tasks (`protein_ss`, `hotpot`, `mbpp_longctx`, `mbpp`) under the same gating policy.

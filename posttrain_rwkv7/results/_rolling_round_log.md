@@ -877,3 +877,24 @@ Failed/pruned highlights:
 Next round plan:
 1. run `round137-144` immediately, prioritizing `arc_mc` transfer on new seeds.
 2. keep broad 70/30 mix with limited anchors and strict quick prune/promo gating.
+
+---
+
+## Round151-158 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed13_discovery`: `scalar_l8_train8e5` med **`+20.83pp`**
+- `protein_ss_seed25_discovery`: `scalar_l8_train8e5` med **`+6.04pp`**
+- `hotpot_seed26_discovery`: `scalar_l8_train8e5` med **`+4.20pp`**
+- `protein_ss_seed24_discovery`: `scalar_l8_train8e5` med **`+3.92pp`**
+- `mbpp_longctx_seed4_repair`: `scalar_l8_train1e4` med **`+3.00pp`**
+- `mbpp_seed18_headprobe`: `scalar_l8_sched_cos` med **`+2.95pp`**
+
+Failed/pruned highlights:
+- `punc_seed12/13_anchor` mostly quick negative or near-flat, med often skipped.
+- `mbpp_seed17_headprobe` underperformed at quick stage; no med promotion.
+- `arc_mc_seed11/12` mostly flat around baseline; `seed13` produced major jump.
+
+Next round plan:
+1. finish `round159-160` and close queue153-160.
+2. continue automatically into queue161-168 with same prune/promote gates.

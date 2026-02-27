@@ -1,0 +1,27 @@
+================================================================================================================
+Round154 fastdiscover summary
+================================================================================================================
+[hotpot_seed25_discovery]
+  quick baseline: 5.38%
+    scalar_l8_train1e4           d_acc=+6.11pp acc=11.50%
+    scalar_l8_train8e5           d_acc=+1.66pp acc=7.04%
+    head_l8                      d_acc=+0.26pp acc=5.64%
+  med:
+    baseline                     acc=10.88%
+    scalar_l8_train1e4           d_acc_vs_med=+0.62pp acc=11.50%
+----------------------------------------------------------------------------------------------------------------
+[mbpp_seed18_headprobe]
+  quick baseline: 42.11%
+    scalar_l8_sched_cos          d_acc=+1.10pp acc=43.21%
+    scalar_l8_train8e5           d_acc=-0.52pp acc=41.59%
+    head_l10_strong              d_acc=-2.50pp acc=39.61%
+  med:
+    baseline                     acc=46.40%
+    scalar_l8_sched_cos          d_acc_vs_med=+2.95pp acc=49.35%
+  pruned:
+    head_l10_strong              quick_drop -2.50pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -0.52pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed18_headprobe            stage=med   cfg=scalar_l8_sched_cos      d_acc=+2.95pp
+  hotpot_seed25_discovery          stage=med   cfg=scalar_l8_train1e4       d_acc=+0.62pp

@@ -1,0 +1,24 @@
+================================================================================================================
+Round155 fastdiscover summary
+================================================================================================================
+[arc_mc_seed12_discovery]
+  quick baseline: 33.33%
+    scalar_l8_train8e5           d_acc=+8.33pp acc=41.67%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=33.33%
+    scalar_l8_sched_cos          d_acc=+0.00pp acc=33.33%
+  med:
+    baseline                     acc=41.67%
+    scalar_l8_train8e5           d_acc_vs_med=+0.00pp acc=41.67%
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed24_discovery]
+  quick baseline: 25.19%
+    scalar_l8_train8e5           d_acc=+5.41pp acc=30.59%
+    head_l8                      d_acc=+1.31pp acc=26.49%
+    scalar_l8_train1e4           d_acc=+0.59pp acc=25.78%
+  med:
+    baseline                     acc=26.68%
+    scalar_l8_train8e5           d_acc_vs_med=+3.92pp acc=30.59%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  protein_ss_seed24_discovery      stage=med   cfg=scalar_l8_train8e5       d_acc=+3.92pp
+  arc_mc_seed12_discovery          stage=med   cfg=scalar_l8_train8e5       d_acc=+0.00pp
