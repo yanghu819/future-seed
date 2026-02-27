@@ -1229,3 +1229,13 @@ Key outcomes (med vs baseline, pp):
 Current status:
 - active queue is now in `round178` (`mbpp_seed27_headprobe`, `hotpot_seed31_discovery`).
 - downstream chains remain active: `185-192`, `193-200`, `201-208`, `209-216`.
+
+### Round178 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `hotpot_seed31_discovery`: quick best `+1.40pp` but med **`-0.55pp`** vs baseline
+- `mbpp_seed27_headprobe`: best quick `+0.04pp`, med skipped
+
+Current status:
+- active queue moved to `round179` (`arc_mc_seed24_discovery`, `protein_ss_seed36_discovery`).
+- chained queues active: `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`.

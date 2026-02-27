@@ -1,0 +1,27 @@
+================================================================================================================
+Round178 fastdiscover summary
+================================================================================================================
+[hotpot_seed31_discovery]
+  quick baseline: 9.31%
+    scalar_l8_train8e5           d_acc=+1.40pp acc=10.71%
+    scalar_l8_train1e4           d_acc=+0.14pp acc=9.46%
+    head_l8                      d_acc=-2.80pp acc=6.52%
+  med:
+    baseline                     acc=11.26%
+    scalar_l8_train8e5           d_acc_vs_med=-0.55pp acc=10.71%
+  pruned:
+    head_l8                      quick_drop -2.80pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_seed27_headprobe]
+  quick baseline: 41.81%
+    head_l10_strong              d_acc=+0.04pp acc=41.85%
+    scalar_l8_sched_cos          d_acc=-0.77pp acc=41.05%
+    scalar_l8_train8e5           d_acc=-0.81pp acc=41.01%
+  med skipped: best_quick head_l10_strong +0.04pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_sched_cos          quick_drop -0.77pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -0.81pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed27_headprobe            stage=quick cfg=head_l10_strong          d_acc=+0.04pp
+  hotpot_seed31_discovery          stage=med   cfg=scalar_l8_train8e5       d_acc=-0.55pp

@@ -1006,3 +1006,20 @@ Failed/pruned:
 Next round plan:
 1. continue `round178-184` and watch whether `mbpp/hotpot` can convert quick gains into med-positive gains.
 2. keep nonstop chain active through `185-192`, `193-200`, `201-208`, `209-216`.
+
+---
+
+## Round178 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `mbpp_seed27_headprobe`: best quick `head_l10_strong` **`+0.04pp`** (med skipped)
+- `hotpot_seed31_discovery`: quick best `scalar_l8_train8e5` **`+1.40pp`**, med **`-0.55pp`**
+
+Failed/pruned:
+- `mbpp_seed27_headprobe`: `scalar_l8_sched_cos` and `scalar_l8_train8e5` quick-pruned (`-0.77pp`, `-0.81pp`).
+- `mbpp_seed27_headprobe`: no candidate reached promote gate (`+0.80pp`), med skipped.
+- `hotpot_seed31_discovery`: `head_l8` quick-pruned (`-2.80pp`); med stage showed regression despite quick gain.
+
+Next round plan:
+1. continue `round179-184`, prioritize `arc_mc/protein_ss` where med-positive hit rate is higher.
+2. maintain nonstop chain through `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`.
