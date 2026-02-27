@@ -898,3 +898,23 @@ Failed/pruned highlights:
 Next round plan:
 1. finish `round159-160` and close queue153-160.
 2. continue automatically into queue161-168 with same prune/promote gates.
+
+---
+
+## Round159-162 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed14_discovery`: `scalar_l8_train1e4` med **`+8.33pp`**
+- `mbpp_seed20_headprobe`: `head_l10_strong` med **`+2.87pp`**
+- `protein_ss_seed27_discovery`: `scalar_l8_train1e4` med **`+1.95pp`**
+- `punc_seed14_anchor`: `head_l8` med **`+0.17pp`**
+
+Failed/pruned highlights:
+- `hotpot_seed27_discovery`: best quick `-0.26pp`, below promote gate `+0.80pp`; med skipped.
+- `hotpot_seed27_discovery`: `scalar_l8_train1e4` (`-2.94pp`) and `head_l8` (`-3.08pp`) quick-pruned.
+- `mbpp_seed21_headprobe`: quick winner `scalar_l8_train8e5` promoted (`+0.92pp`) but med regressed **`-0.67pp`** vs baseline; marked strong negative and cooldown to round170.
+- `arc_mc_seed15_discovery`: quick uplift was positive but med landed flat (`+0.00pp`), no net gain.
+
+Next round plan:
+1. continue queue `round161-168` to completion and keep strict quick prune/promote policy.
+2. auto-chain queue `round169-176` then `round177-184` for nonstop broad discovery.

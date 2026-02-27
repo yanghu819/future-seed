@@ -1,0 +1,29 @@
+================================================================================================================
+Round161 fastdiscover summary
+================================================================================================================
+[arc_mc_seed15_discovery]
+  quick baseline: 33.33%
+    scalar_l8_train8e5           d_acc=+4.17pp acc=37.50%
+    scalar_l8_train1e4           d_acc=-4.17pp acc=29.17%
+    scalar_l8_sched_cos          d_acc=-4.17pp acc=29.17%
+  med:
+    baseline                     acc=37.50%
+    scalar_l8_train8e5           d_acc_vs_med=+0.00pp acc=37.50%
+  pruned:
+    scalar_l8_train1e4           quick_drop -4.17pp < -0.50pp
+    scalar_l8_sched_cos          quick_drop -4.17pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed27_discovery]
+  quick baseline: 27.61%
+    scalar_l8_train1e4           d_acc=+1.95pp acc=29.56%
+    head_l8                      d_acc=+0.10pp acc=27.71%
+    scalar_l8_train8e5           d_acc=-2.47pp acc=25.14%
+  med:
+    baseline                     acc=27.61%
+    scalar_l8_train1e4           d_acc_vs_med=+1.95pp acc=29.56%
+  pruned:
+    scalar_l8_train8e5           quick_drop -2.47pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  protein_ss_seed27_discovery      stage=med   cfg=scalar_l8_train1e4       d_acc=+1.95pp
+  arc_mc_seed15_discovery          stage=med   cfg=scalar_l8_train8e5       d_acc=+0.00pp

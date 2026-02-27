@@ -1150,6 +1150,24 @@ Key outcomes (med vs baseline, pp):
 - `mbpp_longctx_seed4_repair`: `scalar_l8_train1e4` **`+3.00pp`**
 - `mbpp_seed18_headprobe`: `scalar_l8_sched_cos` **`+2.95pp`**
 
-Running:
-- queue `results/_search_queue_round153_160_fastloop.json` currently in `round159-160`
-- chained queue `results/_search_queue_round161_168_fastloop.json` already prepared and waiting for auto-start after round160.
+Follow-up status:
+- queue `results/_search_queue_round153_160_fastloop.json` completed through round160.
+- chained queue `results/_search_queue_round161_168_fastloop.json` launched after round160.
+
+### Round159-162 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed14_discovery`: `scalar_l8_train1e4` **`+8.33pp`**
+- `mbpp_seed20_headprobe`: `head_l10_strong` **`+2.87pp`**
+- `protein_ss_seed27_discovery`: `scalar_l8_train1e4` **`+1.95pp`**
+- `punc_seed14_anchor`: `head_l8` **`+0.17pp`**
+
+Main pruned/negative patterns:
+- `hotpot_seed27_discovery`: best quick `-0.26pp`, failed promote gate (`+0.80pp`), med skipped.
+- `hotpot_seed27_discovery`: `scalar_l8_train1e4` (`-2.94pp`) and `head_l8` (`-3.08pp`) quick-pruned.
+- `mbpp_seed21_headprobe`: quick passed (`+0.92pp`) but med regressed to **`-0.67pp`** vs baseline (cooldown applied).
+
+Running/chaining:
+- active queue: `results/_search_queue_round161_168_fastloop.json` (currently in round163+)
+- next queue prepared: `results/_search_queue_round169_176_fastloop.json` (auto-start after round168)
+- next-next queue prepared: `results/_search_queue_round177_184_fastloop.json` (auto-start after round176)
