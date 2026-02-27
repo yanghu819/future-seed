@@ -1022,4 +1022,4 @@ Failed/pruned:
 
 Next round plan:
 1. continue `round179-184`, prioritize `arc_mc/protein_ss` where med-positive hit rate is higher.
-2. maintain nonstop chain through `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`.
+2. maintain nonstop chain through `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`, `233-240`.

@@ -1238,4 +1238,4 @@ Key outcomes (med vs baseline, pp):
 
 Current status:
 - active queue moved to `round179` (`arc_mc_seed24_discovery`, `protein_ss_seed36_discovery`).
-- chained queues active: `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`.
+- chained queues active: `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`, `233-240`.
