@@ -1171,3 +1171,13 @@ Running/chaining:
 - active queue: `results/_search_queue_round161_168_fastloop.json` (currently in round163+)
 - next queue prepared: `results/_search_queue_round169_176_fastloop.json` (auto-start after round168)
 - next-next queue prepared: `results/_search_queue_round177_184_fastloop.json` (auto-start after round176)
+
+### Round163 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed16_discovery`: `scalar_l8_sched_cos` **`+16.67pp`**
+- `protein_ss_seed28_discovery`: `scalar_l8_train1e4` **`+1.40pp`**
+
+Current status:
+- active queue has moved to `round164`.
+- continuation queue prepared: `results/_search_queue_round185_192_fastloop.json` (auto-start after round184).

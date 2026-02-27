@@ -918,3 +918,18 @@ Failed/pruned highlights:
 Next round plan:
 1. continue queue `round161-168` to completion and keep strict quick prune/promote policy.
 2. auto-chain queue `round169-176` then `round177-184` for nonstop broad discovery.
+
+---
+
+## Round163 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed16_discovery`: `scalar_l8_sched_cos` med **`+16.67pp`**
+- `protein_ss_seed28_discovery`: `scalar_l8_train1e4` med **`+1.40pp`**
+
+Failed/pruned:
+- no quick-prune on this round; both tasks cleared promote gates and produced positive med gains.
+
+Next round plan:
+1. continue `round164-168` and keep quick prune (`-0.50pp`) / promote (`+0.80pp`) gates unchanged.
+2. keep nonstop chain active through `round169-176`, `round177-184`, and prepared `round185-192`.
