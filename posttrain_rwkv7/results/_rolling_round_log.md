@@ -1198,3 +1198,26 @@ Next round plan:
 Notes:
 - `results/_search_queue_round241_248_fastloop.json` ... `_round393_400_fastloop.json` updated to profile `75_new_25_anchor_rebalance_v2`.
 - Updated queue generator supports profiles and explicit seed starts (`scripts/rebuild_fastloop_queues_broad.py`).
+
+## Round231-232 (fastloop queues, completed 2026-02-27)
+
+Best config vs baseline:
+- `round231`: no positive quick deltas; best is `punc_seed32_anchor` `scalar_l8_train8e5` **`-0.00pp`** (effectively flat)
+- `round232`: `protein_ss_seed62_discovery` `scalar_l8_train8e5` quick **`+0.65pp`** (below promote gate, med skipped)
+
+Failed/pruned highlights:
+- `mbpp_seed47_headprobe`: all quick candidates below baseline (`-0.54pp` to `-0.90pp`), med skipped.
+- `arc_mc_seed50_discovery`: all quick candidates tied baseline (`+0.00pp`), med skipped.
+- both rounds produced no new med-positive additions.
+
+Next round plan:
+1. Continue active `round233-240` with updated broad queue and canonical dedup.
+2. From `round241+`, switch to `rebalance_v2` profile emphasizing `protein_ss` and `arc_mc` throughput.
+
+## Round233 (in progress)
+
+Best config vs baseline (interim):
+- `arc_mc_seed51_discovery`: `scalar_l8_train1e4` med **`+4.17pp`** (provisional)
+
+Current risk:
+- `protein_ss_seed63_discovery` med outcome pending; round-level usefulness decision not final.

@@ -1348,3 +1348,9 @@ Current status:
 - Applied a second-pass allocation rebalance for `round241-400`: higher share on `protein_ss` + `arc_mc`, reduced low-yield loops, and retained periodic `squad/wikitext` calibration.
 - New queue profile tag: `75_new_25_anchor_rebalance_v2`.
 - Seed continuity was explicitly advanced (`arc:54`, `protein_ss:66`, `mbpp:50`, `hotpot:47`, `mbpp_longctx:17`, `squad:8`, `wiki:4`) to avoid overlap with active `round233-240` block.
+
+### Round231-233 Status (2026-02-27)
+
+- `round231` completed: both tasks (`mbpp_seed47_headprobe`, `punc_seed32_anchor`) failed promote gate; no med stage.
+- `round232` completed: `arc_mc_seed50_discovery` flat (`+0.00pp` quick best), `protein_ss_seed62_discovery` near-gate (`+0.65pp`) but still med-skipped.
+- `round233` running under new queue: `arc_mc_seed51_discovery` already reached **`+4.17pp`** med vs baseline (provisional; round not finished).
