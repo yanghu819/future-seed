@@ -1081,6 +1081,27 @@ Next round plan:
 
 ---
 
+## Round209-214 - fastloop queues (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed39_discovery`: `scalar_l8_train1e4` med **`+8.33pp`**
+- `mbpp_longctx_seed12_repair`: `scalar_l8_train8e5` med **`+4.37pp`**
+- `arc_mc_seed40_discovery`: `scalar_l8_sched_cos` med **`+4.17pp`**
+- `arc_mc_seed41_discovery`: `scalar_l8_sched_cos` med **`+4.17pp`**
+- `hotpot_seed39_discovery`: `scalar_l8_train1e4` med **`+3.07pp`**
+
+Failed/pruned highlights:
+- `hotpot_seed40_discovery`: all candidates quick negative (`-1.52pp` to `-3.20pp`), med skipped.
+- `mbpp_seed39_headprobe`: quick uplift did not transfer; med `-1.23pp`.
+- `mbpp_seed40_anchor` / `punc_seed27_anchor`: below promote gate (`+0.37pp`, `+0.64pp`), med skipped.
+- `protein_ss_seed51/53`: near-flat quick, med skipped.
+
+Next round plan:
+1. finish active queue `209-216` (`round215+` in progress), then auto-chain into `217-224`.
+2. keep nonstop chain active through `225-232`, `233-240`, and prepared extension `241-248`.
+
+---
+
 ## Chain Extension (prepared 2026-02-27)
 
 Best config vs baseline:

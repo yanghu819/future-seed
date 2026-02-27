@@ -1279,3 +1279,21 @@ Current status:
 Key outcomes (med vs baseline, pp):
 - `arc_mc_seed38_discovery`: best quick `+0.00pp`, med skipped
 - `protein_ss_seed50_discovery`: all quick candidates `+0.00pp`, med skipped
+
+### Round209-214 (fastloop queues, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed39_discovery`: `scalar_l8_train1e4` **`+8.33pp`**
+- `mbpp_longctx_seed12_repair`: `scalar_l8_train8e5` **`+4.37pp`**
+- `arc_mc_seed40_discovery`: `scalar_l8_sched_cos` **`+4.17pp`**
+- `arc_mc_seed41_discovery`: `scalar_l8_sched_cos` **`+4.17pp`**
+- `hotpot_seed39_discovery`: `scalar_l8_train1e4` **`+3.07pp`**
+
+Main pruned/negative patterns:
+- `hotpot_seed40_discovery` candidates all quick negative (up to `-3.20pp`), med skipped.
+- `mbpp_seed39_headprobe` and several anchor tasks showed quick gains but med regression/skip.
+- `protein_ss_seed51/53` mostly failed promote gate (near-flat quick).
+
+Current status:
+- active queue remains `209-216`, currently in `round215`.
+- downstream chain is armed continuously through `round248`.
