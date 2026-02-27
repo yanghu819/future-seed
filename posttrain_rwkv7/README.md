@@ -1330,3 +1330,8 @@ Main pruned/negative patterns:
 Current status:
 - active queue is in `round230` (`protein_ss_seed61_discovery` path running).
 - chained queues remain active through `round248`.
+
+### Chain Tail Extension
+
+- Added queued fastloop blocks through `round400` (`369-376`, `377-384`, `385-392`, `393-400`).
+- Remote auto-chainer scripts for these blocks are started and waiting on predecessor summaries.

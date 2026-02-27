@@ -1140,6 +1140,20 @@ Next round plan:
 
 ---
 
+## Chain Tail Extension (prepared 2026-02-27)
+
+Best config vs baseline:
+- N/A (orchestration-only update)
+
+Failed/pruned:
+- none; queue/chainer expansion step only.
+
+Next round plan:
+1. continue nonstop chain through existing blocks and new tail blocks `369-376`, `377-384`, `385-392`, `393-400`.
+2. keep same sync rhythm after each completed round window: remote runs -> local snapshot -> rolling logs -> backup push.
+
+---
+
 ## Chain Extension (prepared 2026-02-27)
 
 Best config vs baseline:
