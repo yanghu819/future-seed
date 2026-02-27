@@ -989,3 +989,20 @@ Failed/pruned highlights:
 Next round plan:
 1. continue active queue `177-184` and keep strict quick prune (`-0.50pp`) and promote (`+0.80pp`) gates.
 2. maintain nonstop chain through `185-192`, `193-200`, `201-208` and extend farther as needed.
+
+---
+
+## Round177 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed23_discovery`: best quick `scalar_l8_sched_cos` **`+0.00pp`**
+- `protein_ss_seed35_discovery`: best quick `scalar_l8_train8e5` **`-0.47pp`**
+
+Failed/pruned:
+- `arc_mc_seed23_discovery`: `scalar_l8_train1e4` quick-pruned (`-8.33pp`), remaining candidates did not pass promote gate.
+- `protein_ss_seed35_discovery`: `head_l8` and `scalar_l8_train1e4` quick-pruned (`-2.24pp`, `-3.13pp`).
+- both tasks failed `quick >= +0.80pp` promote gate, so med stage skipped for this round.
+
+Next round plan:
+1. continue `round178-184` and watch whether `mbpp/hotpot` can convert quick gains into med-positive gains.
+2. keep nonstop chain active through `185-192`, `193-200`, `201-208`, `209-216`.

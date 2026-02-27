@@ -1219,3 +1219,13 @@ Main pruned/negative patterns:
 Current status:
 - `169-176` completed and auto-chained into active queue `177-184`.
 - waiting chains remain active for `185-192`, `193-200`, `201-208`.
+
+### Round177 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed23_discovery`: best quick `+0.00pp`, med skipped
+- `protein_ss_seed35_discovery`: best quick `-0.47pp`, med skipped
+
+Current status:
+- active queue is now in `round178` (`mbpp_seed27_headprobe`, `hotpot_seed31_discovery`).
+- downstream chains remain active: `185-192`, `193-200`, `201-208`, `209-216`.
