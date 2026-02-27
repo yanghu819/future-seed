@@ -1,6 +1,6 @@
 {
   "strategy": {
-    "search_mix": "70_new_30_anchor",
+    "search_mix": "75_new_25_anchor_broad",
     "quick_promote_pp": 0.8,
     "quick_prune_pp": -0.5,
     "strong_negative_quick_pp": -1.0,
@@ -14,8 +14,8 @@
       "novelty_tier": "new",
       "tasks": [
         {
-          "name": "arc_mc_seed71_discovery",
-          "seed": 71,
+          "name": "arc_mc_seed66_discovery",
+          "seed": 66,
           "trainer": "train_arc_mc_sft.py",
           "ds": "ai2_arc",
           "ds_cfg": "ARC-Challenge",
@@ -108,8 +108,8 @@
           ]
         },
         {
-          "name": "protein_ss_seed83_discovery",
-          "seed": 83,
+          "name": "protein_ss_seed78_discovery",
+          "seed": 78,
           "trainer": "train_protein_ss_spot_sft.py",
           "ds": "lamm-mit/protein_secondary_structure_from_PDB",
           "ds_cfg": "",
@@ -175,23 +175,6 @@
               ]
             },
             {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
               "name": "scalar_l8_train1e4",
               "args": [
                 "--alpha_lr",
@@ -207,6 +190,29 @@
                 "--fs_clip",
                 "1.0"
               ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
             }
           ]
         }
@@ -217,8 +223,8 @@
       "novelty_tier": "new",
       "tasks": [
         {
-          "name": "mbpp_seed63_headprobe",
-          "seed": 63,
+          "name": "mbpp_seed58_headprobe",
+          "seed": 58,
           "trainer": "train_punc_restore_sft.py",
           "ds": "mbpp",
           "ds_cfg": "",
@@ -254,12 +260,33 @@
           "quick_budget": 160,
           "quick_steps": 160,
           "quick_eval_every": 20,
-          "quick_val_batches": 3,
+          "quick_val_batches": 2,
           "med_budget": 260,
           "med_steps": 320,
           "med_eval_every": 20,
           "med_val_batches": 3,
           "candidates": [
+            {
+              "name": "head_l10_strong",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-2",
+                "--alpha_head_lr",
+                "1e-3",
+                "--fs_layer_start",
+                "10",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
             {
               "name": "scalar_l8_sched_cos",
               "args": [
@@ -284,31 +311,10 @@
               ]
             },
             {
-              "name": "head_l10_strong",
+              "name": "scalar_l8_train1e4",
               "args": [
                 "--alpha_lr",
-                "0",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "head",
-                "--alpha_head_init",
-                "-2",
-                "--alpha_head_lr",
-                "1e-3",
-                "--fs_layer_start",
-                "10",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
+                "1e-4",
                 "--alpha_init",
                 "-2",
                 "--fs_variant",
@@ -406,10 +412,10 @@
               ]
             },
             {
-              "name": "scalar_l8_train8e5",
+              "name": "scalar_l8_sched_cos",
               "args": [
                 "--alpha_lr",
-                "8e-5",
+                "0",
                 "--alpha_init",
                 "-2",
                 "--fs_variant",
@@ -419,6 +425,12 @@
                 "--fs_norm",
                 "--fs_detach",
                 "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
                 "1.0"
               ]
             }
@@ -431,40 +443,177 @@
       "novelty_tier": "new",
       "tasks": [
         {
-          "name": "arc_mc_seed72_discovery",
-          "seed": 72,
-          "trainer": "train_arc_mc_sft.py",
-          "ds": "ai2_arc",
-          "ds_cfg": "ARC-Challenge",
+          "name": "squad_seed16_discovery",
+          "seed": 16,
+          "trainer": "train_punc_restore_sft.py",
+          "ds": "squad",
+          "ds_cfg": "",
           "base_args": [
             "--ds",
-            "ai2_arc",
+            "squad",
             "--ds_cfg",
-            "ARC-Challenge",
+            "",
             "--train_split",
             "train",
             "--val_split",
             "validation",
             "--n_train",
-            "1000",
+            "1200",
             "--n_val",
-            "200",
+            "160",
+            "--min_chars",
+            "64",
+            "--max_chars",
+            "260",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "1024",
             "--max_prompt_tokens",
+            "1536",
+            "--min_prompt_tokens",
             "512",
             "--max_answer_tokens",
-            "8",
+            "128",
             "--bsz",
-            "8"
+            "12"
           ],
-          "quick_budget": 130,
+          "quick_budget": 150,
           "quick_steps": 160,
           "quick_eval_every": 20,
-          "quick_val_batches": 3,
-          "med_budget": 240,
+          "quick_val_batches": 2,
+          "med_budget": 260,
           "med_steps": 320,
           "med_eval_every": 20,
           "med_val_batches": 3,
           "candidates": [
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr",
+                "1e-4",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wiki_seed12_discovery",
+          "seed": 12,
+          "trainer": "train_punc_restore_sft.py",
+          "ds": "wikitext",
+          "ds_cfg": "wikitext-2-raw-v1",
+          "base_args": [
+            "--ds",
+            "wikitext",
+            "--ds_cfg",
+            "wikitext-2-raw-v1",
+            "--train_split",
+            "train",
+            "--val_split",
+            "validation",
+            "--n_train",
+            "1200",
+            "--n_val",
+            "200",
+            "--min_chars",
+            "48",
+            "--max_chars",
+            "260",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "1024",
+            "--max_prompt_tokens",
+            "1536",
+            "--min_prompt_tokens",
+            "512",
+            "--max_answer_tokens",
+            "160",
+            "--bsz",
+            "4"
+          ],
+          "quick_budget": 120,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 2,
+          "med_budget": 220,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 3,
+          "candidates": [
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
             {
               "name": "scalar_l8_train1e4",
               "args": [
@@ -504,12 +653,81 @@
                 "--fs_alpha_max",
                 "1.0"
               ]
-            },
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 276,
+      "novelty_tier": "anchor",
+      "tasks": [
+        {
+          "name": "mbpp_longctx_seed25_repair",
+          "seed": 25,
+          "trainer": "train_mbpp_longctx_sft.py",
+          "ds": "mbpp",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds",
+            "mbpp",
+            "--ds_cfg",
+            "",
+            "--train_split",
+            "train",
+            "--val_split",
+            "test",
+            "--n_train",
+            "320",
+            "--n_val",
+            "80",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "768",
+            "--max_prompt_tokens",
+            "2560",
+            "--min_prompt_tokens",
+            "1024",
+            "--max_answer_tokens",
+            "160",
+            "--bsz",
+            "1"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 3,
+          "candidates": [
             {
-              "name": "scalar_l8_train8e5",
+              "name": "head_l8",
               "args": [
                 "--alpha_lr",
-                "8e-5",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr",
+                "1e-4",
                 "--alpha_init",
                 "-2",
                 "--fs_variant",
@@ -521,12 +739,35 @@
                 "--fs_clip",
                 "1.0"
               ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
             }
           ]
         },
         {
-          "name": "protein_ss_seed84_discovery",
-          "seed": 84,
+          "name": "protein_ss_seed79_discovery",
+          "seed": 79,
           "trainer": "train_protein_ss_spot_sft.py",
           "ds": "lamm-mit/protein_secondary_structure_from_PDB",
           "ds_cfg": "",
@@ -592,23 +833,6 @@
               ]
             },
             {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
               "name": "scalar_l8_train1e4",
               "args": [
                 "--alpha_lr",
@@ -624,59 +848,7 @@
                 "--fs_clip",
                 "1.0"
               ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "round": 276,
-      "novelty_tier": "anchor",
-      "tasks": [
-        {
-          "name": "mbpp_seed64_anchor",
-          "seed": 64,
-          "trainer": "train_punc_restore_sft.py",
-          "ds": "mbpp",
-          "ds_cfg": "",
-          "base_args": [
-            "--ds",
-            "mbpp",
-            "--ds_cfg",
-            "",
-            "--train_split",
-            "train",
-            "--val_split",
-            "test",
-            "--n_train",
-            "340",
-            "--n_val",
-            "100",
-            "--min_chars",
-            "24",
-            "--max_chars",
-            "360",
-            "--fill_notes_to_max",
-            "--note_pool_size",
-            "384",
-            "--max_prompt_tokens",
-            "1408",
-            "--min_prompt_tokens",
-            "384",
-            "--max_answer_tokens",
-            "160",
-            "--bsz",
-            "12"
-          ],
-          "quick_budget": 160,
-          "quick_steps": 160,
-          "quick_eval_every": 20,
-          "quick_val_batches": 3,
-          "med_budget": 260,
-          "med_steps": 320,
-          "med_eval_every": 20,
-          "med_val_batches": 3,
-          "candidates": [
+            },
             {
               "name": "scalar_l8_sched_cos",
               "args": [
@@ -699,145 +871,6 @@
                 "--fs_alpha_max",
                 "1.0"
               ]
-            },
-            {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "head_l10_strong",
-              "args": [
-                "--alpha_lr",
-                "0",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "head",
-                "--alpha_head_init",
-                "-2",
-                "--alpha_head_lr",
-                "1e-3",
-                "--fs_layer_start",
-                "10",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "punc_seed43_anchor",
-          "seed": 43,
-          "trainer": "train_punc_restore_sft.py",
-          "ds": "hotpot_qa",
-          "ds_cfg": "distractor",
-          "base_args": [
-            "--ds",
-            "hotpot_qa",
-            "--ds_cfg",
-            "distractor",
-            "--train_split",
-            "train",
-            "--val_split",
-            "validation",
-            "--n_train",
-            "800",
-            "--n_val",
-            "160",
-            "--min_chars",
-            "48",
-            "--max_chars",
-            "220",
-            "--fill_notes_to_max",
-            "--note_pool_size",
-            "512",
-            "--max_prompt_tokens",
-            "1024",
-            "--min_prompt_tokens",
-            "256",
-            "--max_answer_tokens",
-            "64",
-            "--bsz",
-            "8"
-          ],
-          "quick_budget": 120,
-          "quick_steps": 160,
-          "quick_eval_every": 20,
-          "quick_val_batches": 3,
-          "med_budget": 240,
-          "med_steps": 360,
-          "med_eval_every": 20,
-          "med_val_batches": 3,
-          "candidates": [
-            {
-              "name": "scalar_l8_train1e4",
-              "args": [
-                "--alpha_lr",
-                "1e-4",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "head_l8",
-              "args": [
-                "--alpha_lr",
-                "0",
-                "--alpha_init",
-                "-3",
-                "--fs_variant",
-                "head",
-                "--alpha_head_init",
-                "-3",
-                "--alpha_head_lr",
-                "5e-4",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
             }
           ]
         }
@@ -848,8 +881,8 @@
       "novelty_tier": "new",
       "tasks": [
         {
-          "name": "arc_mc_seed73_discovery",
-          "seed": 73,
+          "name": "arc_mc_seed67_discovery",
+          "seed": 67,
           "trainer": "train_arc_mc_sft.py",
           "ds": "ai2_arc",
           "ds_cfg": "ARC-Challenge",
@@ -1024,10 +1057,129 @@
               ]
             },
             {
-              "name": "scalar_l8_train8e5",
+              "name": "scalar_l8_sched_cos",
               "args": [
                 "--alpha_lr",
-                "8e-5",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 278,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "mbpp_seed59_headprobe",
+          "seed": 59,
+          "trainer": "train_punc_restore_sft.py",
+          "ds": "mbpp",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds",
+            "mbpp",
+            "--ds_cfg",
+            "",
+            "--train_split",
+            "train",
+            "--val_split",
+            "test",
+            "--n_train",
+            "340",
+            "--n_val",
+            "100",
+            "--min_chars",
+            "24",
+            "--max_chars",
+            "360",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "384",
+            "--max_prompt_tokens",
+            "1408",
+            "--min_prompt_tokens",
+            "384",
+            "--max_answer_tokens",
+            "160",
+            "--bsz",
+            "12"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 2,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 3,
+          "candidates": [
+            {
+              "name": "head_l10_strong",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-2",
+                "--alpha_head_lr",
+                "1e-3",
+                "--fs_layer_start",
+                "10",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr",
+                "1e-4",
                 "--alpha_init",
                 "-2",
                 "--fs_variant",
@@ -1041,16 +1193,230 @@
               ]
             }
           ]
+        },
+        {
+          "name": "squad_seed17_discovery",
+          "seed": 17,
+          "trainer": "train_punc_restore_sft.py",
+          "ds": "squad",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds",
+            "squad",
+            "--ds_cfg",
+            "",
+            "--train_split",
+            "train",
+            "--val_split",
+            "validation",
+            "--n_train",
+            "1200",
+            "--n_val",
+            "160",
+            "--min_chars",
+            "64",
+            "--max_chars",
+            "260",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "1024",
+            "--max_prompt_tokens",
+            "1536",
+            "--min_prompt_tokens",
+            "512",
+            "--max_answer_tokens",
+            "128",
+            "--bsz",
+            "12"
+          ],
+          "quick_budget": 150,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 2,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 3,
+          "candidates": [
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr",
+                "1e-4",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            }
+          ]
         }
       ]
     },
     {
-      "round": 278,
-      "novelty_tier": "new",
+      "round": 279,
+      "novelty_tier": "anchor",
       "tasks": [
         {
-          "name": "protein_ss_seed85_discovery",
-          "seed": 85,
+          "name": "wiki_seed13_anchor",
+          "seed": 13,
+          "trainer": "train_punc_restore_sft.py",
+          "ds": "wikitext",
+          "ds_cfg": "wikitext-2-raw-v1",
+          "base_args": [
+            "--ds",
+            "wikitext",
+            "--ds_cfg",
+            "wikitext-2-raw-v1",
+            "--train_split",
+            "train",
+            "--val_split",
+            "validation",
+            "--n_train",
+            "1200",
+            "--n_val",
+            "200",
+            "--min_chars",
+            "48",
+            "--max_chars",
+            "260",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "1024",
+            "--max_prompt_tokens",
+            "1536",
+            "--min_prompt_tokens",
+            "512",
+            "--max_answer_tokens",
+            "160",
+            "--bsz",
+            "4"
+          ],
+          "quick_budget": 120,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 2,
+          "med_budget": 220,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 3,
+          "candidates": [
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr",
+                "1e-4",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "protein_ss_seed80_discovery",
+          "seed": 80,
           "trainer": "train_protein_ss_spot_sft.py",
           "ds": "lamm-mit/protein_secondary_structure_from_PDB",
           "ds_cfg": "",
@@ -1116,82 +1482,6 @@
               ]
             },
             {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "scalar_l8_train1e4",
-              "args": [
-                "--alpha_lr",
-                "1e-4",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "mbpp_longctx_seed20_repair",
-          "seed": 20,
-          "trainer": "train_mbpp_longctx_sft.py",
-          "ds": "mbpp",
-          "ds_cfg": "",
-          "base_args": [
-            "--ds",
-            "mbpp",
-            "--ds_cfg",
-            "",
-            "--train_split",
-            "train",
-            "--val_split",
-            "test",
-            "--n_train",
-            "320",
-            "--n_val",
-            "80",
-            "--fill_notes_to_max",
-            "--note_pool_size",
-            "768",
-            "--max_prompt_tokens",
-            "2560",
-            "--min_prompt_tokens",
-            "1024",
-            "--max_answer_tokens",
-            "160",
-            "--bsz",
-            "1"
-          ],
-          "quick_budget": 160,
-          "quick_steps": 160,
-          "quick_eval_every": 20,
-          "quick_val_batches": 3,
-          "med_budget": 260,
-          "med_steps": 320,
-          "med_eval_every": 20,
-          "med_val_batches": 3,
-          "candidates": [
-            {
               "name": "scalar_l8_train1e4",
               "args": [
                 "--alpha_lr",
@@ -1208,96 +1498,6 @@
                 "1.0"
               ]
             },
-            {
-              "name": "head_l8",
-              "args": [
-                "--alpha_lr",
-                "0",
-                "--alpha_init",
-                "-3",
-                "--fs_variant",
-                "head",
-                "--alpha_head_init",
-                "-3",
-                "--alpha_head_lr",
-                "5e-4",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "round": 279,
-      "novelty_tier": "anchor",
-      "tasks": [
-        {
-          "name": "mbpp_seed65_headprobe",
-          "seed": 65,
-          "trainer": "train_punc_restore_sft.py",
-          "ds": "mbpp",
-          "ds_cfg": "",
-          "base_args": [
-            "--ds",
-            "mbpp",
-            "--ds_cfg",
-            "",
-            "--train_split",
-            "train",
-            "--val_split",
-            "test",
-            "--n_train",
-            "340",
-            "--n_val",
-            "100",
-            "--min_chars",
-            "24",
-            "--max_chars",
-            "360",
-            "--fill_notes_to_max",
-            "--note_pool_size",
-            "384",
-            "--max_prompt_tokens",
-            "1408",
-            "--min_prompt_tokens",
-            "384",
-            "--max_answer_tokens",
-            "160",
-            "--bsz",
-            "12"
-          ],
-          "quick_budget": 160,
-          "quick_steps": 160,
-          "quick_eval_every": 20,
-          "quick_val_batches": 3,
-          "med_budget": 260,
-          "med_steps": 320,
-          "med_eval_every": 20,
-          "med_val_batches": 3,
-          "candidates": [
             {
               "name": "scalar_l8_sched_cos",
               "args": [
@@ -1320,145 +1520,6 @@
                 "--fs_alpha_max",
                 "1.0"
               ]
-            },
-            {
-              "name": "head_l10_strong",
-              "args": [
-                "--alpha_lr",
-                "0",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "head",
-                "--alpha_head_init",
-                "-2",
-                "--alpha_head_lr",
-                "1e-3",
-                "--fs_layer_start",
-                "10",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            }
-          ]
-        },
-        {
-          "name": "punc_seed44_anchor",
-          "seed": 44,
-          "trainer": "train_punc_restore_sft.py",
-          "ds": "hotpot_qa",
-          "ds_cfg": "distractor",
-          "base_args": [
-            "--ds",
-            "hotpot_qa",
-            "--ds_cfg",
-            "distractor",
-            "--train_split",
-            "train",
-            "--val_split",
-            "validation",
-            "--n_train",
-            "800",
-            "--n_val",
-            "160",
-            "--min_chars",
-            "48",
-            "--max_chars",
-            "220",
-            "--fill_notes_to_max",
-            "--note_pool_size",
-            "512",
-            "--max_prompt_tokens",
-            "1024",
-            "--min_prompt_tokens",
-            "256",
-            "--max_answer_tokens",
-            "64",
-            "--bsz",
-            "8"
-          ],
-          "quick_budget": 120,
-          "quick_steps": 160,
-          "quick_eval_every": 20,
-          "quick_val_batches": 3,
-          "med_budget": 240,
-          "med_steps": 360,
-          "med_eval_every": 20,
-          "med_val_batches": 3,
-          "candidates": [
-            {
-              "name": "scalar_l8_train1e4",
-              "args": [
-                "--alpha_lr",
-                "1e-4",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
-              "name": "head_l8",
-              "args": [
-                "--alpha_lr",
-                "0",
-                "--alpha_init",
-                "-3",
-                "--fs_variant",
-                "head",
-                "--alpha_head_init",
-                "-3",
-                "--alpha_head_lr",
-                "5e-4",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
             }
           ]
         }
@@ -1469,8 +1530,8 @@
       "novelty_tier": "new",
       "tasks": [
         {
-          "name": "arc_mc_seed74_discovery",
-          "seed": 74,
+          "name": "arc_mc_seed68_discovery",
+          "seed": 68,
           "trainer": "train_arc_mc_sft.py",
           "ds": "ai2_arc",
           "ds_cfg": "ARC-Challenge",
@@ -1563,50 +1624,44 @@
           ]
         },
         {
-          "name": "protein_ss_seed86_discovery",
-          "seed": 86,
-          "trainer": "train_protein_ss_spot_sft.py",
-          "ds": "lamm-mit/protein_secondary_structure_from_PDB",
+          "name": "mbpp_longctx_seed26_repair",
+          "seed": 26,
+          "trainer": "train_mbpp_longctx_sft.py",
+          "ds": "mbpp",
           "ds_cfg": "",
           "base_args": [
             "--ds",
-            "lamm-mit/protein_secondary_structure_from_PDB",
-            "--split",
+            "mbpp",
+            "--ds_cfg",
+            "",
+            "--train_split",
             "train",
+            "--val_split",
+            "test",
             "--n_train",
-            "1200",
+            "320",
             "--n_val",
-            "240",
-            "--max_seq_len",
-            "512",
-            "--min_seq_len",
-            "96",
-            "--num_queries",
-            "48",
-            "--query_region",
-            "random",
+            "80",
             "--fill_notes_to_max",
             "--note_pool_size",
-            "2048",
-            "--max_note_seq_len",
-            "256",
+            "768",
             "--max_prompt_tokens",
-            "2048",
+            "2560",
             "--min_prompt_tokens",
             "1024",
             "--max_answer_tokens",
-            "128",
+            "160",
             "--bsz",
-            "2"
+            "1"
           ],
-          "quick_budget": 140,
+          "quick_budget": 160,
           "quick_steps": 160,
           "quick_eval_every": 20,
-          "quick_val_batches": 4,
+          "quick_val_batches": 3,
           "med_budget": 260,
           "med_steps": 320,
           "med_eval_every": 20,
-          "med_val_batches": 4,
+          "med_val_batches": 3,
           "candidates": [
             {
               "name": "head_l8",
@@ -1630,23 +1685,6 @@
               ]
             },
             {
-              "name": "scalar_l8_train8e5",
-              "args": [
-                "--alpha_lr",
-                "8e-5",
-                "--alpha_init",
-                "-2",
-                "--fs_variant",
-                "scalar",
-                "--fs_layer_start",
-                "8",
-                "--fs_norm",
-                "--fs_detach",
-                "--fs_clip",
-                "1.0"
-              ]
-            },
-            {
               "name": "scalar_l8_train1e4",
               "args": [
                 "--alpha_lr",
@@ -1660,6 +1698,29 @@
                 "--fs_norm",
                 "--fs_detach",
                 "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
                 "1.0"
               ]
             }

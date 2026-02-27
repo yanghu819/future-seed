@@ -1335,3 +1335,10 @@ Current status:
 
 - Added queued fastloop blocks through `round400` (`369-376`, `377-384`, `385-392`, `393-400`).
 - Remote auto-chainer scripts for these blocks are started and waiting on predecessor summaries.
+
+### Queue Retrofit (2026-02-27, Round233+)
+
+- Reworked dedup in `scripts/run_round77_82_fastdiscover.py` to use canonical signatures (ignore task alias) and include `trainer` + `base_args_fp`, reducing repeated reruns of equivalent configs.
+- Rebuilt fastloop queues from `round233` to `round400` with a broader 75/25 mix (`new`/`anchor`) instead of repeated anchor-heavy loops.
+- Expanded active task mix to include `squad` and `wikitext` discovery lines alongside `arc_mc`, `protein_ss`, `hotpot`, `mbpp`, and `mbpp_longctx`.
+- Hot-swapped queue files in-place (`results/_search_queue_round233_240_fastloop.json` ... `_round393_400_fastloop.json`) so existing remote autochain scripts continue without restart.

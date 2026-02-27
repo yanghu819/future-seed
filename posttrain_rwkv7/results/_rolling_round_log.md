@@ -1165,3 +1165,20 @@ Failed/pruned:
 Next round plan:
 1. run prepared fastloop queues continuously through `round368` (`249-256` ... `361-368`) after existing chain completes.
 2. keep per-round sync cadence unchanged: remote runs -> local snapshot -> README/rolling log -> backup branch push.
+
+## Queue Retrofit - broad-search + anti-repeat (2026-02-27)
+
+Best config vs baseline:
+- N/A (orchestration change)
+
+Failed/pruned:
+- N/A (no training run in this step)
+
+Next round plan:
+1. Continue current `225-232` run uninterrupted; verify `233-240` launches with new queue content.
+2. Keep chained nonstop execution to `round400` with broadened task mix and canonical dedup.
+
+Notes:
+- Updated `scripts/run_round77_82_fastdiscover.py` signature matching to avoid duplicate med/quick reruns under renamed task aliases.
+- Added `scripts/rebuild_fastloop_queues_broad.py` and regenerated queues `233-400`.
+- Updated remote queue files in place so existing `runs/autochain_roundXXX_YYY.sh` launchers pick up new mixes automatically.

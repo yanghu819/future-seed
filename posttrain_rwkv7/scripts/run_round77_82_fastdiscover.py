@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -58,12 +59,59 @@ class RoundSpec:
 class HistoryIndex:
     def __init__(self) -> None:
         self.med_by_signature: Dict[str, dict] = {}
+        self.med_by_signature_canon: Dict[str, dict] = {}
         self.cooldown_until: Dict[str, int] = {}
+        self.cooldown_until_canon: Dict[str, int] = {}
+
+    @staticmethod
+    def canonical_signature(signature: str) -> str:
+        """Canonical key that ignores cosmetic task naming differences."""
+        try:
+            payload = json.loads(signature)
+        except Exception:
+            return signature
+        if not isinstance(payload, dict):
+            return signature
+        payload.pop("task", None)
+        return json.dumps(payload, sort_keys=True, ensure_ascii=False)
 
     def update_cooldown(self, signature: str, until_round: int) -> None:
         prev = self.cooldown_until.get(signature, -1)
         if until_round > prev:
             self.cooldown_until[signature] = until_round
+        canon = self.canonical_signature(signature)
+        prev_c = self.cooldown_until_canon.get(canon, -1)
+        if until_round > prev_c:
+            self.cooldown_until_canon[canon] = until_round
+
+    def get_cooldown(self, signature: str) -> Optional[int]:
+        direct = self.cooldown_until.get(signature)
+        canon = self.cooldown_until_canon.get(self.canonical_signature(signature))
+        if direct is None:
+            return canon
+        if canon is None:
+            return direct
+        return max(direct, canon)
+
+    def add_med_signature(self, signature: str, row: dict) -> None:
+        prev = self.med_by_signature.get(signature)
+        if prev is None or int(row.get("round", -1)) >= int(prev.get("round", -1)):
+            self.med_by_signature[signature] = row
+        canon = self.canonical_signature(signature)
+        prev_c = self.med_by_signature_canon.get(canon)
+        if prev_c is None or int(row.get("round", -1)) >= int(prev_c.get("round", -1)):
+            self.med_by_signature_canon[canon] = row
+
+    def has_med_signature(self, signature: str) -> bool:
+        if signature in self.med_by_signature:
+            return True
+        return self.canonical_signature(signature) in self.med_by_signature_canon
+
+    def get_med_signature(self, signature: str) -> Optional[dict]:
+        row = self.med_by_signature.get(signature)
+        if row is not None:
+            return row
+        return self.med_by_signature_canon.get(self.canonical_signature(signature))
 
 
 def env() -> dict:
@@ -115,12 +163,19 @@ def prompt_len(base_args: List[str]) -> int:
         return -1
 
 
+def base_args_fingerprint(base_args: List[str]) -> str:
+    payload = json.dumps(base_args, ensure_ascii=False)
+    return hashlib.md5(payload.encode("utf-8")).hexdigest()[:12]
+
+
 def signature_for(task: Task, cfg_name: str) -> str:
     payload = {
         "task": task.name,
+        "trainer": task.trainer,
         "seed": int(task.seed),
         "ds": task.ds,
         "ds_cfg": task.ds_cfg,
+        "base_args_fp": base_args_fingerprint(task.base_args),
         "cfg_name": cfg_name,
         "quick_budget": int(task.quick_budget),
         "med_budget": int(task.med_budget),
@@ -333,9 +388,9 @@ def load_history(runs_dir: Path) -> HistoryIndex:
             if isinstance(cur_cd, int):
                 hist.update_cooldown(sig, cur_cd)
             if r.get("stage") == "med" and r.get("status") == "ok":
-                prev = hist.med_by_signature.get(sig)
-                if prev is None or int(r.get("round", round_id)) >= int(prev.get("round", -1)):
-                    hist.med_by_signature[sig] = r
+                rec = dict(r)
+                rec["round"] = int(rec.get("round", round_id))
+                hist.add_med_signature(sig, rec)
 
         # infer strong negatives from rows that already have signatures.
         by_task_stage: Dict[Tuple[str, str], Dict[str, float]] = {}
@@ -410,7 +465,7 @@ def load_queue(queue_path: Path) -> List[RoundSpec]:
 def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_run: bool) -> None:
     # task-level fast skip if all candidate signatures already have med results.
     cand_sigs = [signature_for(task, c.name) for c in task.cands]
-    if all(sig in hist.med_by_signature for sig in cand_sigs):
+    if all(hist.has_med_signature(sig) for sig in cand_sigs):
         append_record(
             rec_path,
             {
@@ -443,7 +498,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
         extra=[],
         gate_reason="promote",
         signature=sig_base,
-        cooldown_until_round=hist.cooldown_until.get(sig_base),
+        cooldown_until_round=hist.get_cooldown(sig_base),
         dry_run=dry_run,
     )
     if base_quick is None:
@@ -467,7 +522,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
     scored: List[Tuple[Candidate, float, float, str]] = []
     for cand in task.cands:
         sig = signature_for(task, cand.name)
-        cd = hist.cooldown_until.get(sig)
+        cd = hist.get_cooldown(sig)
         if cd is not None and round_id <= cd:
             append_record(
                 rec_path,
@@ -486,7 +541,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
             )
             continue
 
-        if sig in hist.med_by_signature:
+        if hist.has_med_signature(sig):
             append_record(
                 rec_path,
                 {
@@ -499,7 +554,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                     "reason": "existing_med_signature",
                     "gate_reason": "med_skip",
                     "signature": sig,
-                    "cooldown_until_round": hist.cooldown_until.get(sig),
+                    "cooldown_until_round": hist.get_cooldown(sig),
                 },
             )
             continue
@@ -518,7 +573,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
             extra=cand.args,
             gate_reason="promote",
             signature=sig,
-            cooldown_until_round=hist.cooldown_until.get(sig),
+            cooldown_until_round=hist.get_cooldown(sig),
             dry_run=dry_run,
         )
         if acc is None:
@@ -542,7 +597,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                     "reason": f"quick_drop {dpp:+.2f}pp < {PRUNE_PP:+.2f}pp",
                     "gate_reason": "quick_prune",
                     "signature": sig,
-                    "cooldown_until_round": hist.cooldown_until.get(sig),
+                    "cooldown_until_round": hist.get_cooldown(sig),
                 },
             )
 
@@ -564,15 +619,16 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                 "reason": f"best_quick {best_txt} < promote_gate {PROMOTE_PP:+.2f}pp",
                 "gate_reason": "med_skip",
                 "signature": best[3] if best else "",
-                "cooldown_until_round": hist.cooldown_until.get(best[3]) if best else None,
+                "cooldown_until_round": hist.get_cooldown(best[3]) if best else None,
             },
         )
         return
 
     # med baseline: reuse existing med if exact signature exists.
     base_med_sig = sig_base
-    if base_med_sig in hist.med_by_signature:
-        base_med = float(hist.med_by_signature[base_med_sig]["best_val_tok_acc"])
+    base_med_rec = hist.get_med_signature(base_med_sig)
+    if base_med_rec is not None:
+        base_med = float(base_med_rec["best_val_tok_acc"])
         append_record(
             rec_path,
             {
@@ -582,13 +638,13 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                 "stage": "med",
                 "config": "baseline",
                 "status": "skip_reuse",
-                "best_val_loss": hist.med_by_signature[base_med_sig].get("best_val_loss"),
+                "best_val_loss": base_med_rec.get("best_val_loss"),
                 "best_val_tok_acc": base_med,
-                "run_dir": hist.med_by_signature[base_med_sig].get("run_dir", ""),
+                "run_dir": base_med_rec.get("run_dir", ""),
                 "reason": "existing_med_signature",
                 "gate_reason": "med_skip",
                 "signature": base_med_sig,
-                "cooldown_until_round": hist.cooldown_until.get(base_med_sig),
+                "cooldown_until_round": hist.get_cooldown(base_med_sig),
             },
         )
     else:
@@ -606,7 +662,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
             extra=[],
             gate_reason="promote",
             signature=base_med_sig,
-            cooldown_until_round=hist.cooldown_until.get(base_med_sig),
+            cooldown_until_round=hist.get_cooldown(base_med_sig),
             dry_run=dry_run,
         )
         if b is None:
@@ -629,7 +685,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
         base_med = b
 
     for cand, _qa, _qdpp, sig in promoted:
-        cd = hist.cooldown_until.get(sig)
+        cd = hist.get_cooldown(sig)
         if cd is not None and round_id <= cd:
             append_record(
                 rec_path,
@@ -648,8 +704,9 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
             )
             continue
 
-        if sig in hist.med_by_signature:
-            fs_med = float(hist.med_by_signature[sig]["best_val_tok_acc"])
+        sig_rec = hist.get_med_signature(sig)
+        if sig_rec is not None:
+            fs_med = float(sig_rec["best_val_tok_acc"])
             append_record(
                 rec_path,
                 {
@@ -659,13 +716,13 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                     "stage": "med",
                     "config": cand.name,
                     "status": "skip_reuse",
-                    "best_val_loss": hist.med_by_signature[sig].get("best_val_loss"),
+                    "best_val_loss": sig_rec.get("best_val_loss"),
                     "best_val_tok_acc": fs_med,
-                    "run_dir": hist.med_by_signature[sig].get("run_dir", ""),
+                    "run_dir": sig_rec.get("run_dir", ""),
                     "reason": "existing_med_signature",
                     "gate_reason": "med_skip",
                     "signature": sig,
-                    "cooldown_until_round": hist.cooldown_until.get(sig),
+                    "cooldown_until_round": hist.get_cooldown(sig),
                 },
             )
         else:
@@ -683,7 +740,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                 extra=cand.args,
                 gate_reason="promote",
                 signature=sig,
-                cooldown_until_round=hist.cooldown_until.get(sig),
+                cooldown_until_round=hist.get_cooldown(sig),
                 dry_run=dry_run,
             )
             if fs_med is None:
@@ -704,7 +761,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
                     "reason": f"strong_med_negative {dmed:+.2f}pp <= {STRONG_NEG_MED_PP:+.2f}pp",
                     "gate_reason": "med_skip",
                     "signature": sig,
-                    "cooldown_until_round": hist.cooldown_until.get(sig),
+                    "cooldown_until_round": hist.get_cooldown(sig),
                 },
             )
 
@@ -810,6 +867,16 @@ def run_self_tests() -> None:
     h.update_cooldown(sig, 20)
     h.update_cooldown(sig, 18)
     assert h.cooldown_until[sig] == 20
+
+    # canonical signature ignores "task" field so renamed tasks dedup.
+    s1 = json.dumps({"task": "foo", "ds": "x", "seed": 1, "cfg_name": "a"}, sort_keys=True)
+    s2 = json.dumps({"task": "bar", "ds": "x", "seed": 1, "cfg_name": "a"}, sort_keys=True)
+    rec = {"round": 3, "best_val_tok_acc": 0.1}
+    h2 = HistoryIndex()
+    h2.add_med_signature(s1, rec)
+    assert h2.has_med_signature(s2)
+    h2.update_cooldown(s1, 9)
+    assert h2.get_cooldown(s2) == 9
 
     print("self_test_ok")
 
