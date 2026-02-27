@@ -1023,3 +1023,20 @@ Failed/pruned:
 Next round plan:
 1. continue `round179-184`, prioritize `arc_mc/protein_ss` where med-positive hit rate is higher.
 2. maintain nonstop chain through `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`, `233-240`.
+
+---
+
+## Round179 - fastloop queue (completed 2026-02-27)
+
+Best config vs baseline:
+- `arc_mc_seed24_discovery`: `scalar_l8_train1e4` med **`+0.00pp`**
+- `protein_ss_seed36_discovery`: best quick **`+0.00pp`** (no promote)
+
+Failed/pruned:
+- no strong quick-prune failures in this round, but both tasks lacked meaningful uplift.
+- `arc_mc_seed24_discovery`: quick gains (`+4.17pp`) did not transfer to med (flat at `+0.00pp`).
+- `protein_ss_seed36_discovery`: all candidates tied baseline at quick stage; med skipped by promote gate.
+
+Next round plan:
+1. continue `round180-184`, watch anchor tasks for regression while preserving discovery throughput.
+2. keep nonstop chain active through `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`, `233-240`.

@@ -1239,3 +1239,13 @@ Key outcomes (med vs baseline, pp):
 Current status:
 - active queue moved to `round179` (`arc_mc_seed24_discovery`, `protein_ss_seed36_discovery`).
 - chained queues active: `185-192`, `193-200`, `201-208`, `209-216`, `217-224`, `225-232`, `233-240`.
+
+### Round179 (fastdiscover, completed)
+
+Key outcomes (med vs baseline, pp):
+- `arc_mc_seed24_discovery`: `scalar_l8_train1e4` med **`+0.00pp`** (flat)
+- `protein_ss_seed36_discovery`: all quick candidates **`+0.00pp`**, med skipped
+
+Current status:
+- active queue moved to `round180` (`mbpp_seed28_anchor`, `punc_seed19_anchor`).
+- queued auto-chain remains continuous through `240`.
