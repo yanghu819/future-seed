@@ -1255,3 +1255,19 @@ Notes:
 - Added profile `kernel_v3` (`85_new_15_anchor_kernel_v3`) with cycle emphasis on `protein_ss/protein_contact/arc_mc`.
 - Deployed queues: `_search_queue_round417_424_fastloop.json`, `_search_queue_round425_432_fastloop.json`.
 - Deployed remote autochains: `autochain_round417_424.sh`, `autochain_round425_432.sh`.
+
+## Nonstop Extension - Round433+ (2026-03-02)
+
+Best config vs baseline:
+- N/A (orchestration extension)
+
+Failed/pruned:
+- N/A (start-of-window status)
+
+Next round plan:
+1. run `round433-440` fully under `kernel_v3` and collect med-positive density for `protein_contact` entrants.
+2. auto-chain `round441-448` with no idle gap; keep quick prune/promote thresholds unchanged.
+
+Notes:
+- Added queues: `_search_queue_round433_440_fastloop.json`, `_search_queue_round441_448_fastloop.json`.
+- Active runner confirmed on `433-440`; `autochain_round441_448.sh` waiting on round440 summary.

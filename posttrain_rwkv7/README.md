@@ -1383,3 +1383,13 @@ Current execution continues in `round401-408` queue and will auto-chain into `ro
 Recent round signal snapshot:
 - Positive med wins: `protein_ss_seed174 +4.58pp`, `protein_ss_seed173 +2.98pp`, `protein_ss_seed171 +2.49pp`, `mbpp_seed92 +1.89pp`.
 - Negative/unstable lanes: multiple `arc_mc` hard drops (quick `-4pp` to `-12pp`), and repeated `wiki` baseline failures.
+
+### Nonstop Extension (2026-03-02, Round433+)
+
+- Continued nonstop execution after `round432` completion by launching:
+  - `results/_search_queue_round433_440_fastloop.json`
+  - `results/_search_queue_round441_448_fastloop.json`
+- Profile kept as `85_new_15_anchor_kernel_v3` to prioritize kernel-value exploration (`protein_ss`, `protein_contact`, `arc_mc`).
+- Remote status:
+  - active: `run_round77_82_fastdiscover.py --queue results/_search_queue_round433_440_fastloop.json`
+  - waiting chainer: `runs/autochain_round441_448.sh` (trigger on `_summary_round440_fastdiscover.txt`)
