@@ -1368,3 +1368,18 @@ Current status:
   - `wiki_seed24_discovery`: quick baseline failed (`rc_nonzero`), task skipped
 
 Current execution continues in `round401-408` queue and will auto-chain into `round409-416`.
+
+### Kernel-Value Priority Update (2026-03-01, Round417+)
+
+- Prioritized broader kernel-value exploration by introducing `protein_contact` into the active search mix.
+- New queue profile: `85_new_15_anchor_kernel_v3` with heavier focus on `protein_ss / protein_contact / arc_mc` and reduced dependency on unstable `wiki` runs.
+- Generated and deployed:
+  - `results/_search_queue_round417_424_fastloop.json`
+  - `results/_search_queue_round425_432_fastloop.json`
+- Remote autochain scripts are armed:
+  - `runs/autochain_round417_424.sh` (trigger: `_summary_round416_fastdiscover.txt`)
+  - `runs/autochain_round425_432.sh` (trigger: `_summary_round424_fastdiscover.txt`)
+
+Recent round signal snapshot:
+- Positive med wins: `protein_ss_seed174 +4.58pp`, `protein_ss_seed173 +2.98pp`, `protein_ss_seed171 +2.49pp`, `mbpp_seed92 +1.89pp`.
+- Negative/unstable lanes: multiple `arc_mc` hard drops (quick `-4pp` to `-12pp`), and repeated `wiki` baseline failures.

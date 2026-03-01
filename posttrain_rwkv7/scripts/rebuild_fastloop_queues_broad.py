@@ -192,6 +192,64 @@ def mk_protein_ss(seed: int) -> dict:
     }
 
 
+def mk_protein_contact(seed: int) -> dict:
+    return {
+        "name": f"protein_contact_seed{seed}_discovery",
+        "seed": seed,
+        "trainer": "train_protein_contact_pair_sft.py",
+        "ds": "heya5/protein_contact_map",
+        "ds_cfg": "",
+        "base_args": [
+            "--ds",
+            "heya5/protein_contact_map",
+            "--train_split",
+            "train",
+            "--val_split",
+            "valid",
+            "--n_train",
+            "1600",
+            "--n_val",
+            "120",
+            "--max_seq_len",
+            "384",
+            "--min_seq_len",
+            "96",
+            "--num_pairs",
+            "32",
+            "--min_sep",
+            "8",
+            "--contact_cutoff",
+            "8.0",
+            "--pair_sampling",
+            "random",
+            "--pos_ratio",
+            "0.5",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "2048",
+            "--max_note_seq_len",
+            "256",
+            "--max_prompt_tokens",
+            "2048",
+            "--min_prompt_tokens",
+            "1024",
+            "--max_answer_tokens",
+            "128",
+            "--bsz",
+            "2",
+        ],
+        "quick_budget": 140,
+        "quick_steps": 160,
+        "quick_eval_every": 20,
+        "quick_val_batches": 4,
+        "med_budget": 260,
+        "med_steps": 320,
+        "med_eval_every": 20,
+        "med_val_batches": 4,
+        "candidates": cand_pack(["head_l8", "scalar_l8_train1e4", "scalar_l8_sched_cos"]),
+    }
+
+
 def mk_hotpot(seed: int) -> dict:
     return {
         "name": f"hotpot_seed{seed}_discovery",
@@ -434,6 +492,7 @@ def mk_wiki(seed: int, novelty_tier: str) -> dict:
 BUILDERS = {
     "arc_mc": mk_arc,
     "protein_ss": mk_protein_ss,
+    "protein_contact": mk_protein_contact,
     "hotpot": mk_hotpot,
     "mbpp": mk_mbpp,
     "mbpp_longctx": mk_mbpp_longctx,
@@ -445,6 +504,7 @@ BUILDERS = {
 SEED_START = {
     "arc_mc": 51,
     "protein_ss": 63,
+    "protein_contact": 1,
     "hotpot": 45,
     "mbpp": 48,
     "mbpp_longctx": 15,
@@ -477,6 +537,18 @@ CYCLE_REBALANCE_V2: List[Tuple[str, Tuple[str, str]]] = [
 ]
 
 
+CYCLE_KERNEL_V3: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("protein_ss", "arc_mc")),
+    ("new", ("protein_contact", "mbpp")),
+    ("new", ("squad", "hotpot")),
+    ("anchor", ("mbpp_longctx", "protein_ss")),
+    ("new", ("protein_contact", "arc_mc")),
+    ("new", ("protein_ss", "mbpp")),
+    ("anchor", ("squad", "protein_contact")),
+    ("new", ("protein_ss", "protein_contact")),
+]
+
+
 PROFILES: Dict[str, Dict[str, object]] = {
     "broad_v1": {
         "cycle": CYCLE_BROAD_V1,
@@ -485,6 +557,10 @@ PROFILES: Dict[str, Dict[str, object]] = {
     "rebalance_v2": {
         "cycle": CYCLE_REBALANCE_V2,
         "search_mix": "75_new_25_anchor_rebalance_v2",
+    },
+    "kernel_v3": {
+        "cycle": CYCLE_KERNEL_V3,
+        "search_mix": "85_new_15_anchor_kernel_v3",
     },
 }
 
@@ -543,10 +619,12 @@ def main() -> None:
     ap.add_argument("--seed_mbpp_longctx", type=int, default=SEED_START["mbpp_longctx"])
     ap.add_argument("--seed_squad", type=int, default=SEED_START["squad"])
     ap.add_argument("--seed_wiki", type=int, default=SEED_START["wiki"])
+    ap.add_argument("--seed_protein_contact", type=int, default=SEED_START["protein_contact"])
     args = ap.parse_args()
     seed_start = {
         "arc_mc": int(args.seed_arc_mc),
         "protein_ss": int(args.seed_protein_ss),
+        "protein_contact": int(args.seed_protein_contact),
         "hotpot": int(args.seed_hotpot),
         "mbpp": int(args.seed_mbpp),
         "mbpp_longctx": int(args.seed_mbpp_longctx),

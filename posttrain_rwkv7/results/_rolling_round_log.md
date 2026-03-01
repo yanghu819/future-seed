@@ -1237,3 +1237,21 @@ Failed/pruned highlights:
 Next round plan:
 1. continue `round404-408` with same quick prune / promote gates and updated dedup/cooldown policy.
 2. auto-chain into `round409-416`, then run a hit-rate rebalance pass based on recent 16-round med-positive density.
+
+## Kernel Priority Replan - Round417+ (2026-03-01)
+
+Best config vs baseline:
+- N/A (queue allocation update)
+
+Failed/pruned:
+- N/A (orchestration-only step)
+
+Next round plan:
+1. finish active `409-416`, then auto-chain into `417-424` (`kernel_v3`).
+2. continue into `425-432` and evaluate med-positive density against previous `rebalance_v2` window.
+
+Notes:
+- Added `protein_contact` task builder in `scripts/rebuild_fastloop_queues_broad.py`.
+- Added profile `kernel_v3` (`85_new_15_anchor_kernel_v3`) with cycle emphasis on `protein_ss/protein_contact/arc_mc`.
+- Deployed queues: `_search_queue_round417_424_fastloop.json`, `_search_queue_round425_432_fastloop.json`.
+- Deployed remote autochains: `autochain_round417_424.sh`, `autochain_round425_432.sh`.
