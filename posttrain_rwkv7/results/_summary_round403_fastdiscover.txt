@@ -1,0 +1,19 @@
+================================================================================================================
+Round403 fastdiscover summary
+================================================================================================================
+[squad_seed48_discovery]
+  quick baseline: 13.57%
+    scalar_l8_sched_cos          d_acc=+1.01pp acc=14.58%
+    head_l8                      d_acc=-0.24pp acc=13.33%
+    scalar_l8_train1e4           d_acc=-0.76pp acc=12.82%
+  med:
+    baseline                     acc=17.75%
+    scalar_l8_sched_cos          d_acc_vs_med=+0.73pp acc=18.48%
+  pruned:
+    scalar_l8_train1e4           quick_drop -0.76pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[wiki_seed24_discovery]
+  quick baseline failed
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  squad_seed48_discovery           stage=med   cfg=scalar_l8_sched_cos      d_acc=+0.73pp

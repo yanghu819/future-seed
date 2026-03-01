@@ -1354,3 +1354,17 @@ Current status:
 - `round231` completed: both tasks (`mbpp_seed47_headprobe`, `punc_seed32_anchor`) failed promote gate; no med stage.
 - `round232` completed: `arc_mc_seed50_discovery` flat (`+0.00pp` quick best), `protein_ss_seed62_discovery` near-gate (`+0.65pp`) but still med-skipped.
 - `round233` running under new queue: `arc_mc_seed51_discovery` already reached **`+4.17pp`** med vs baseline (provisional; round not finished).
+
+### Round401-403 Status (latest)
+
+- `round401` completed with med-positive gains:
+  - `arc_mc_seed114_discovery`: `scalar_l8_train1e4` **`+4.17pp`**
+  - `protein_ss_seed166_discovery`: `scalar_l8_sched_cos` **`+0.16pp`**
+- `round402` completed with mixed outcomes:
+  - `mbpp_seed90_headprobe`: quick best `+2.67pp` but med **`-1.85pp`** (flagged strong negative)
+  - `protein_ss_seed167_discovery`: best quick `+0.38pp`, below promote gate; med skipped
+- `round403` completed:
+  - `squad_seed48_discovery`: `scalar_l8_sched_cos` med **`+0.73pp`**
+  - `wiki_seed24_discovery`: quick baseline failed (`rc_nonzero`), task skipped
+
+Current execution continues in `round401-408` queue and will auto-chain into `round409-416`.

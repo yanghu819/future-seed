@@ -1221,3 +1221,19 @@ Best config vs baseline (interim):
 
 Current risk:
 - `protein_ss_seed63_discovery` med outcome pending; round-level usefulness decision not final.
+
+## Round401-403 (fastloop queues, completed)
+
+Best config vs baseline:
+- `round401`: `arc_mc_seed114_discovery` / `scalar_l8_train1e4` med **`+4.17pp`**
+- `round401`: `protein_ss_seed166_discovery` / `scalar_l8_sched_cos` med **`+0.16pp`**
+- `round403`: `squad_seed48_discovery` / `scalar_l8_sched_cos` med **`+0.73pp`**
+
+Failed/pruned highlights:
+- `round402` `mbpp_seed90_headprobe`: quick best `+2.67pp`, but med **`-1.85pp`** vs baseline (strong negative flagged, cooldown applied).
+- `round402` `protein_ss_seed167_discovery`: best quick `+0.38pp`, below promote gate `+0.80pp`, med skipped.
+- `round403` `wiki_seed24_discovery`: quick baseline run failed (`rc_nonzero`), entire task skipped.
+
+Next round plan:
+1. continue `round404-408` with same quick prune / promote gates and updated dedup/cooldown policy.
+2. auto-chain into `round409-416`, then run a hit-rate rebalance pass based on recent 16-round med-positive density.

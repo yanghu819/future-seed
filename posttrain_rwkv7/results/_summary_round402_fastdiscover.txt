@@ -1,0 +1,24 @@
+================================================================================================================
+Round402 fastdiscover summary
+================================================================================================================
+[mbpp_seed90_headprobe]
+  quick baseline: 41.46%
+    scalar_l8_sched_cos          d_acc=+2.67pp acc=44.13%
+    head_l10_strong              d_acc=+0.02pp acc=41.48%
+    scalar_l8_train1e4           d_acc=-2.08pp acc=39.38%
+  med:
+    baseline                     acc=47.44%
+    scalar_l8_sched_cos          d_acc_vs_med=-1.85pp acc=45.58%
+  pruned:
+    scalar_l8_train1e4           quick_drop -2.08pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed167_discovery]
+  quick baseline: 29.13%
+    head_l8                      d_acc=+0.38pp acc=29.51%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=29.13%
+    scalar_l8_sched_cos          d_acc=+0.00pp acc=29.13%
+  med skipped: best_quick head_l8 +0.38pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  protein_ss_seed167_discovery     stage=quick cfg=head_l8                  d_acc=+0.38pp
+  mbpp_seed90_headprobe            stage=med   cfg=scalar_l8_sched_cos      d_acc=-1.85pp
