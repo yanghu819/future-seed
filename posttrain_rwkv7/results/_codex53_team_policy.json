@@ -1,0 +1,15 @@
+{
+  "model": "gpt-5.3-codex",
+  "quick_promote_pp": 0.8,
+  "quick_prune_pp": -0.5,
+  "strong_negative_quick_pp": -1.0,
+  "strong_negative_med_pp": -0.5,
+  "cooldown_rounds": 8,
+  "report_template_4lines": [
+    "当前在跑什么",
+    "当前最好结果（任务名 + 提升pp）",
+    "当前主要风险",
+    "下一步两项实验"
+  ],
+  "notes": "Spark disabled. Use GPT-5.3 Codex only."
+}

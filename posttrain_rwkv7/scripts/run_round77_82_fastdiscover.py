@@ -16,11 +16,47 @@ RUNS = ROOT / "runs"
 RESULTS = ROOT / "results"
 PYTHON = ROOT / ".venv" / "bin" / "python"
 
-PROMOTE_PP = 0.8
-PRUNE_PP = -0.5
-STRONG_NEG_QUICK_PP = -1.0
-STRONG_NEG_MED_PP = -0.5
-COOLDOWN_ROUNDS = 8
+DEFAULT_POLICY: Dict[str, Any] = {
+    "model": "gpt-5.3-codex",
+    "quick_promote_pp": 0.8,
+    "quick_prune_pp": -0.5,
+    "strong_negative_quick_pp": -1.0,
+    "strong_negative_med_pp": -0.5,
+    "cooldown_rounds": 8,
+    "report_template_4lines": [
+        "当前在跑什么",
+        "当前最好结果（任务名 + 提升pp）",
+        "当前主要风险",
+        "下一步两项实验",
+    ],
+}
+ACTIVE_POLICY: Dict[str, Any] = dict(DEFAULT_POLICY)
+
+PROMOTE_PP = float(DEFAULT_POLICY["quick_promote_pp"])
+PRUNE_PP = float(DEFAULT_POLICY["quick_prune_pp"])
+STRONG_NEG_QUICK_PP = float(DEFAULT_POLICY["strong_negative_quick_pp"])
+STRONG_NEG_MED_PP = float(DEFAULT_POLICY["strong_negative_med_pp"])
+COOLDOWN_ROUNDS = int(DEFAULT_POLICY["cooldown_rounds"])
+
+
+def apply_policy(policy: Dict[str, Any]) -> None:
+    global PROMOTE_PP, PRUNE_PP, STRONG_NEG_QUICK_PP, STRONG_NEG_MED_PP, COOLDOWN_ROUNDS, ACTIVE_POLICY
+    ACTIVE_POLICY = dict(policy)
+    PROMOTE_PP = float(policy["quick_promote_pp"])
+    PRUNE_PP = float(policy["quick_prune_pp"])
+    STRONG_NEG_QUICK_PP = float(policy["strong_negative_quick_pp"])
+    STRONG_NEG_MED_PP = float(policy["strong_negative_med_pp"])
+    COOLDOWN_ROUNDS = int(policy["cooldown_rounds"])
+
+
+def load_policy(policy_path: Optional[Path]) -> Dict[str, Any]:
+    policy = dict(DEFAULT_POLICY)
+    if policy_path is not None and policy_path.exists():
+        payload = json.loads(policy_path.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            policy.update(payload)
+    apply_policy(policy)
+    return policy
 
 
 @dataclass
@@ -766,7 +802,7 @@ def run_task(round_id: int, rec_path: Path, task: Task, hist: HistoryIndex, dry_
             )
 
 
-def summarize_round(round_id: int, rec_path: Path, summary_path: Path) -> None:
+def summarize_round(round_id: int, rec_path: Path, summary_path: Path, policy: Optional[Dict[str, Any]] = None) -> None:
     rows = []
     for line in rec_path.read_text(encoding="utf-8", errors="ignore").splitlines():
         if not line.strip():
@@ -776,7 +812,14 @@ def summarize_round(round_id: int, rec_path: Path, summary_path: Path) -> None:
         except Exception:
             continue
 
+    pol = policy or ACTIVE_POLICY
     out = ["=" * 112, f"Round{round_id} fastdiscover summary", "=" * 112]
+    out.append(
+        f"policy model={pol.get('model', 'gpt-5.3-codex')} "
+        f"promote={PROMOTE_PP:+.2f}pp prune={PRUNE_PP:+.2f}pp "
+        f"cooldown={COOLDOWN_ROUNDS}"
+    )
+    out.append("=" * 112)
     rank = []
     tasks = sorted({r["task"] for r in rows if "task" in r})
 
@@ -886,6 +929,7 @@ def main() -> None:
     ap.add_argument("--queue", type=str, default=str(RESULTS / "_search_queue_round77_82.json"))
     ap.add_argument("--round_from", type=int, default=77)
     ap.add_argument("--round_to", type=int, default=82)
+    ap.add_argument("--policy", type=str, default=str(RESULTS / "_codex53_team_policy.json"))
     ap.add_argument("--dry_run", action="store_true")
     ap.add_argument("--self_test", action="store_true")
     args = ap.parse_args()
@@ -895,6 +939,7 @@ def main() -> None:
         return
 
     RUNS.mkdir(parents=True, exist_ok=True)
+    policy = load_policy(Path(args.policy))
     queue = load_queue(Path(args.queue))
     hist = load_history(RUNS)
 
@@ -917,7 +962,7 @@ def main() -> None:
         for task in rd.tasks:
             run_task(rd.round_id, rec_path, task, hist, dry_run=args.dry_run)
 
-        summarize_round(rd.round_id, rec_path, summary_path)
+        summarize_round(rd.round_id, rec_path, summary_path, policy=policy)
 
         # refresh history index after each round so dedup/cooldown applies to subsequent rounds.
         hist = load_history(RUNS)

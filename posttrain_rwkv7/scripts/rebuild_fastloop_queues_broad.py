@@ -549,6 +549,62 @@ CYCLE_KERNEL_V3: List[Tuple[str, Tuple[str, str]]] = [
 ]
 
 
+CYCLE_ROI_EXPLORE_V4: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("protein_ss", "arc_mc")),
+    ("new", ("mbpp", "protein_ss")),
+    ("new", ("arc_mc", "mbpp_longctx")),
+    ("new", ("protein_ss", "protein_contact")),
+    ("anchor", ("squad", "mbpp")),
+    ("new", ("hotpot", "arc_mc")),
+    ("new", ("protein_ss", "mbpp")),
+    ("anchor", ("squad", "mbpp_longctx")),
+]
+
+CYCLE_ROI_EXPLORE_V5: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("protein_ss", "arc_mc")),
+    ("new", ("mbpp", "arc_mc")),
+    ("new", ("protein_ss", "mbpp_longctx")),
+    ("new", ("squad", "hotpot")),
+    ("new", ("protein_ss", "squad")),
+    ("anchor", ("mbpp", "protein_ss")),
+    ("new", ("arc_mc", "wiki")),
+    ("anchor", ("mbpp_longctx", "arc_mc")),
+]
+
+CYCLE_RUTHLESS_V6: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("protein_ss", "arc_mc")),
+    ("new", ("mbpp", "wiki")),
+    ("new", ("squad", "mbpp_longctx")),
+    ("anchor", ("protein_ss", "arc_mc")),
+    ("new", ("mbpp", "protein_ss")),
+    ("new", ("arc_mc", "wiki")),
+    ("anchor", ("squad", "mbpp")),
+    ("new", ("mbpp_longctx", "protein_ss")),
+]
+
+CYCLE_BFS_V7: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("arc_mc", "mbpp")),
+    ("new", ("protein_ss", "squad")),
+    ("new", ("wiki", "hotpot")),
+    ("new", ("mbpp_longctx", "protein_contact")),
+    ("anchor", ("arc_mc", "squad")),
+    ("anchor", ("protein_ss", "mbpp")),
+    ("new", ("wiki", "mbpp_longctx")),
+    ("new", ("hotpot", "protein_contact")),
+]
+
+CYCLE_BFS_V8: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("arc_mc", "mbpp")),
+    ("new", ("protein_ss", "squad")),
+    ("new", ("hotpot", "mbpp_longctx")),
+    ("new", ("protein_contact", "arc_mc")),
+    ("anchor", ("protein_ss", "mbpp")),
+    ("anchor", ("squad", "mbpp_longctx")),
+    ("new", ("hotpot", "arc_mc")),
+    ("new", ("protein_contact", "protein_ss")),
+]
+
+
 PROFILES: Dict[str, Dict[str, object]] = {
     "broad_v1": {
         "cycle": CYCLE_BROAD_V1,
@@ -561,6 +617,26 @@ PROFILES: Dict[str, Dict[str, object]] = {
     "kernel_v3": {
         "cycle": CYCLE_KERNEL_V3,
         "search_mix": "85_new_15_anchor_kernel_v3",
+    },
+    "roi_explore_v4": {
+        "cycle": CYCLE_ROI_EXPLORE_V4,
+        "search_mix": "80_new_20_anchor_roi_explore_v4",
+    },
+    "roi_explore_v5": {
+        "cycle": CYCLE_ROI_EXPLORE_V5,
+        "search_mix": "80_new_20_anchor_roi_explore_v5",
+    },
+    "ruthless_v6": {
+        "cycle": CYCLE_RUTHLESS_V6,
+        "search_mix": "85_new_15_anchor_ruthless_v6",
+    },
+    "bfs_v7": {
+        "cycle": CYCLE_BFS_V7,
+        "search_mix": "70_new_30_anchor_bfs_v7",
+    },
+    "bfs_v8": {
+        "cycle": CYCLE_BFS_V8,
+        "search_mix": "70_new_30_anchor_bfs_v8",
     },
 }
 

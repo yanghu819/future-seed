@@ -1271,3 +1271,229 @@ Next round plan:
 Notes:
 - Added queues: `_search_queue_round433_440_fastloop.json`, `_search_queue_round441_448_fastloop.json`.
 - Active runner confirmed on `433-440`; `autochain_round441_448.sh` waiting on round440 summary.
+
+## ROI-Explore v5 Reallocation + Chain Extension (2026-03-02)
+
+Best config vs baseline:
+- latest global best unchanged: `arc_mc_seed120_discovery` / `scalar_l8_sched_cos` med **`+12.50pp`**.
+- latest round-in-flight (`round434`) shows `mbpp_seed98_headprobe` quick candidates currently negative vs baseline (interim).
+
+Failed/pruned highlights:
+- `round434` interim:
+  - `protein_contact_seed10_discovery`: quick all tied baseline (`+0.00pp`), med skipped.
+  - `mbpp_seed98_headprobe`: `head_l10_strong` quick **`-3.77pp`**, `scalar_l8_sched_cos` quick **`-5.28pp`**; both quick-pruned.
+
+Next round plan:
+1. finish active chain `433-440 -> 441-448 -> 449-456 -> 457-464 -> 465-472` without interruption.
+2. auto-enter new high-ROI exploration blocks `473-520` (`roi_explore_v5`) with `protein_contact` removed from the main cycle.
+
+Notes:
+- Added profile `roi_explore_v5` in `scripts/rebuild_fastloop_queues_broad.py` and generated:
+  - `_search_queue_round473_480_fastloop.json`
+  - `_search_queue_round481_488_fastloop.json`
+  - `_search_queue_round489_496_fastloop.json`
+  - `_search_queue_round497_504_fastloop.json`
+  - `_search_queue_round505_512_fastloop.json`
+  - `_search_queue_round513_520_fastloop.json`
+- Deployed remote waiting launchers:
+  - `autochain_round473_480.sh`, `autochain_round481_488.sh`, `autochain_round489_496.sh`,
+  - `autochain_round497_504.sh`, `autochain_round505_512.sh`, `autochain_round513_520.sh`.
+
+## Ruthless Prune + Fast Restart (2026-03-02)
+
+Best config vs baseline:
+- global best unchanged: `arc_mc_seed120_discovery` / `scalar_l8_sched_cos` med **`+12.50pp`**.
+- latest confirmed med-positive remains `protein_ss_seed189_discovery` / `scalar_l8_train1e4` **`+4.90pp`** (`round444`).
+
+Failed/pruned highlights:
+- killed lanes from main cycle:
+  - `protein_contact`: quick promote rate ~`0%`, repeated flat `+0.00pp`.
+  - `hotpot`: recent med transfer negative/unstable (quick positive did not convert reliably).
+
+Next round plan:
+1. run `round449-456` under `ruthless_v6` (no `protein_contact/hotpot`) to maximize new useful-task hit-rate.
+2. continue nonstop chain through `round560` with same ruthless cycle and per-round quick prune/promote gating.
+
+Notes:
+- Added profile `ruthless_v6` (`85_new_15_anchor_ruthless_v6`) in queue builder.
+- Rebuilt queues: `_search_queue_round441_448_fastloop.json` ... `_search_queue_round553_560_fastloop.json`.
+- Immediate cutover executed: old `449-456` process terminated and relaunched; active task is now `protein_ss_seed232_discovery`.
+- Added autochains for new tail blocks:
+  - `autochain_round521_528.sh`
+  - `autochain_round529_536.sh`
+  - `autochain_round537_544.sh`
+  - `autochain_round545_552.sh`
+  - `autochain_round553_560.sh`
+
+## GPT-5.3 Codex Policy + Best-of-N Replan (2026-03-02)
+
+Best config vs baseline:
+- global best unchanged: `arc_mc_seed120_discovery` / `scalar_l8_sched_cos` med **`+12.50pp`**.
+- latest finished ruthless rounds:
+  - `round449`: `protein_ss_seed232_discovery` / `scalar_l8_sched_cos` med **`+3.24pp`**
+  - `round449`: `arc_mc_seed164_discovery` / `scalar_l8_train1e4` med **`+4.17pp`**
+  - `round450`: `mbpp_seed126_headprobe` / `scalar_l8_sched_cos` med **`+0.50pp`**
+
+Failed/pruned highlights:
+- `round450` `wiki_seed34_discovery`: quick baseline failed (`rc_nonzero`), task med skipped.
+- `round451` still in progress; risk remains on `mbpp_longctx` variance.
+
+Next round plan:
+1. keep current `449-456` chain running uninterrupted, then continue through `560`.
+2. auto-enter Best-of-N planned `561-640` blocks under strict GPT-5.3 Codex policy.
+
+Notes:
+- Added policy file `results/_codex53_team_policy.json` (Spark disabled, GPT-5.3 Codex only).
+- Updated runner `scripts/run_round77_82_fastdiscover.py` with `--policy` support and policy header in summaries.
+- Added `scripts/plan_bestofn_fastloop.py` and produced:
+  - `results/_bestofn_plan_round561_640.json`
+  - selected profile: `ruthless_v6`
+  - generated queues: `_search_queue_round561_568_fastloop.json` ... `_search_queue_round633_640_fastloop.json`.
+- Added waiting launchers:
+  - `autochain_round561_568.sh`, `autochain_round569_576.sh`, `autochain_round577_584.sh`,
+  - `autochain_round585_592.sh`, `autochain_round593_600.sh`, `autochain_round601_608.sh`,
+  - `autochain_round609_616.sh`, `autochain_round617_624.sh`, `autochain_round625_632.sh`,
+  - `autochain_round633_640.sh`.
+
+## Round455-457 (ruthless_v6, completed)
+
+Best config vs baseline:
+- `round455`:
+  - `squad_seed81_anchor` / `scalar_l8_train1e4` med **`+0.69pp`**
+  - `mbpp_seed128_anchor` / `scalar_l8_train1e4` med **`-0.33pp`**
+- `round456`:
+  - `protein_ss_seed235_discovery` / `scalar_l8_train1e4` med **`+1.33pp`**
+  - `mbpp_longctx_seed86_repair` / `scalar_l8_sched_cos` med **`-1.46pp`** (strong negative flagged)
+- `round457`:
+  - `arc_mc_seed167_discovery` quick all **`+4.17pp`**, but med **`-12.50pp`** vs baseline (strong negative flagged)
+  - `protein_ss_seed236_discovery` best quick **`+0.00pp`**, med skipped
+
+Failed/pruned highlights:
+- `wiki_seed35_discovery` quick baseline failed (`rc_nonzero`) in `round454` and wiki failure risk remains active.
+- `mbpp_longctx` and `arc_mc` show high quick-to-med regression variance; cooldown applied to strong negatives.
+
+Next round plan:
+1. finish active `round458` (`mbpp_seed129_headprobe` + `wiki_seed36_discovery`) with strict quick prune.
+2. continue `round459-460` (`squad + mbpp_longctx`, then `protein_ss + arc_mc`) and keep chain rolling into `561+` Best-of-N window.
+
+## BFS-First Cutover (2026-03-02, from round459)
+
+Best config vs baseline:
+- reference best unchanged: `arc_mc_seed120_discovery` / `scalar_l8_sched_cos` med **`+12.50pp`**.
+- immediate pre-cutover positives:
+  - `round455` `squad_seed81_anchor` / `scalar_l8_train1e4` med **`+0.69pp`**
+  - `round456` `protein_ss_seed235_discovery` / `scalar_l8_train1e4` med **`+1.33pp`**
+
+Failed/pruned highlights:
+- `round457` showed severe quick-to-med reversal on ARC (`+4.17pp` quick -> `-12.50pp` med).
+- repeated concentration on a few lanes reduced exploration breadth.
+
+Next round plan:
+1. run breadth-first queue `bfs_v7` from `round459` onward to maximize task coverage before deeper exploitation.
+2. maintain strict gates unchanged (`+0.8pp` promote, `<-0.5pp` prune) while rotating across all task families.
+
+Notes:
+- Added profile `bfs_v7` to `rebuild_fastloop_queues_broad.py`.
+- Rebuilt/deployed queues `round457-640` with BFS cycle.
+- Stopped old `457-464` runner and relaunched:
+  - `run_round77_82_fastdiscover.py --queue results/_search_queue_round457_464_fastloop.json --round_from 459 --round_to 464 --policy results/_codex53_team_policy.json`.
+
+## Long-Context Insight Update (2026-03-02, through round511)
+
+Key result (MBPP line, best-candidate vs baseline, unit=pp):
+- `mbpp_longctx` outperforms non-longctx on average:
+  - quick: `+2.84pp` vs `+1.06pp` (non-long)
+  - med: `+1.04pp` vs `+0.32pp` (non-long)
+- recent highs remain strong:
+  - `round491 mbpp_longctx_seed95_repair`: med `+9.29pp`
+  - `round507 mbpp_longctx_seed99_repair`: med `+7.44pp`
+  - `round471 mbpp_longctx_seed90_repair`: med `+9.71pp`
+
+Risk / stability:
+- variance is large (longctx med worst tail observed to `-6pp` to `-10pp` in some rounds).
+- quick gain does not reliably predict med win:
+  - even with quick `>= +2.5pp`, med positive rate is only about `63%`.
+
+Action:
+1. keep longctx as high-ROI discovery lane (do not kill).
+2. tighten promotion for longctx to reduce false positives:
+   - require quick margin plus one short confirmation eval before full med budget.
+3. prioritize `head_l8` and `scalar_l8_train1e4` for longctx med; lower priority for unstable variants.
+
+## Round512-517 Live Window Update (2026-03-02)
+
+Best config vs baseline (recent window):
+- `round514`: `squad_seed96_discovery` / `head_l8` med **`+0.00pp`**.
+- `round511`: `hotpot_seed86_discovery` / `head_l8` med **`+2.11pp`** (still the latest clear positive in this segment).
+- recent best (500+ range) unchanged: `round507` `mbpp_longctx_seed99_repair` / `head_l8` med **`+7.44pp`**.
+
+Failed/pruned highlights:
+- `round513`: `arc_mc_seed187_discovery` quick **`+8.33pp`** but med **`-4.17pp`** (quick-to-med reversal).
+- `round517`: `protein_ss_seed257_discovery` quick all negative (best **`-1.85pp`**) and full prune.
+- `round517`: `mbpp_seed145_anchor` quick best **`+1.44pp`** but med **`-3.28pp`**.
+
+Current run status:
+- active runner: `round513-520` queue.
+- current round: `round518` (`squad_seed97_anchor` + `mbpp_longctx_seed102_repair`) in progress.
+- autochain and supervisor for `521-640` remain alive (no-gap continuation enabled).
+
+Next round plan:
+1. finish `round518-520` and immediately roll into `521-528` without manual wait.
+2. for volatile lanes (ARC/MBPP longctx), keep strict gate and prefer confirmation before full med spend.
+
+## Round518-520 Completion + Round521 Start (2026-03-02)
+
+Best config vs baseline:
+- `round519`: `arc_mc_seed189_discovery` / `scalar_l8_train8e5` med **`+0.00pp`**.
+- `round518`: `mbpp_longctx_seed102_repair` best quick **`-0.41pp`** (no promote).
+- `round520`: `protein_contact_seed33_discovery` best quick **`+0.00pp`** (no promote).
+
+Failed/pruned highlights:
+- `round518` `squad_seed97_anchor`: all three FS candidates quick below baseline (`-1.50pp` to `-1.76pp`), full prune.
+- `round518` `mbpp_longctx_seed102_repair`: `train1e4/sched_cos` quick strong negative and pruned.
+- `round520` `protein_ss_seed258_discovery`: all candidates quick negative and pruned.
+
+Current run status:
+- autochain has advanced to queue `round521-528`.
+- active tasks in `round521`: `arc_mc_seed190_discovery` + `mbpp_seed146_headprobe`.
+
+Next round plan:
+1. finish `521-522` and watch whether ARC can convert quick gains into med positive.
+2. keep BFS breadth on `hotpot/protein/mbpp_longctx` in `523-524` while preserving hard prune rules.
+
+## Round521 Update (2026-03-02)
+
+Best config vs baseline:
+- `mbpp_seed146_headprobe` / `head_l10_strong` med **`+0.34pp`**.
+- `arc_mc_seed190_discovery` had flat quick (`+0.00pp`) and med skipped.
+
+Failed/pruned highlights:
+- no hard-prune collapse in this round, but gain size remains small.
+- ARC still shows limited conversion under current quick gate.
+
+Current run status:
+- moved into `round522`; running `protein_ss_seed259_discovery` baseline quick.
+
+Next round plan:
+1. finish `round522` (`protein_ss_seed259` + `squad_seed98`) and inspect conversion quality.
+2. continue `round523` (`hotpot_seed89` + `mbpp_longctx_seed103`) as next ROI probe.
+
+## Round529-534 Update (2026-03-02)
+
+Best config vs baseline:
+- `round534`: `mbpp_longctx_seed106_repair` / `head_l8` med **`+8.69pp`** (new best in recent `529-534` window).
+- `round529`: `mbpp_seed148_headprobe` / `head_l10_strong` med **`+2.84pp`**.
+- `round530`: `protein_ss_seed262_discovery` / `scalar_l8_train1e4` med **`+2.38pp`**.
+
+Failed/pruned highlights:
+- `round532`: `arc_mc_seed194_discovery` and `protein_contact_seed36_discovery` both flat (`+0.00pp`) and med skipped.
+- `round533`: `mbpp_seed149_anchor` and `protein_ss_seed263_discovery` both below promote gate, med skipped.
+- several lanes remain high variance (ARC/longctx), so hard prune and cooldown still necessary.
+
+Current run status:
+- runner has advanced to queue `round529-536`.
+- current round is `round535`, task pair: `hotpot_seed92_discovery` + `arc_mc_seed195_discovery`.
+
+Next round plan:
+1. finish `round535` and check if hotpot/arc can produce med-positive conversion.
+2. execute `round536` (`protein_contact_seed37` + `protein_ss_seed264`) then roll directly into `537-544` autochain.

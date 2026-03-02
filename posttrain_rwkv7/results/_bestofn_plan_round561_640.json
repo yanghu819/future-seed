@@ -1,0 +1,50 @@
+{
+  "model": "gpt-5.3-codex",
+  "window": {
+    "start_round": 561,
+    "end_round": 640,
+    "block_size": 8
+  },
+  "history_window": {
+    "from": 409,
+    "to": 460
+  },
+  "promote_pp": 0.8,
+  "candidates": [
+    "ruthless_v6",
+    "roi_explore_v5",
+    "kernel_v3"
+  ],
+  "kill_tasks": [
+    "protein_contact",
+    "hotpot"
+  ],
+  "scores": [
+    {
+      "profile": "ruthless_v6",
+      "score": 5.610225,
+      "search_mix": "85_new_15_anchor_ruthless_v6"
+    },
+    {
+      "profile": "roi_explore_v5",
+      "score": 5.382259,
+      "search_mix": "80_new_20_anchor_roi_explore_v5"
+    },
+    {
+      "profile": "kernel_v3",
+      "score": 0.674247,
+      "search_mix": "85_new_15_anchor_kernel_v3"
+    }
+  ],
+  "chosen_profile": "ruthless_v6",
+  "seed_start": {
+    "arc_mc": 206,
+    "protein_ss": 288,
+    "protein_contact": 14,
+    "hotpot": 72,
+    "mbpp": 168,
+    "mbpp_longctx": 113,
+    "squad": 108,
+    "wiki": 62
+  }
+}
