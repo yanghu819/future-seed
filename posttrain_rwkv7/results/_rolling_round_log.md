@@ -1524,3 +1524,22 @@ Live result note:
   - `mbpp_longctx_seed107_repair` / `scalar_l8_sched_cos` med **`-1.90pp`**
 - runner was manually restarted from `round540` to enforce tightened policy immediately:
   - `--policy results/_codex53_team_policy.json` (`+1.0/-0.4`).
+
+## Round540-545 Sprint Window (tight policy live)
+
+Best config vs baseline:
+- `round544`: `protein_ss_seed267_discovery` / `scalar_l8_train1e4` med **`+2.31pp`**.
+- `round543`: `hotpot_seed94_discovery` / `scalar_l8_sched_cos` med **`+1.88pp`**.
+- `round545`: `mbpp_seed152_headprobe` / `scalar_l8_train1e4` med **`+0.39pp`**.
+
+Failed/pruned highlights:
+- `round540`: `protein_contact_seed38` and `arc_mc_seed197` both med skipped (quick best `+0.00pp`).
+- `round542`: `mbpp_longctx_seed108_repair` full quick negative (`best -1.23pp`), hard prune.
+- `round545`: `mbpp_longctx_seed109_repair` quick `+3.25pp` but med **`-0.95pp`** (still high variance).
+
+Current run status:
+- now running `round546` (`arc_mc_seed199_discovery` + `protein_ss_seed268_discovery`) in `sprint_v9`.
+
+Next round plan:
+1. complete `round546` and verify ARC conversion under tightened gate.
+2. proceed `round547-548` (`mbpp`/`protein_ss`/`arc`/`mbpp_longctx`) with same strict prune.
