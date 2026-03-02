@@ -1543,3 +1543,21 @@ Current run status:
 Next round plan:
 1. complete `round546` and verify ARC conversion under tightened gate.
 2. proceed `round547-548` (`mbpp`/`protein_ss`/`arc`/`mbpp_longctx`) with same strict prune.
+
+## Sprint Closure (round545-568 completed)
+
+Status:
+- sprint block reached target cap at `round568` and all experiment workers stopped.
+- gapless supervisor process was terminated after completion to avoid idle loop.
+
+Window summary (round545-568):
+- med items: `22`; positive rate: `63.6%`; mean gain: `+1.10pp`.
+- best in-window gain: `round557 arc_mc_seed205_discovery` / `scalar_l8_train8e5` med **`+8.33pp`**.
+- other notable positives:
+  - `round551 arc_mc_seed202_discovery` med **`+4.17pp`**
+  - `round557 mbpp_longctx_seed113_repair` med **`+3.57pp`**
+  - `round552 protein_ss_seed271_discovery` med **`+2.34pp`**
+
+Latest round (568):
+- `mbpp_longctx_seed117_repair`: quick strong positive but med **`-0.02pp`**.
+- `protein_ss_seed279_discovery`: med **`-2.11pp`**.
