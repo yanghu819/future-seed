@@ -1517,3 +1517,10 @@ Operational changes:
 
 Expected finish:
 - from current `round539` to cap `round568`: about `3.0-3.5h` at current observed throughput.
+
+Live result note:
+- `round539` completed with old runner policy (`+0.8/-0.5`) before restart:
+  - `hotpot_seed93_discovery` / `scalar_l8_sched_cos` med **`+2.29pp`**
+  - `mbpp_longctx_seed107_repair` / `scalar_l8_sched_cos` med **`-1.90pp`**
+- runner was manually restarted from `round540` to enforce tightened policy immediately:
+  - `--policy results/_codex53_team_policy.json` (`+1.0/-0.4`).
