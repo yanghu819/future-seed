@@ -1,7 +1,7 @@
 {
   "model": "gpt-5.3-codex",
-  "quick_promote_pp": 0.8,
-  "quick_prune_pp": -0.5,
+  "quick_promote_pp": 1.0,
+  "quick_prune_pp": -0.4,
   "strong_negative_quick_pp": -1.0,
   "strong_negative_med_pp": -0.5,
   "cooldown_rounds": 8,

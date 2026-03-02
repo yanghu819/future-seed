@@ -1497,3 +1497,23 @@ Current run status:
 Next round plan:
 1. finish `round535` and check if hotpot/arc can produce med-positive conversion.
 2. execute `round536` (`protein_contact_seed37` + `protein_ss_seed264`) then roll directly into `537-544` autochain.
+
+## Sprint Cap Update (2026-03-02, single-GPU time compression)
+
+Reason:
+- to avoid long-tail runtime on one RTX4090, switched to capped sprint window instead of open-ended `457-640` full sweep.
+
+Operational changes:
+1. policy tightened (remote live):
+   - `quick_promote_pp`: `+1.0pp` (from `+0.8pp`)
+   - `quick_prune_pp`: `-0.4pp` (from `-0.5pp`)
+2. queue strategy replaced for `round545-568`:
+   - new profile: `sprint_v9` (`90_new_10_anchor_sprint_v9`)
+   - high-ROI only lanes: `mbpp_longctx / mbpp / arc_mc / protein_ss`
+   - dropped low-conversion lanes from sprint block (`squad/hotpot/protein_contact/wiki`)
+3. supervisor cap changed:
+   - `runs/supervise_gapless_457_640.sh`: `END=568`
+   - killed waiting autochains for `569+`; kept only `545-552`, `553-560`, `561-568`.
+
+Expected finish:
+- from current `round539` to cap `round568`: about `3.0-3.5h` at current observed throughput.

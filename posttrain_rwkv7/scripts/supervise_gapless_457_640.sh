@@ -5,7 +5,7 @@ cd /root/autodl-tmp/future-seed-posttrain
 
 LOG="runs/_supervise_gapless_457_640.log"
 START=457
-END=640
+END=568
 POLICY="results/_codex53_team_policy.json"
 
 echo "[$(date +%F_%T)] supervisor started" >> "$LOG"

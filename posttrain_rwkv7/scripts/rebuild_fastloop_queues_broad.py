@@ -604,6 +604,17 @@ CYCLE_BFS_V8: List[Tuple[str, Tuple[str, str]]] = [
     ("new", ("protein_contact", "protein_ss")),
 ]
 
+CYCLE_SPRINT_V9: List[Tuple[str, Tuple[str, str]]] = [
+    ("new", ("mbpp_longctx", "mbpp")),
+    ("new", ("arc_mc", "protein_ss")),
+    ("anchor", ("mbpp", "arc_mc")),
+    ("new", ("protein_ss", "mbpp")),
+    ("new", ("arc_mc", "mbpp_longctx")),
+    ("anchor", ("mbpp", "protein_ss")),
+    ("new", ("arc_mc", "mbpp")),
+    ("new", ("protein_ss", "mbpp_longctx")),
+]
+
 
 PROFILES: Dict[str, Dict[str, object]] = {
     "broad_v1": {
@@ -637,6 +648,10 @@ PROFILES: Dict[str, Dict[str, object]] = {
     "bfs_v8": {
         "cycle": CYCLE_BFS_V8,
         "search_mix": "70_new_30_anchor_bfs_v8",
+    },
+    "sprint_v9": {
+        "cycle": CYCLE_SPRINT_V9,
+        "search_mix": "90_new_10_anchor_sprint_v9",
     },
 }
 
