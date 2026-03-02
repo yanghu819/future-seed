@@ -1393,3 +1393,30 @@ Recent round signal snapshot:
 - Remote status:
   - active: `run_round77_82_fastdiscover.py --queue results/_search_queue_round433_440_fastloop.json`
   - waiting chainer: `runs/autochain_round441_448.sh` (trigger on `_summary_round440_fastdiscover.txt`)
+
+### Round459-568 Consolidated Closure (2026-03-03)
+
+- Execution was continued in fastdiscover mode through `round568` with strict quick-to-med gating and cooldown.
+- Policy was upgraded to GPT-5.3 codex policy file:
+  - `results/_codex53_team_policy.json`
+  - final sprint gates: quick promote `+1.00pp`, quick prune `< -0.40pp`, cooldown `8`.
+- Search scheduling evolved to prioritize ROI:
+  - broad BFS phase (`bfs_v7/bfs_v8`) to expand task coverage.
+  - sprint phase (`sprint_v9`) for high-ROI lanes only: `mbpp_longctx / mbpp / arc_mc / protein_ss`.
+- Sprint block (`round545-568`) reached planned cap and was cleanly stopped (no open worker loops).
+
+Key sprint outcomes (`round545-568`):
+- med comparisons: `22`, med positive rate: `63.6%`, med mean delta: `+1.10pp`.
+- best in-window result:
+  - `round557 arc_mc_seed205_discovery` / `scalar_l8_train8e5`: **`+8.33pp`**.
+- other notable positives:
+  - `round551 arc_mc_seed202_discovery`: **`+4.17pp`**
+  - `round557 mbpp_longctx_seed113_repair`: **`+3.57pp`**
+  - `round552 protein_ss_seed271_discovery`: **`+2.34pp`**
+
+Primary artifacts:
+- rolling log: `results/_rolling_round_log.md`
+- sprint closure report: `results/_summary_round545_568_sprint_closure.txt`
+- terminal round files:
+  - `results/_summary_round568_fastdiscover.txt`
+  - `results/_round568_fastdiscover_records.jsonl`
