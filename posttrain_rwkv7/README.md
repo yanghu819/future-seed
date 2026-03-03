@@ -1420,3 +1420,76 @@ Primary artifacts:
 - terminal round files:
   - `results/_summary_round568_fastdiscover.txt`
   - `results/_round568_fastdiscover_records.jsonl`
+
+### Complete Good/Bad Audit (round77-569, detailed)
+
+This section is the full consolidated梳理 of good and bad outcomes from the fastdiscover line.
+
+Data scope:
+- parsed all `results/_round*_fastdiscover_records.jsonl` in round range `77-569`
+- files parsed: `259`
+- quick rows: `495`
+- med rows: `237`
+- quick prune decisions: `477`
+- med skip decisions: `253`
+
+Full ledgers (all entries, not sampled):
+- med ledger (all good/bad med rows): `results/_audit_round77_569_med_ledger.csv`
+- quick ledger (all good/bad quick rows): `results/_audit_round77_569_quick_ledger.csv`
+- per-task quick/med joined table: `results/_audit_round77_569_task_combo.csv`
+- analysis report: `results/_audit_round77_569_analysis.md`
+
+Global metrics:
+- quick mean/median: `+1.48pp / +0.76pp`
+- quick positive rate: `63.0%`
+- med mean/median: `+1.74pp / +1.19pp`
+- med positive rate: `69.6%`
+- all-time best med: `round157 arc_mc_seed13_discovery +20.83pp`
+- all-time worst med: `round457 arc_mc_seed167_discovery -12.50pp`
+
+Family-level performance:
+
+| Family | Quick n | Quick mean(pp) | Quick pos% | Med n | Med mean(pp) | Med pos% |
+|---|---:|---:|---:|---:|---:|---:|
+| arc_mc | 90 | +2.73 | 52.2% | 47 | +3.72 | 55.3% |
+| hotpot | 60 | +1.32 | 63.3% | 30 | +0.86 | 73.3% |
+| mbpp | 85 | +1.02 | 77.6% | 46 | +0.38 | 63.0% |
+| mbpp_longctx | 40 | +2.18 | 77.5% | 25 | +1.32 | 52.0% |
+| protein_ss | 114 | +1.58 | 66.7% | 60 | +2.40 | 88.3% |
+| squad | 31 | +0.57 | 74.2% | 10 | +0.45 | 80.0% |
+| protein_contact | 32 | +0.00 | 0.0% | 0 | +0.00 | 0.0% |
+
+Top positive med runs (selected):
+- round157 `arc_mc_seed13_discovery` / `scalar_l8_train8e5`: `+20.83pp`
+- round163 `arc_mc_seed16_discovery` / `scalar_l8_sched_cos`: `+16.67pp`
+- round136 `arc_mc_seed3_discovery` / `scalar_l8_sched_cos`: `+12.50pp`
+- round405 `arc_mc_seed115_discovery` / `scalar_l8_train1e4`: `+12.50pp`
+- round417 `arc_mc_seed120_discovery` / `scalar_l8_sched_cos`: `+12.50pp`
+- round222 `mbpp_longctx_seed13_repair` / `scalar_l8_train8e5`: `+10.00pp`
+- round534 `mbpp_longctx_seed106_repair` / `head_l8`: `+8.69pp`
+- round557 `arc_mc_seed205_discovery` / `scalar_l8_train8e5`: `+8.33pp`
+- round569 `arc_mc_seed211_repro` / `scalar_l8_train1e4`: `+8.33pp`
+- round528 `protein_ss_seed261_discovery` / `scalar_l8_sched_cos`: `+8.14pp`
+
+Top negative med runs (selected):
+- round457 `arc_mc_seed167_discovery` / `scalar_l8_train1e4`: `-12.50pp`
+- round116 `mbpp_longctx_seed0_repair` / `scalar_l8_train1e4`: `-6.45pp`
+- round172 `mbpp_seed25_anchor` / `scalar_l8_train8e5`: `-4.68pp`
+- round197 `arc_mc_seed33_discovery` / `scalar_l8_sched_cos`: `-4.17pp`
+- round513 `arc_mc_seed187_discovery` / `scalar_l8_train1e4`: `-4.17pp`
+- round189 `arc_mc_seed29_discovery` / `scalar_l8_train1e4`: `-4.17pp`
+- round502 `mbpp_longctx_seed98_repair` / `scalar_l8_train1e4`: `-3.89pp`
+- round517 `mbpp_seed145_anchor` / `scalar_l8_train1e4`: `-3.28pp`
+- round91 `hotpot_seed2_discovery` / `scalar_l8_train8e5`: `-2.74pp`
+- round568 `protein_ss_seed279_discovery` / `head_l8`: `-2.11pp`
+
+Core failure mode analysis:
+- high quick does not guarantee med positive; strong quick->med reversals occurred repeatedly.
+- representative reversal: `round457 arc_mc_seed167_discovery` quick `+4.17pp` -> med `-12.50pp`.
+- longctx variance is real: multiple runs with quick `+3pp~+5pp` later drop to near-zero or negative med.
+
+Execution decisions from this audit:
+- keep as core lanes: `arc_mc`, `protein_ss`, `mbpp`.
+- conditional keep: `mbpp_longctx` (only under stricter med gate / confirmation due variance).
+- prune from main line: `protein_contact` (quick flat, med coverage zero).
+- gate recommendation: keep strict policy (`promote >= +1.0pp`, `prune < -0.4pp`) for single-GPU ROI.
