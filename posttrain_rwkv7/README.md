@@ -4,6 +4,26 @@ This repo tracks end-to-end Future-Seed post-training experiments (single-GPU se
 
 ## Start Here (New Readers)
 
+### 0) 5-minute onboarding checklist
+
+```bash
+# 1) verify required files + run orchestrator self-test
+bash scripts/repro_doctor.sh
+
+# 2) run a finite reproducible packet (round569-574)
+bash scripts/run_repropack_569_574.sh
+
+# 3) copy newly generated outputs from runs/ to results/
+bash scripts/sync_runs_to_results.sh
+
+# 4) rebuild audit from raw JSONL
+python3 scripts/generate_fastdiscover_audit.py \
+  --results_dir results \
+  --round_from 77 \
+  --round_to 569 \
+  --out_prefix results/_audit_round77_569
+```
+
 ### 1) Repo purpose
 
 - prove whether Future-Seed gives stable gains on real tasks (not only toy tasks)
@@ -21,15 +41,45 @@ Most important files:
 - rolling experiment log: `results/_rolling_round_log.md`
 - sprint closure report: `results/_summary_round545_568_sprint_closure.txt`
 - complete audit (good+bad): `results/_audit_round77_569_analysis.md`
+- results guide: `results/README_RESULTS.md`
+- scripts guide: `scripts/README_SCRIPTS.md`
+- reproducibility doctor: `scripts/repro_doctor.sh`
+- runs->results sync: `scripts/sync_runs_to_results.sh`
 
-### 3) Quick reproducibility paths
+### 3) Output path contract (important)
+
+- orchestrator always writes fresh outputs to `runs/` (raw run-time directory)
+- this backup repo stores curated snapshots under `results/`
+- after each round block, run:
+
+```bash
+bash scripts/sync_runs_to_results.sh --round-from 569 --round-to 574
+```
+
+Without this sync step, README/audit may describe old snapshots.
+
+### 4) Quick reproducibility paths
+
+Path 0 (sanity check before any run):
+
+```bash
+bash scripts/repro_doctor.sh
+```
 
 Path A (rerun a finite high-ROI packet):
+
 ```bash
 bash scripts/run_repropack_569_574.sh
 ```
 
-Path B (rebuild complete audit from raw records):
+Path B (sync generated records into tracked snapshot directory):
+
+```bash
+bash scripts/sync_runs_to_results.sh --round-from 569 --round-to 574
+```
+
+Path C (rebuild complete audit from raw records):
+
 ```bash
 python3 scripts/generate_fastdiscover_audit.py \
   --results_dir results \
@@ -38,7 +88,8 @@ python3 scripts/generate_fastdiscover_audit.py \
   --out_prefix results/_audit_round77_569
 ```
 
-Path C (continue queued search):
+Path D (continue queued search):
+
 ```bash
 ./.venv/bin/python scripts/run_round77_82_fastdiscover.py \
   --queue results/_search_queue_round545_552_fastloop.json \
@@ -47,7 +98,27 @@ Path C (continue queued search):
   --policy results/_codex53_team_policy.json
 ```
 
-### 4) Core result dashboard (round77-569)
+Path E (dry-run queue only, no training):
+
+```bash
+./.venv/bin/python scripts/run_round77_82_fastdiscover.py \
+  --queue results/_search_queue_round569_576_fastloop.json \
+  --round_from 569 \
+  --round_to 574 \
+  --policy results/_codex53_team_policy.json \
+  --dry_run
+```
+
+### 5) Gate policy in one glance
+
+- quick promote threshold: `>= +0.8pp` (policy can override; current team policy uses stricter gates)
+- quick prune threshold: `< -0.5pp`
+- strong negative cooldown:
+  - quick `<= -1.0pp` or med `<= -0.5pp`
+  - cooldown length: 8 rounds
+- dedup key (signature): `(task, seed, ds, ds_cfg, cfg_name, quick_budget, med_budget, note_pool, prompt_len)`
+
+### 6) Core result dashboard (round77-569)
 
 Global:
 - quick mean/median: `+1.48pp / +0.76pp`
@@ -81,7 +152,7 @@ Main failure mode:
 - quick>0 does not guarantee med>0; major reversals exist.
 - representative reversal: `round457 arc_mc_seed167`: quick `+4.17pp` -> med `-12.50pp`.
 
-### 5) Operational decisions from audit
+### 7) Operational decisions from audit
 
 - keep as core lanes: `arc_mc`, `protein_ss`, `mbpp`
 - conditional keep: `mbpp_longctx` (must use stricter med gate/confirmation)
@@ -90,7 +161,7 @@ Main failure mode:
   - promote `>= +1.0pp`
   - prune `< -0.4pp`
 
-### 6) How to read result files
+### 8) How to read result files
 
 Naming:
 - `_summary_roundXXX_fastdiscover.txt`: human-readable per-round report
@@ -107,6 +178,13 @@ Most useful analysis artifacts:
 - complete report: `results/_audit_round77_569_analysis.md`
 - all med rows (good+bad): `results/_audit_round77_569_med_ledger.csv`
 - quick/med joined rows: `results/_audit_round77_569_task_combo.csv`
+
+Per-round reproducibility acceptance:
+- `runs/_roundXXX_fastdiscover_records.jsonl` generated
+- `runs/_summary_roundXXX_fastdiscover.txt` generated
+- sync done: same files appear in `results/`
+- rolling log updated: `results/_rolling_round_log.md`
+- if round closes a block: audit regeneration command completed
 
 ## Detailed Round-by-Round History
 

@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 PY_BIN="${PY_BIN:-./.venv/bin/python}"
-QUEUE="${QUEUE:-results/_search_queue_round569_574_repropack.json}"
+QUEUE="${QUEUE:-results/_search_queue_round569_576_fastloop.json}"
 POLICY="${POLICY:-results/_codex53_team_policy.json}"
 ROUND_FROM="${ROUND_FROM:-569}"
 ROUND_TO="${ROUND_TO:-574}"
