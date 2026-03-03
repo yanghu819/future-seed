@@ -1,0 +1,27 @@
+================================================================================================================
+Round192 fastdiscover summary
+================================================================================================================
+[arc_mc_seed30_discovery]
+  quick baseline: 41.67%
+    scalar_l8_train8e5           d_acc=-8.33pp acc=33.33%
+    scalar_l8_train1e4           d_acc=-12.50pp acc=29.17%
+    scalar_l8_sched_cos          d_acc=-16.67pp acc=25.00%
+  med skipped: best_quick scalar_l8_train8e5 -8.33pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -12.50pp < -0.50pp
+    scalar_l8_sched_cos          quick_drop -16.67pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -8.33pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed42_discovery]
+  quick baseline: 30.54%
+    scalar_l8_train8e5           d_acc=+0.50pp acc=31.04%
+    scalar_l8_train1e4           d_acc=-1.33pp acc=29.21%
+    head_l8                      d_acc=-1.92pp acc=28.63%
+  med skipped: best_quick scalar_l8_train8e5 +0.50pp < promote_gate +0.80pp
+  pruned:
+    head_l8                      quick_drop -1.92pp < -0.50pp
+    scalar_l8_train1e4           quick_drop -1.33pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  protein_ss_seed42_discovery      stage=quick cfg=scalar_l8_train8e5       d_acc=+0.50pp
+  arc_mc_seed30_discovery          stage=quick cfg=scalar_l8_train8e5       d_acc=-8.33pp

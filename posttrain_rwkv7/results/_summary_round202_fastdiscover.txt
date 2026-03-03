@@ -1,0 +1,26 @@
+================================================================================================================
+Round202 fastdiscover summary
+================================================================================================================
+[hotpot_seed37_discovery]
+  quick baseline: 9.96%
+    head_l8                      d_acc=-0.50pp acc=9.46%
+    scalar_l8_train1e4           d_acc=-2.16pp acc=7.80%
+    scalar_l8_train8e5           d_acc=-2.30pp acc=7.66%
+  med skipped: best_quick head_l8 -0.50pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -2.16pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -2.30pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_seed36_headprobe]
+  quick baseline: 41.83%
+    scalar_l8_sched_cos          d_acc=-0.45pp acc=41.39%
+    scalar_l8_train8e5           d_acc=-0.87pp acc=40.97%
+    head_l10_strong              d_acc=-1.41pp acc=40.43%
+  med skipped: best_quick scalar_l8_sched_cos -0.45pp < promote_gate +0.80pp
+  pruned:
+    head_l10_strong              quick_drop -1.41pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -0.87pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed36_headprobe            stage=quick cfg=scalar_l8_sched_cos      d_acc=-0.45pp
+  hotpot_seed37_discovery          stage=quick cfg=head_l8                  d_acc=-0.50pp

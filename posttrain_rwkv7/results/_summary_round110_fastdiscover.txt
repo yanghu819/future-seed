@@ -1,0 +1,18 @@
+================================================================================================================
+Round110 fastdiscover summary
+================================================================================================================
+[mbpp_seed6_headprobe]
+  quick baseline: 42.61%
+    scalar_l8_sched_cos          d_acc=-0.07pp acc=42.54%
+    head_l10_strong              d_acc=-1.89pp acc=40.72%
+    head_l10_clip07              d_acc=-2.42pp acc=40.19%
+  med skipped: best_quick scalar_l8_sched_cos -0.07pp < promote_gate +0.80pp
+  pruned:
+    head_l10_strong              quick_drop -1.89pp < -0.50pp
+    head_l10_clip07              quick_drop -2.42pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[squad_seed4_anchor]
+  quick baseline failed
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed6_headprobe             stage=quick cfg=scalar_l8_sched_cos      d_acc=-0.07pp

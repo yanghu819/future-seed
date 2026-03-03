@@ -1,0 +1,29 @@
+Round28 started: Sat Feb 21 22:53:05 CST 2026
+RUN bsz=2 stage=quick cfg=baseline mode=no_fs budget=90
+RUN bsz=2 stage=quick cfg=scalar_l8_trainable mode=prompt_fs budget=90
+RUN bsz=2 stage=med cfg=scalar_l8_trainable mode=prompt_fs budget=280
+RUN bsz=4 stage=quick cfg=baseline mode=no_fs budget=90
+RUN bsz=4 stage=quick cfg=scalar_l8_trainable mode=prompt_fs budget=90
+RUN bsz=6 stage=quick cfg=baseline mode=no_fs budget=90
+RUN bsz=6 stage=quick cfg=scalar_l8_trainable mode=prompt_fs budget=90
+RUN bsz=8 stage=quick cfg=baseline mode=no_fs budget=90
+====================================================================================================================
+Round28 MBPP throughput sweep summary
+====================================================================================================================
+[bsz=2]
+  baseline quick: acc=10.46% loss=5.3564
+  fs quick: acc=11.46% d_acc=+1.00pp
+  fs med: acc=25.39% d_acc=+14.92pp loss=4.1841
+--------------------------------------------------------------------------------------------------------------------
+[bsz=4]
+  baseline quick: acc=11.71% loss=5.2929
+  fs quick: acc=9.66% d_acc=-2.05pp
+--------------------------------------------------------------------------------------------------------------------
+[bsz=6]
+  baseline quick: acc=14.50% loss=4.9403
+  fs quick: acc=12.42% d_acc=-2.08pp
+--------------------------------------------------------------------------------------------------------------------
+[bsz=8]
+  baseline failed
+--------------------------------------------------------------------------------------------------------------------
+Round28 finished: Sat Feb 21 23:00:08 CST 2026

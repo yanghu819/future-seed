@@ -1,0 +1,26 @@
+================================================================================================================
+Round105 fastdiscover summary
+================================================================================================================
+[arc_seed5_discovery]
+  quick baseline: 10.72%
+    scalar_l8_train1e4           d_acc=-2.19pp acc=8.54%
+    scalar_l8_train8e5           d_acc=-2.25pp acc=8.47%
+    head_l8                      d_acc=-3.42pp acc=7.30%
+  med skipped: best_quick scalar_l8_train1e4 -2.19pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -2.19pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -2.25pp < -0.50pp
+    head_l8                      quick_drop -3.42pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed6_discovery]
+  quick baseline: 31.37%
+    scalar_l8_train1e4           d_acc=+0.44pp acc=31.82%
+    head_l8                      d_acc=-0.33pp acc=31.04%
+    scalar_l8_train8e5           d_acc=-3.50pp acc=27.87%
+  med skipped: best_quick scalar_l8_train1e4 +0.44pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train8e5           quick_drop -3.50pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  protein_ss_seed6_discovery       stage=quick cfg=scalar_l8_train1e4       d_acc=+0.44pp
+  arc_seed5_discovery              stage=quick cfg=scalar_l8_train1e4       d_acc=-2.19pp

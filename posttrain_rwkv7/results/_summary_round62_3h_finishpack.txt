@@ -1,0 +1,36 @@
+================================================================================================================
+Round62 3h finishpack summary
+================================================================================================================
+[mbpp_strict_seed2_confirm]
+  quick baseline: 41.36%
+    head_l10_strong              d_acc=+0.74pp acc=42.10%
+    head_l10_midlr               d_acc=-1.26pp acc=40.10%
+  med:
+    baseline                     acc=47.15%
+    head_l10_strong              d_acc_vs_med=-1.98pp acc=45.17%
+  pruned:
+    head_l10_midlr               quick_drop -1.26pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[punc_restore_seed0_scout]
+  quick baseline: 8.44%
+    head_l8                      d_acc=+1.66pp acc=10.10%
+    scalar_l8_sched_cos          d_acc=-0.26pp acc=8.18%
+  med:
+    baseline                     acc=10.59%
+    head_l8                      d_acc_vs_med=+0.51pp acc=11.09%
+----------------------------------------------------------------------------------------------------------------
+[squad_strict_seed1_rescue]
+  quick baseline: 14.83%
+    scalar_l8_sched_ultra        d_acc=-0.01pp acc=14.82%
+    scalar_l8_train5e5           d_acc=-0.50pp acc=14.33%
+    scalar_l10_sched_gentle      d_acc=-1.00pp acc=13.83%
+  med skipped: best_quick -0.01pp < med_gate +0.20pp
+  pruned:
+    scalar_l10_sched_gentle      quick_drop -1.00pp < -0.50pp
+    scalar_l8_train5e5           quick_drop -0.50pp < -0.50pp
+    scalar_l8_sched_ultra        best_quick -0.01pp < med_gate +0.20pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  punc_restore_seed0_scout     stage=med   cfg=head_l8                  d_acc=+0.51pp
+  squad_strict_seed1_rescue    stage=quick cfg=scalar_l8_sched_ultra    d_acc=-0.01pp
+  mbpp_strict_seed2_confirm    stage=med   cfg=head_l10_strong          d_acc=-1.98pp

@@ -1,0 +1,26 @@
+================================================================================================================
+Round133 fastdiscover summary
+================================================================================================================
+[hotpot_seed19_discovery]
+  quick baseline: 11.61%
+    head_l8                      d_acc=-0.12pp acc=11.50%
+    scalar_l8_train1e4           d_acc=-2.30pp acc=9.31%
+    scalar_l8_train8e5           d_acc=-3.20pp acc=8.41%
+  med skipped: best_quick head_l8 -0.12pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -2.30pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -3.20pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[protein_ss_seed15_discovery]
+  quick baseline: 30.37%
+    scalar_l8_train1e4           d_acc=-0.41pp acc=29.96%
+    scalar_l8_train8e5           d_acc=-0.95pp acc=29.42%
+    head_l8                      d_acc=-4.60pp acc=25.77%
+  med skipped: best_quick scalar_l8_train1e4 -0.41pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train8e5           quick_drop -0.95pp < -0.50pp
+    head_l8                      quick_drop -4.60pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  hotpot_seed19_discovery          stage=quick cfg=head_l8                  d_acc=-0.12pp
+  protein_ss_seed15_discovery      stage=quick cfg=scalar_l8_train1e4       d_acc=-0.41pp

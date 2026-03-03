@@ -1,0 +1,25 @@
+================================================================================================================
+Round68 squad head rescue summary
+================================================================================================================
+[squad_seed1_head_rescue]
+  quick baseline: 14.83%
+    head_l8_nodetach             d_acc=-0.25pp acc=14.58%
+    head_l8                      d_acc=-0.76pp acc=14.07%
+  med skipped: best_quick -0.25pp < med_gate -0.20pp
+  pruned:
+    head_l8                      quick_drop -0.76pp < -0.50pp
+    head_l8_nodetach             best_quick -0.25pp < med_gate -0.20pp
+----------------------------------------------------------------------------------------------------------------
+[squad_seed3_head_rescue]
+  quick baseline: 14.67%
+    head_l8_nodetach             d_acc=-0.76pp acc=13.90%
+    head_l8                      d_acc=-1.35pp acc=13.32%
+  med skipped: best_quick -0.76pp < med_gate -0.20pp
+  pruned:
+    head_l8                      quick_drop -1.35pp < -0.50pp
+    head_l8_nodetach             quick_drop -0.76pp < -0.50pp
+    head_l8_nodetach             best_quick -0.76pp < med_gate -0.20pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  squad_seed1_head_rescue          stage=quick cfg=head_l8_nodetach         d_acc=-0.25pp
+  squad_seed3_head_rescue          stage=quick cfg=head_l8_nodetach         d_acc=-0.76pp

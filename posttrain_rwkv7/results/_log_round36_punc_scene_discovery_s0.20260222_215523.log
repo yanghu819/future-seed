@@ -1,0 +1,47 @@
+Round36 started: Sun Feb 22 21:55:23 CST 2026
+wikitext incomplete cache cleaned
+RUN task=punc_hotpot stage=quick cfg=baseline mode=no_fs
+RUN task=punc_hotpot stage=quick cfg=head_l8 mode=prompt_fs
+RUN task=punc_hotpot stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_hotpot stage=med cfg=head_l8 mode=prompt_fs
+RUN task=punc_mbpp stage=quick cfg=baseline mode=no_fs
+RUN task=punc_mbpp stage=quick cfg=head_l8 mode=prompt_fs
+RUN task=punc_mbpp stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_mbpp stage=med cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_wikitext stage=quick cfg=baseline mode=no_fs
+RUN task=punc_agnews stage=quick cfg=baseline mode=no_fs
+RUN task=punc_squad stage=quick cfg=baseline mode=no_fs
+RUN task=punc_squad stage=quick cfg=head_l8 mode=prompt_fs
+RUN task=punc_squad stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs
+RUN task=punc_squad stage=med cfg=scalar_l8_sched_cos mode=prompt_fs
+====================================================================================================================
+Round36 punc scene discovery summary
+====================================================================================================================
+[punc_agnews]
+  baseline failed
+--------------------------------------------------------------------------------------------------------------------
+[punc_hotpot]
+  baseline quick: acc=8.50%
+    head_l8                d_acc=+1.41pp acc=9.91%
+    scalar_l8_sched_cos    d_acc=+0.83pp acc=9.33%
+  med (top1 only):
+    head_l8                d_acc=+2.30pp acc=10.80%
+--------------------------------------------------------------------------------------------------------------------
+[punc_mbpp]
+  baseline quick: acc=40.83%
+    scalar_l8_sched_cos    d_acc=+1.28pp acc=42.11%
+    head_l8                d_acc=-1.85pp acc=38.98%
+  med (top1 only):
+    scalar_l8_sched_cos    d_acc=+4.45pp acc=45.28%
+--------------------------------------------------------------------------------------------------------------------
+[punc_squad]
+  baseline quick: acc=11.22%
+    scalar_l8_sched_cos    d_acc=+1.90pp acc=13.12%
+    head_l8                d_acc=+0.95pp acc=12.17%
+  med (top1 only):
+    scalar_l8_sched_cos    d_acc=+4.52pp acc=15.74%
+--------------------------------------------------------------------------------------------------------------------
+[punc_wikitext]
+  baseline failed
+--------------------------------------------------------------------------------------------------------------------
+Round36 finished: Sun Feb 22 22:10:56 CST 2026

@@ -1,0 +1,16 @@
+PROBE task=mbpp_fix bsz=2
+SELECT task=mbpp_fix bsz=2
+RUN task=mbpp_fix stage=quick cfg=baseline mode=no_fs bsz=2 budget=90
+RUN task=mbpp_fix stage=quick cfg=scalar_l8_norm_node mode=prompt_fs bsz=2 budget=90
+PRUNE task=mbpp_fix cfg=scalar_l8_norm_node d_acc=0.0005666330588686569 (<0.002)
+RUN task=mbpp_fix stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=2 budget=90
+KEEP task=mbpp_fix cfg=scalar_l8_trainable quick_d_acc=0.009996379866478722 -> med
+RUN task=mbpp_fix stage=med cfg=scalar_l8_trainable mode=prompt_fs bsz=2 budget=260
+RUN task=mbpp_fix stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs bsz=2 budget=90
+PRUNE task=mbpp_fix cfg=scalar_l8_sched_cos d_acc=-0.006730455694138757 (<0.002)
+RUN task=mbpp_fix stage=quick cfg=head_l8 mode=prompt_fs bsz=2 budget=90
+PRUNE task=mbpp_fix cfg=head_l8 d_acc=0.001378593320966237 (<0.002)
+PROBE task=protein_contact_fix bsz=4
+SELECT task=protein_contact_fix bsz=4
+RUN task=protein_contact_fix stage=quick cfg=baseline mode=no_fs bsz=4 budget=90
+RUN task=protein_contact_fix stage=quick cfg=scalar_l8_norm_node mode=prompt_fs bsz=4 budget=90

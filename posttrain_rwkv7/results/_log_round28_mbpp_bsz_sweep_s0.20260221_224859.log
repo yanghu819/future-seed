@@ -1,0 +1,4 @@
+Round28 started: Sat Feb 21 22:48:59 CST 2026
+RUN bsz=2 stage=quick cfg=baseline mode=no_fs budget=90
+RUN bsz=2 stage=quick cfg=scalar_l8_trainable mode=prompt_fs budget=90
+RUN bsz=2 stage=med cfg=scalar_l8_trainable mode=prompt_fs budget=280

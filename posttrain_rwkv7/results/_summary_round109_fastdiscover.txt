@@ -1,0 +1,24 @@
+================================================================================================================
+Round109 fastdiscover summary
+================================================================================================================
+[arc_seed6_discovery]
+  quick baseline: 9.02%
+    head_l8                      d_acc=+0.24pp acc=9.26%
+    scalar_l8_train1e4           d_acc=-0.40pp acc=8.62%
+    scalar_l8_train8e5           d_acc=-0.76pp acc=8.26%
+  med skipped: best_quick head_l8 +0.24pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train8e5           quick_drop -0.76pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[hotpot_seed6_discovery]
+  quick baseline: 7.10%
+    scalar_l8_train1e4           d_acc=+2.86pp acc=9.96%
+    scalar_l8_train8e5           d_acc=+2.86pp acc=9.96%
+    head_l8                      d_acc=+0.56pp acc=7.66%
+  med:
+    baseline                     acc=9.01%
+    scalar_l8_train1e4           d_acc_vs_med=+3.59pp acc=12.59%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  hotpot_seed6_discovery           stage=med   cfg=scalar_l8_train1e4       d_acc=+3.59pp
+  arc_seed6_discovery              stage=quick cfg=head_l8                  d_acc=+0.24pp

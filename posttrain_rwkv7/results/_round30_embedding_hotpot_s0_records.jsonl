@@ -1,0 +1,2 @@
+{"mode":"baseline","status":"ok","run_dir":"runs/20260222-165337/embedding_hotpot/baseline","val_r1":0.01171875,"val_r5":0.03125,"val_mrr10":0.01928633432539682}
+{"mode":"fs","status":"ok","run_dir":"runs/20260222-165423/embedding_hotpot/fs","val_r1":0.0078125,"val_r5":0.03125,"val_mrr10":0.016910032242063493}

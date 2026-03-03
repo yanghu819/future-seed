@@ -1,0 +1,6 @@
+Round22 started: Sat Feb 21 20:10:11 CST 2026
+PROBE task=mbpp_focus bsz=4
+PROBE task=mbpp_focus bsz=3
+PROBE task=mbpp_focus bsz=2
+PROBE task=mbpp_focus bsz=1
+RUN task=mbpp_focus stage=quick cfg=baseline mode=no_fs bsz=1 budget=120

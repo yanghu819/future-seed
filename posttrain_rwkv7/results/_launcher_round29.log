@@ -1,0 +1,33 @@
+Round29 started: Sun Feb 22 15:36:14 CST 2026
+RUN seed=0 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=0 stage=quick cfg=head_l8 mode=prompt_fs budget=110
+RUN seed=0 stage=med cfg=head_l8 mode=prompt_fs budget=300
+RUN seed=1 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=1 stage=quick cfg=head_l8 mode=prompt_fs budget=110
+RUN seed=1 stage=med cfg=head_l8 mode=prompt_fs budget=300
+RUN seed=2 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=2 stage=quick cfg=head_l8 mode=prompt_fs budget=110
+RUN seed=2 stage=med cfg=head_l8 mode=prompt_fs budget=300
+RUN seed=3 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=3 stage=quick cfg=head_l8 mode=prompt_fs budget=110
+RUN seed=3 stage=med cfg=head_l8 mode=prompt_fs budget=300
+RUN seed=4 stage=quick cfg=baseline mode=no_fs budget=110
+RUN seed=4 stage=quick cfg=head_l8 mode=prompt_fs budget=110
+RUN seed=4 stage=med cfg=head_l8 mode=prompt_fs budget=300
+====================================================================================================================
+Round29 punc_restore seed-5 summary
+====================================================================================================================
+[quick]
+  seed=0: baseline=9.18% fs=9.99% d_acc=+0.80pp
+  seed=1: baseline=8.68% fs=9.25% d_acc=+0.58pp
+  seed=2: baseline=7.61% fs=9.81% d_acc=+2.20pp
+  seed=3: baseline=7.51% fs=9.92% d_acc=+2.41pp
+  seed=4: baseline=9.81% fs=10.45% d_acc=+0.64pp
+  mean d_acc=+1.33pp, positive_seeds=5/5
+[med]
+  seed=0: acc=11.60% loss=10.2647
+  seed=1: acc=9.82% loss=9.8830
+  seed=2: acc=11.69% loss=10.1692
+  seed=3: acc=10.73% loss=10.0444
+  seed=4: acc=10.95% loss=10.0469
+Round29 finished: Sun Feb 22 15:49:41 CST 2026

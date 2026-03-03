@@ -1,0 +1,15 @@
+Round23 started: Sat Feb 21 21:27:50 CST 2026
+RUN task=mbpp_rt stage=quick cfg=baseline mode=no_fs bsz=4 budget=110
+RUN task=mbpp_rt stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=4 budget=110
+PRUNE task=mbpp_rt cfg=scalar_l8_trainable d_acc_pp=-1.3193424322615832%
+RUN task=mbpp_rt stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs bsz=4 budget=110
+PRUNE task=mbpp_rt cfg=scalar_l8_sched_cos d_acc_pp=-4.669872569317839%
+RUN task=mbpp_rt stage=quick cfg=head_l8 mode=prompt_fs bsz=4 budget=110
+PRUNE task=mbpp_rt cfg=head_l8 d_acc_pp=-1.281688944360257%
+RUN task=hotpot_rt stage=quick cfg=baseline mode=no_fs bsz=4 budget=110
+RUN task=hotpot_rt stage=quick cfg=scalar_l10_trainable mode=prompt_fs bsz=4 budget=110
+PRUNE task=hotpot_rt cfg=scalar_l10_trainable d_acc_pp=0.0%
+RUN task=hotpot_rt stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs bsz=4 budget=110
+PRUNE task=hotpot_rt cfg=scalar_l10_sched_cos d_acc_pp=0.0%
+RUN task=hotpot_rt stage=quick cfg=head_l10 mode=prompt_fs bsz=4 budget=110
+PRUNE task=hotpot_rt cfg=head_l10 d_acc_pp=0.0%

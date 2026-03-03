@@ -1,0 +1,25 @@
+================================================================================================================
+Round120 fastdiscover summary
+================================================================================================================
+[hotpot_longctx_seed3_discovery]
+  quick baseline: 8.89%
+    scalar_l8_sched_cos          d_acc=+0.00pp acc=8.89%
+    scalar_l8_train8e5           d_acc=-2.22pp acc=6.67%
+    scalar_l8_train1e4           d_acc=-8.89pp acc=0.00%
+  med skipped: best_quick scalar_l8_sched_cos +0.00pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -8.89pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -2.22pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_longctx_seed1_repair]
+  quick baseline: 13.86%
+    scalar_l8_train1e4           d_acc=+0.16pp acc=14.01%
+    scalar_l8_train8e5           d_acc=-0.22pp acc=13.63%
+    head_l8                      d_acc=-1.61pp acc=12.24%
+  med skipped: best_quick scalar_l8_train1e4 +0.16pp < promote_gate +0.80pp
+  pruned:
+    head_l8                      quick_drop -1.61pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_longctx_seed1_repair        stage=quick cfg=scalar_l8_train1e4       d_acc=+0.16pp
+  hotpot_longctx_seed3_discovery   stage=quick cfg=scalar_l8_sched_cos      d_acc=+0.00pp

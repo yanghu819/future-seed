@@ -1,0 +1,19 @@
+================================================================================================================
+Round61 strict seed1 frontier summary
+================================================================================================================
+[mbpp_strict_seed1]
+  quick baseline: 40.43%
+    head_l10_strong              d_acc=+3.43pp acc=43.86%
+    head_l10_midlr               d_acc=+1.90pp acc=42.33%
+    head_l10_sched_cos           d_acc=+1.43pp acc=41.86%
+  med:
+    baseline                     acc=46.67%
+    head_l10_strong              d_acc_vs_med_base=+0.35pp d_acc_vs_quick_base=+6.58pp acc=47.01%
+----------------------------------------------------------------------------------------------------------------
+[squad_strict_seed1]
+  quick baseline: 14.83%
+    scalar_l8_train1e4           d_acc=-0.25pp acc=14.58%
+    scalar_l8_sched_cos_highfloor d_acc=-0.50pp acc=14.32%
+    scalar_l8_sched_cos          d_acc=-0.75pp acc=14.08%
+  med skipped: quick_d_acc=-0.25pp < prune_pp=0.30pp
+----------------------------------------------------------------------------------------------------------------

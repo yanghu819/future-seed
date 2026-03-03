@@ -1,0 +1,24 @@
+Round24 started: Sat Feb 21 21:50:04 CST 2026
+RUN task=punc_restore_rt stage=quick cfg=baseline mode=no_fs bsz=10 budget=110
+RUN task=protein_ss_rt stage=quick cfg=baseline mode=no_fs bsz=10 budget=110
+RUN task=protein_ss_rt stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs bsz=10 budget=110
+RUN task=protein_ss_rt stage=med cfg=scalar_l10_sched_cos mode=prompt_fs bsz=10 budget=320
+RUN task=protein_ss_rt stage=quick cfg=scalar_l10_trainable mode=prompt_fs bsz=10 budget=110
+PRUNE task=protein_ss_rt cfg=scalar_l10_trainable d_acc_pp=-0.12619539846995265%
+RUN task=protein_ss_rt stage=quick cfg=head_l10 mode=prompt_fs bsz=10 budget=110
+PRUNE task=protein_ss_rt cfg=head_l10 d_acc_pp=0.2287498737503446%
+================================================================================================================
+Round24 summary (punc+protein, serial early-prune)
+================================================================================================================
+[protein_ss_rt]
+  baseline quick: acc=30.17% loss=6.2034 bsz=10
+    scalar_l10_sched_cos     d_acc=+0.51pp acc=30.68%
+    head_l10                 d_acc=+0.23pp acc=30.40%
+    scalar_l10_trainable     d_acc=-0.13pp acc=30.04%
+  med confirmed:
+    scalar_l10_sched_cos     d_acc=+4.14pp acc=34.31% loss=5.6427
+----------------------------------------------------------------------------------------------------------------
+[punc_restore_rt]
+  baseline failed or missing
+----------------------------------------------------------------------------------------------------------------
+Round24 finished: Sat Feb 21 22:03:51 CST 2026

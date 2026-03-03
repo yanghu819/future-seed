@@ -1,0 +1,41 @@
+Loading data...
+Traceback (most recent call last):
+  File "/root/autodl-tmp/future-seed-posttrain/train_punc_restore_sft.py", line 557, in <module>
+    main()
+  File "/root/autodl-tmp/future-seed-posttrain/train_punc_restore_sft.py", line 333, in main
+    train_ex = build_examples(
+  File "/root/autodl-tmp/future-seed-posttrain/train_punc_restore_sft.py", line 180, in build_examples
+    ds_obj = load_dataset(ds, ds_cfg, split=split)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/datasets/load.py", line 2587, in load_dataset
+    builder_instance = load_dataset_builder(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/datasets/load.py", line 2259, in load_dataset_builder
+    dataset_module = dataset_module_factory(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/datasets/load.py", line 1910, in dataset_module_factory
+    raise e1 from None
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/datasets/load.py", line 1855, in dataset_module_factory
+    raise e
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/datasets/load.py", line 1828, in dataset_module_factory
+    dataset_info = hf_api.dataset_info(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 2860, in dataset_info
+    r = get_session().get(path, headers=headers, timeout=timeout, params=params)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_client.py", line 1053, in get
+    return self.request(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+  File "/usr/lib/python3.10/contextlib.py", line 153, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "/root/autodl-tmp/future-seed-posttrain/.venv/lib/python3.10/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ConnectError: [Errno 99] Cannot assign requested address

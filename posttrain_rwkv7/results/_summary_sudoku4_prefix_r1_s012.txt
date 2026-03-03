@@ -1,0 +1,6 @@
+filter: {'base': 2, 'mask_count': 8, 'mask_region': 'prefix', 'bsz': 8, 'time_budget_sec': 180, 'max_steps': 0, 'eval_every': 50, 'val_batches': 16, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'fs_variant': 'scalar', 'alpha_head_init': -2.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 6, 'fs_alpha_schedule': 'none', 'fs_alpha_min': 1.0, 'fs_alpha_max': 1.0, 'fs_norm': True, 'fs_clip': 1.0, 'fs_detach': True}
+==========================================================================================
+pairs=3 mean d_acc=+0.0029 std=0.0008 | mean d_loss=-0.0018 std=0.0096 | sign(+/0/-)=3/0/0
+  seed=0 d_acc=+0.0039 (no=0.9414 fs=0.9453) d_loss=+0.0102
+  seed=1 d_acc=+0.0029 (no=0.9424 fs=0.9453) d_loss=-0.0134
+  seed=2 d_acc=+0.0020 (no=0.9453 fs=0.9473) d_loss=-0.0023

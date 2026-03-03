@@ -1,0 +1,19 @@
+Round25 started: Sat Feb 21 22:07:03 CST 2026
+RUN stage=quick cfg=baseline mode=no_fs budget=120
+RUN stage=quick cfg=scalar_l8_trainable mode=prompt_fs budget=120
+PRUNE cfg=scalar_l8_trainable d_acc_pp=-2.199074074074074%
+RUN stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs budget=120
+RUN stage=med cfg=scalar_l8_sched_cos mode=prompt_fs budget=360
+RUN stage=quick cfg=head_l8 mode=prompt_fs budget=120
+RUN stage=med cfg=head_l8 mode=prompt_fs budget=360
+==========================================================================================================
+Round25 punc salvage summary
+==========================================================================================================
+baseline quick: acc=9.18% loss=10.4251 bsz=2
+  scalar_l8_sched_cos      d_acc=+0.80pp acc=9.99%
+  head_l8                  d_acc=+0.80pp acc=9.99%
+  scalar_l8_trainable      d_acc=-2.20pp acc=6.99%
+med confirmed:
+  head_l8                  d_acc=+3.45pp acc=12.64% loss=10.2647
+  scalar_l8_sched_cos      d_acc=+2.71pp acc=11.90% loss=10.1964
+Round25 finished: Sat Feb 21 22:13:00 CST 2026

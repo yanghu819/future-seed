@@ -1,0 +1,16 @@
+filter: {'ds': 'squad', 'train_split': 'train', 'val_split': 'validation', 'q_first': False, 'fill_ctx_to_max': True, 'distractor_pool_size': 4096, 'train_data_seed': 0, 'val_data_seed': 1234, 'n_train': 2048, 'n_val': 512, 'bsz': 2, 'time_budget_sec': 240, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'seed_scale': 1.0, 'max_answer_tokens': 24}
+==========================================================================================
+L=512 pairs=3 mean d_acc=+0.0034 std=0.0048 | mean d_loss=-0.0589 std=0.0663
+  seed=0 d_acc=+0.0102 (no=0.0851 fs=0.0952) d_loss=+0.0296
+  seed=1 d_acc=+0.0000 (no=0.0810 fs=0.0810) d_loss=-0.0765
+  seed=2 d_acc=+0.0000 (no=0.1066 fs=0.1066) d_loss=-0.1299
+==========================================================================================
+L=1024 pairs=3 mean d_acc=-0.0023 std=0.0052 | mean d_loss=-0.0660 std=0.0985
+  seed=0 d_acc=-0.0020 (no=0.0920 fs=0.0900) d_loss=+0.0009
+  seed=1 d_acc=+0.0039 (no=0.0810 fs=0.0849) d_loss=-0.2052
+  seed=2 d_acc=-0.0088 (no=0.1066 fs=0.0979) d_loss=+0.0063
+==========================================================================================
+L=2048 pairs=3 mean d_acc=-0.0062 std=0.0076 | mean d_loss=+0.0321 std=0.3503
+  seed=0 d_acc=-0.0077 (no=0.0927 fs=0.0851) d_loss=-0.1675
+  seed=1 d_acc=-0.0146 (no=0.0927 fs=0.0781) d_loss=-0.2607
+  seed=2 d_acc=+0.0038 (no=0.1057 fs=0.1095) d_loss=+0.5245

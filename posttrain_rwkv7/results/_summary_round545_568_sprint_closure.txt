@@ -1,0 +1,45 @@
+====================================================================================================
+Future-Seed Posttrain Sprint Closure (round545-568)
+====================================================================================================
+Date: 2026-03-03
+Runner mode: single-GPU serial (RTX4090), gapless autochain
+Policy: gpt-5.3-codex, quick promote >= +1.00pp, quick prune < -0.40pp, cooldown=8
+Scope: rounds 545-568 (sprint_v9 high-ROI cycle: mbpp_longctx/mbpp/arc_mc/protein_ss)
+
+[Window KPI]
+- Completed rounds: 24 (545-568)
+- Med comparisons: 22
+- Med positive rate: 63.6%
+- Med mean delta: +1.10pp
+- Med median delta: +0.90pp
+- Quick prune count: 43
+- Med skip count: 18
+
+[Best Positive Findings]
+1) round557 arc_mc_seed205_discovery / scalar_l8_train8e5: +8.33pp (med)
+2) round551 arc_mc_seed202_discovery / scalar_l8_train1e4: +4.17pp (med)
+3) round557 mbpp_longctx_seed113_repair / head_l8: +3.57pp (med)
+4) round552 protein_ss_seed271_discovery / scalar_l8_train1e4: +2.34pp (med)
+5) round554 protein_ss_seed272_discovery / scalar_l8_train1e4: +2.05pp (med)
+
+[Family-level Med Signal (round545-568)]
+- arc_mc: mean +4.17pp, positive rate 66.7% (n=3)
+- mbpp: mean +0.90pp, positive rate 88.9% (n=9)
+- mbpp_longctx: mean +0.33pp, positive rate 20.0% (n=5)
+- protein_ss: mean +0.38pp, positive rate 60.0% (n=5)
+
+[Risk / Failure Pattern]
+- mbpp_longctx remains high variance: several quick positives failed to hold in med.
+- latest round568 closed negative on both tasks:
+  - mbpp_longctx_seed117_repair: -0.02pp (med)
+  - protein_ss_seed279_discovery: -2.11pp (med)
+
+[Closure Status]
+- Sprint target round568 reached.
+- run_round and train worker processes stopped.
+- supervisor process stopped after completion.
+
+[Artifacts]
+- Per-round summaries: results/_summary_round545_fastdiscover.txt ... _summary_round568_fastdiscover.txt
+- Per-round records: results/_round545_fastdiscover_records.jsonl ... _round568_fastdiscover_records.jsonl
+- Rolling log: results/_rolling_round_log.md

@@ -1,0 +1,457 @@
+{
+  "version": "2026-02-21",
+  "project": "rwkv7-future-seed-posttrain",
+  "primary_metric": "mean_d_acc",
+  "experiments": [
+    {
+      "id": "arc_optionsfirst_r2",
+      "summary": "results/_summary_arc_optionsfirst_stabilized_r2.txt",
+      "task": "arc_mcq",
+      "ordering": "options_first",
+      "paper_role": "core_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0339
+    },
+    {
+      "id": "arc_optionsfirst_r4_sched",
+      "summary": "results/_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt",
+      "task": "arc_mcq",
+      "ordering": "options_first",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": 0.0156
+    },
+    {
+      "id": "arc_qfirst_r3",
+      "summary": "results/_summary_arc_qfirst_stabilized_r3.txt",
+      "task": "arc_mcq",
+      "ordering": "question_first",
+      "paper_role": "control",
+      "status": "completed",
+      "mean_d_acc": -0.0052
+    },
+    {
+      "id": "hotpot_qafter_r4",
+      "summary": "results/_summary_hotpot_qafter_stabilized_r4_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "core_negative",
+      "status": "completed",
+      "mean_d_acc": -0.0027
+    },
+    {
+      "id": "hotpot_qfirst_r5",
+      "summary": "results/_summary_hotpot_qfirst_stabilized_r5_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_first",
+      "paper_role": "control",
+      "status": "completed",
+      "mean_d_acc": -0.009
+    },
+    {
+      "id": "hotpot_qafter_len4096_r6",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "core_mixed",
+      "status": "completed",
+      "mean_d_acc": 0.0012
+    },
+    {
+      "id": "hotpot_qfirst_len4096_r7_s0",
+      "summary": "results/_summary_hotpot_qfirst_stabilized_len4096_r7_s0.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_first",
+      "paper_role": "single_seed_control",
+      "status": "completed",
+      "mean_d_acc": 0.0025
+    },
+    {
+      "id": "hotpot_qafter_len4096_r8_alpha_m4",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r8_alpha_m4_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": -0.0056
+    },
+    {
+      "id": "hotpot_qafter_len4096_r9_sched",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r9_sched_linear_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": -0.022
+    },
+    {
+      "id": "hotpot_qafter_len4096_r10_lstart10",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r10_lstart10_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": -0.0225
+    },
+    {
+      "id": "hotpot_qafter_len4096_r11_l10_a2",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart10_alpha-2_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "grid",
+      "status": "completed",
+      "mean_d_acc": -0.0225
+    },
+    {
+      "id": "hotpot_qafter_len4096_r11_l10_a3",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart10_alpha-3_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "grid",
+      "status": "completed",
+      "mean_d_acc": 0.0058
+    },
+    {
+      "id": "hotpot_qafter_len4096_r11_l12_a2",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart12_alpha-2_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "grid",
+      "status": "completed",
+      "mean_d_acc": 0.0
+    },
+    {
+      "id": "hotpot_qafter_len4096_r11_l12_a3",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r11_lstart12_alpha-3_s012.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "grid",
+      "status": "completed",
+      "mean_d_acc": 0.0
+    },
+    {
+      "id": "mbpp_qafter_len4096_r1",
+      "summary": "results/_summary_mbpp_qafter_stabilized_len4096_r1_s012.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "core_negative",
+      "status": "completed",
+      "mean_d_acc": -0.0191
+    },
+    {
+      "id": "mbpp_qfirst_len4096_r1",
+      "summary": "results/_summary_mbpp_qfirst_stabilized_len4096_r1_s012.txt",
+      "task": "mbpp",
+      "ordering": "question_first",
+      "paper_role": "control_negative",
+      "status": "completed",
+      "mean_d_acc": -0.0254
+    },
+    {
+      "id": "sudoku4_prefix_r1",
+      "summary": "results/_summary_sudoku4_prefix_r1_s012.txt",
+      "task": "sudoku",
+      "ordering": "prefix_mask",
+      "paper_role": "core_positive_small",
+      "status": "completed",
+      "mean_d_acc": 0.0029
+    },
+    {
+      "id": "sudoku4_suffix_r1",
+      "summary": "results/_summary_sudoku4_suffix_r1_s012.txt",
+      "task": "sudoku",
+      "ordering": "suffix_mask",
+      "paper_role": "control_neutral",
+      "status": "completed",
+      "mean_d_acc": 0.0003
+    },
+    {
+      "id": "sudoku9_prefix_r1",
+      "summary": "results/_summary_sudoku9_prefix_r1_s012.txt",
+      "task": "sudoku",
+      "ordering": "prefix_mask",
+      "paper_role": "hard_control",
+      "status": "completed",
+      "mean_d_acc": -0.0009
+    },
+    {
+      "id": "sudoku9_suffix_r1",
+      "summary": "results/_summary_sudoku9_suffix_r1_s012.txt",
+      "task": "sudoku",
+      "ordering": "suffix_mask",
+      "paper_role": "hard_negative",
+      "status": "completed",
+      "mean_d_acc": -0.2861
+    },
+    {
+      "id": "protein_ss_spot_qafter_r1",
+      "summary": "results/_summary_protein_ss_spot_qafter_len2048_r1_s012.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "real_task_negative",
+      "status": "completed",
+      "mean_d_acc": -0.0011
+    },
+    {
+      "id": "protein_ss_spot_qfirst_r1",
+      "summary": "results/_summary_protein_ss_spot_qfirst_len2048_r1_s012.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_first",
+      "paper_role": "real_task_control",
+      "status": "completed",
+      "mean_d_acc": -0.0001
+    },
+    {
+      "id": "protein_contact_pair_r1",
+      "summary": "results/_summary_protein_contact_pair_qafter_len2048_r1_s012.txt",
+      "task": "protein_contact_pair",
+      "ordering": "question_after",
+      "paper_role": "real_task",
+      "status": "completed",
+      "mean_d_acc": 0.0
+    },
+    {
+      "id": "protein_contact_pair_r2_trainable",
+      "summary": "results/_summary_protein_contact_pair_qafter_len2048_r2_trainable_s012.txt",
+      "task": "protein_contact_pair",
+      "ordering": "question_after",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": 0.0
+    },
+    {
+      "id": "protein_contact_pair_r3_balanced",
+      "summary": "results/_summary_protein_contact_pair_qafter_len2048_r3_balanced_s012.txt",
+      "task": "protein_contact_pair",
+      "ordering": "question_after",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": -0.0007
+    },
+    {
+      "id": "protein_contact_pair_r4_sched",
+      "summary": "results/_summary_protein_contact_pair_qafter_len2048_r4_sched_s012.txt",
+      "task": "protein_contact_pair",
+      "ordering": "question_after",
+      "paper_role": "ablation",
+      "status": "completed",
+      "mean_d_acc": -0.0043
+    },
+    {
+      "id": "arc_optionsfirst_r5_s01234",
+      "summary": "results/_summary_arc_optionsfirst_stabilized_r5_s01234.txt",
+      "task": "arc_mcq",
+      "ordering": "options_first",
+      "paper_role": "stability_check",
+      "status": "completed",
+      "mean_d_acc": -0.0203
+    },
+    {
+      "id": "arc_qfirst_r5_s01234",
+      "summary": "results/_summary_arc_qfirst_stabilized_r5_s01234.txt",
+      "task": "arc_mcq",
+      "ordering": "question_first",
+      "paper_role": "stability_check_control",
+      "status": "completed",
+      "mean_d_acc": 0.0005
+    },
+    {
+      "id": "hotpot_qafter_len4096_r12_l10_a3_s01234",
+      "summary": "results/_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "stability_check",
+      "status": "completed",
+      "mean_d_acc": 0.0054
+    },
+    {
+      "id": "hotpot_qfirst_len4096_r12_l10_a3_s01234",
+      "summary": "results/_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_first",
+      "paper_role": "stability_check_control",
+      "status": "completed",
+      "mean_d_acc": 0.0052
+    },
+    {
+      "id": "round20_serial_earlystop_s0",
+      "summary": "results/_summary_round20_serial_earlystop_s0.txt",
+      "task": "multi_task_search",
+      "ordering": "mixed",
+      "paper_role": "targeted_search",
+      "status": "completed",
+      "mean_d_acc": null
+    },
+    {
+      "id": "protein_ss_round20_best_norm_node_s0",
+      "summary": "results/_summary_round20_serial_earlystop_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "new_positive_regime",
+      "status": "completed",
+      "mean_d_acc": 0.0802
+    },
+    {
+      "id": "round21_targeted_search_s0",
+      "summary": "results/_summary_round21_targeted_search_s0.txt",
+      "task": "multi_task_search",
+      "ordering": "mixed",
+      "paper_role": "targeted_search",
+      "status": "completed",
+      "mean_d_acc": null
+    },
+    {
+      "id": "mbpp_fix_round21_scalar_l8_trainable_s0",
+      "summary": "results/_summary_round21_targeted_search_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "new_positive_regime",
+      "status": "completed",
+      "mean_d_acc": 0.1361
+    },
+    {
+      "id": "protein_ss_refine_round21_scalar_l10_sched_cos_s0",
+      "summary": "results/_summary_round21_targeted_search_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "new_positive_regime",
+      "status": "completed",
+      "mean_d_acc": 0.1331
+    },
+    {
+      "id": "round22_mbpp_focus_bestquick",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "real_task_negative",
+      "status": "completed",
+      "mean_d_acc": -0.0092
+    },
+    {
+      "id": "round22_protein_ss_expand_bestquick",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive_small",
+      "status": "completed",
+      "mean_d_acc": 0.015
+    },
+    {
+      "id": "round22_sudoku4_refine_bestmed",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "sudoku",
+      "ordering": "random_mask_4x4",
+      "paper_role": "core_positive",
+      "status": "completed",
+      "mean_d_acc": 0.3329
+    },
+    {
+      "id": "round22_sudoku9_probe_bestmed",
+      "summary": "results/_summary_round22_adaptive_search_s0.txt",
+      "task": "sudoku",
+      "ordering": "random_mask_9x9",
+      "paper_role": "hard_positive_small",
+      "status": "completed",
+      "mean_d_acc": 0.0151
+    },
+    {
+      "id": "round24_protein_ss_rt_sched_cos_med",
+      "summary": "results/_summary_round24_punc_protein_s0.txt",
+      "task": "protein_ss_spot",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0414
+    },
+    {
+      "id": "round25_punc_head_l8_med",
+      "summary": "results/_summary_round25_punc_salvage_s0.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0345
+    },
+    {
+      "id": "round25_punc_sched_cos_med",
+      "summary": "results/_summary_round25_punc_salvage_s0.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive_secondary",
+      "status": "completed",
+      "mean_d_acc": 0.0271
+    },
+    {
+      "id": "round26_mbpp_low_scalar_l8_trainable_med",
+      "summary": "results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "real_task_positive",
+      "status": "completed",
+      "mean_d_acc": 0.1917
+    },
+    {
+      "id": "round26_hotpot_low_scalar_l10_trainable_quick",
+      "summary": "results/_summary_round26_mbpp_hotpot_lowthroughput_s0.txt",
+      "task": "hotpot_qa",
+      "ordering": "question_after",
+      "paper_role": "real_task_no_gain",
+      "status": "completed",
+      "mean_d_acc": 0.0
+    },
+    {
+      "id": "round27_mbpp_low_scalar_l8_trainable_quick_s012",
+      "summary": "results/_summary_round27_seedcheck_positive_s012.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "seedcheck_mixed",
+      "status": "completed",
+      "mean_d_acc": 0.0017
+    },
+    {
+      "id": "round27_punc_head_l8_quick_s012",
+      "summary": "results/_summary_round27_seedcheck_positive_s012.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "seedcheck_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0119
+    },
+    {
+      "id": "round28_mbpp_bsz2_scalar_l8_trainable_med",
+      "summary": "results/_summary_round28_mbpp_bsz_sweep_s0.txt",
+      "task": "mbpp",
+      "ordering": "question_after",
+      "paper_role": "throughput_sweep_positive_low_bsz",
+      "status": "completed",
+      "mean_d_acc": 0.1492
+    },
+    {
+      "id": "round30_embedding_hotpot_baseline_s0",
+      "summary": "results/_summary_round30_embedding_hotpot_s0.txt",
+      "task": "embedding_hotpot_retrieval",
+      "ordering": "question_to_context",
+      "paper_role": "embedding_pilot_baseline",
+      "status": "completed",
+      "mean_d_acc": null
+    },
+    {
+      "id": "round30_embedding_hotpot_fs_delta_s0",
+      "summary": "results/_summary_round30_embedding_hotpot_s0.txt",
+      "task": "embedding_hotpot_retrieval",
+      "ordering": "question_to_context",
+      "paper_role": "embedding_pilot_fs_delta",
+      "status": "completed",
+      "mean_d_acc": -0.0039
+    },
+    {
+      "id": "round29_punc_seed5_head_l8_quick_s01234",
+      "summary": "results/_summary_round29_punc_seed5_s01234.txt",
+      "task": "punc_restore",
+      "ordering": "question_after",
+      "paper_role": "seedcheck_positive",
+      "status": "completed",
+      "mean_d_acc": 0.0133
+    }
+  ]
+}

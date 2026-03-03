@@ -1,0 +1,68 @@
+PROBE task=mbpp_fix bsz=2
+SELECT task=mbpp_fix bsz=2
+RUN task=mbpp_fix stage=quick cfg=baseline mode=no_fs bsz=2 budget=90
+RUN task=mbpp_fix stage=quick cfg=scalar_l8_norm_node mode=prompt_fs bsz=2 budget=90
+PRUNE task=mbpp_fix cfg=scalar_l8_norm_node d_acc=0.0005666330588686569 (<0.002)
+RUN task=mbpp_fix stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=2 budget=90
+KEEP task=mbpp_fix cfg=scalar_l8_trainable quick_d_acc=0.009996379866478722 -> med
+RUN task=mbpp_fix stage=med cfg=scalar_l8_trainable mode=prompt_fs bsz=2 budget=260
+RUN task=mbpp_fix stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs bsz=2 budget=90
+PRUNE task=mbpp_fix cfg=scalar_l8_sched_cos d_acc=-0.006730455694138757 (<0.002)
+RUN task=mbpp_fix stage=quick cfg=head_l8 mode=prompt_fs bsz=2 budget=90
+PRUNE task=mbpp_fix cfg=head_l8 d_acc=0.001378593320966237 (<0.002)
+PROBE task=protein_contact_fix bsz=4
+SELECT task=protein_contact_fix bsz=4
+RUN task=protein_contact_fix stage=quick cfg=baseline mode=no_fs bsz=4 budget=90
+RUN task=protein_contact_fix stage=quick cfg=scalar_l8_norm_node mode=prompt_fs bsz=4 budget=90
+PRUNE task=protein_contact_fix cfg=scalar_l8_norm_node d_acc=0.0 (<0.002)
+RUN task=protein_contact_fix stage=quick cfg=scalar_l8_trainable mode=prompt_fs bsz=4 budget=90
+PRUNE task=protein_contact_fix cfg=scalar_l8_trainable d_acc=0.0 (<0.002)
+RUN task=protein_contact_fix stage=quick cfg=scalar_l8_sched_cos mode=prompt_fs bsz=4 budget=90
+PRUNE task=protein_contact_fix cfg=scalar_l8_sched_cos d_acc=0.0 (<0.002)
+RUN task=protein_contact_fix stage=quick cfg=head_l8 mode=prompt_fs bsz=4 budget=90
+PRUNE task=protein_contact_fix cfg=head_l8 d_acc=0.0 (<0.002)
+RUN task=protein_ss_refine stage=quick cfg=baseline mode=no_fs bsz=8 budget=90
+RUN task=protein_ss_refine stage=quick cfg=scalar_l10_norm_node mode=prompt_fs bsz=8 budget=90
+KEEP task=protein_ss_refine cfg=scalar_l10_norm_node quick_d_acc=0.028697695620083785 -> med
+RUN task=protein_ss_refine stage=med cfg=scalar_l10_norm_node mode=prompt_fs bsz=8 budget=260
+RUN task=protein_ss_refine stage=quick cfg=scalar_l10_trainable mode=prompt_fs bsz=8 budget=90
+KEEP task=protein_ss_refine cfg=scalar_l10_trainable quick_d_acc=0.04479712367104974 -> med
+RUN task=protein_ss_refine stage=med cfg=scalar_l10_trainable mode=prompt_fs bsz=8 budget=260
+RUN task=protein_ss_refine stage=quick cfg=scalar_l10_sched_cos mode=prompt_fs bsz=8 budget=90
+KEEP task=protein_ss_refine cfg=scalar_l10_sched_cos quick_d_acc=0.020121211070931677 -> med
+RUN task=protein_ss_refine stage=med cfg=scalar_l10_sched_cos mode=prompt_fs bsz=8 budget=260
+RUN task=protein_ss_refine stage=quick cfg=head_l10 mode=prompt_fs bsz=8 budget=90
+KEEP task=protein_ss_refine cfg=head_l10 quick_d_acc=0.017181868196169764 -> med
+RUN task=protein_ss_refine stage=med cfg=head_l10 mode=prompt_fs bsz=8 budget=260
+============================================================================================================
+Round21 targeted search summary (single seed)
+============================================================================================================
+[mbpp_fix]
+  baseline quick: acc=0.1046 loss=5.3564 bsz=2
+    scalar_l8_trainable      d_acc=+0.0100 acc=0.1146 [KEEP]
+    head_l8                  d_acc=+0.0014 acc=0.1060 [PRUNE]
+    scalar_l8_norm_node      d_acc=+0.0006 acc=0.1052 [PRUNE]
+    scalar_l8_sched_cos      d_acc=-0.0067 acc=0.0979 [PRUNE]
+  med confirmed:
+    scalar_l8_trainable      d_acc=+0.1361 acc=0.2407 loss=4.5021
+------------------------------------------------------------------------------------------------------------
+[protein_contact_fix]
+  baseline quick: acc=0.9883 loss=0.1937 bsz=4
+    scalar_l8_norm_node      d_acc=+0.0000 acc=0.9883 [PRUNE]
+    scalar_l8_trainable      d_acc=+0.0000 acc=0.9883 [PRUNE]
+    scalar_l8_sched_cos      d_acc=+0.0000 acc=0.9883 [PRUNE]
+    head_l8                  d_acc=+0.0000 acc=0.9883 [PRUNE]
+  med confirmed: none
+------------------------------------------------------------------------------------------------------------
+[protein_ss_refine]
+  baseline quick: acc=0.2114 loss=6.2359 bsz=8
+    scalar_l10_trainable     d_acc=+0.0448 acc=0.2562 [KEEP]
+    scalar_l10_norm_node     d_acc=+0.0287 acc=0.2401 [KEEP]
+    scalar_l10_sched_cos     d_acc=+0.0201 acc=0.2315 [KEEP]
+    head_l10                 d_acc=+0.0172 acc=0.2286 [KEEP]
+  med confirmed:
+    scalar_l10_sched_cos     d_acc=+0.1331 acc=0.3445 loss=5.5123
+    scalar_l10_trainable     d_acc=+0.1282 acc=0.3395 loss=5.6065
+    head_l10                 d_acc=+0.1235 acc=0.3348 loss=5.5625
+    scalar_l10_norm_node     d_acc=+0.1143 acc=0.3257 loss=5.6950
+------------------------------------------------------------------------------------------------------------

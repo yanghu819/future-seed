@@ -1,0 +1,28 @@
+================================================================================================================
+Round106 fastdiscover summary
+================================================================================================================
+[hotpot_seed5_discovery]
+  quick baseline: 8.41%
+    scalar_l8_train1e4           d_acc=-1.28pp acc=7.13%
+    head_l8                      d_acc=-1.37pp acc=7.04%
+    scalar_l8_train8e5           d_acc=-1.57pp acc=6.84%
+  med skipped: best_quick scalar_l8_train1e4 -1.28pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -1.28pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -1.57pp < -0.50pp
+    head_l8                      quick_drop -1.37pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_seed5_headprobe]
+  quick baseline: 41.36%
+    head_l10_strong              d_acc=-1.01pp acc=40.35%
+    head_l10_clip07              d_acc=-1.01pp acc=40.35%
+    scalar_l8_sched_cos          d_acc=-1.27pp acc=40.09%
+  med skipped: best_quick head_l10_strong -1.01pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_sched_cos          quick_drop -1.27pp < -0.50pp
+    head_l10_strong              quick_drop -1.01pp < -0.50pp
+    head_l10_clip07              quick_drop -1.01pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_seed5_headprobe             stage=quick cfg=head_l10_strong          d_acc=-1.01pp
+  hotpot_seed5_discovery           stage=quick cfg=scalar_l8_train1e4       d_acc=-1.28pp

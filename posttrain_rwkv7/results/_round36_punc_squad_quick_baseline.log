@@ -1,0 +1,7 @@
+Loading data...
+Using the latest cached version of the dataset since squad couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'plain_text' at /root/autodl-tmp/hf_datasets/squad/plain_text/0.0.0/7b6d24c440a36b6815f21b70d25016731768db1f (last modified on Tue Feb 17 11:33:02 2026).
+Using the latest cached version of the dataset since squad couldn't be found on the Hugging Face Hub
+Found the latest cached dataset configuration 'plain_text' at /root/autodl-tmp/hf_datasets/squad/plain_text/0.0.0/7b6d24c440a36b6815f21b70d25016731768db1f (last modified on Tue Feb 17 11:33:02 2026).
+Saved cache: cache/punc_restore_tok_e9abfeb9cb49.pt
+runs/20260222-220814/punc_restore_sft/no_fs

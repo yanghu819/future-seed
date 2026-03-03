@@ -1,0 +1,8 @@
+filter: {'ds': 'ai2_arc', 'ds_cfg': 'ARC-Challenge', 'train_split': 'train', 'val_split': 'validation', 'q_first': True, 'n_train': 1000, 'n_val': 200, 'max_prompt_tokens': 512, 'max_answer_tokens': 8, 'bsz': 48, 'time_budget_sec': 240, 'max_steps': 2000, 'eval_every': 50, 'val_batches': 8, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'fs_in_gate': False, 'fs_w_lr': 0.0, 'fs_b_lr': 0.0, 'train_gate_only': False, 'fs_variant': 'scalar', 'alpha_head_init': -2.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 6, 'fs_alpha_schedule': 'none', 'fs_alpha_min': 1.0, 'fs_alpha_max': 1.0, 'fs_norm': True, 'fs_clip': 1.0, 'fs_detach': True}
+==========================================================================================
+L=512 pairs=5 mean d_acc=+0.0005 std=0.0094 | mean d_loss=-0.0202 std=0.0179 | sign(+/0/-)=2/0/3
+  seed=0 d_acc=-0.0104 (no=0.3464 fs=0.3359) d_loss=+0.0005
+  seed=1 d_acc=-0.0052 (no=0.3151 fs=0.3099) d_loss=+0.0006
+  seed=2 d_acc=+0.0130 (no=0.3203 fs=0.3333) d_loss=-0.0437
+  seed=3 d_acc=+0.0104 (no=0.3021 fs=0.3125) d_loss=-0.0254
+  seed=4 d_acc=-0.0052 (no=0.3203 fs=0.3151) d_loss=-0.0331

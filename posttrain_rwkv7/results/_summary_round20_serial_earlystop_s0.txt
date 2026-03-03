@@ -1,0 +1,40 @@
+============================================================================================================
+Round20 serial early-stop summary (single seed)
+============================================================================================================
+[hotpot]
+  baseline quick: acc=0.0617 loss=16.4106 bsz=6
+  quick candidates:
+    scalar_l10_norm_detach   d_acc=+0.0000 acc=0.0617 [PRUNE]
+    scalar_l12_norm_detach   d_acc=+0.0000 acc=0.0617 [PRUNE]
+    scalar_l10_nonorm_detach d_acc=+0.0000 acc=0.0617 [PRUNE]
+    inputgate_l10            d_acc=+0.0000 acc=0.0617 [PRUNE]
+    scalar_l10_trainable     d_acc=+0.0000 acc=0.0617 [PRUNE]
+    scalar_l10_sched_cos     d_acc=-0.0291 acc=0.0326 [PRUNE]
+    scalar_l10_norm_node     d_acc=-0.0293 acc=0.0323 [PRUNE]
+    head_l10                 d_acc=-0.0293 acc=0.0323 [PRUNE]
+  med confirmed: none
+------------------------------------------------------------------------------------------------------------
+[mbpp]
+  baseline failed or missing
+------------------------------------------------------------------------------------------------------------
+[protein_contact]
+  baseline failed or missing
+------------------------------------------------------------------------------------------------------------
+[protein_ss]
+  baseline quick: acc=0.2466 loss=5.9313 bsz=8
+  quick candidates:
+    scalar_l10_norm_detach   d_acc=+0.0445 acc=0.2912 [KEEP]
+    scalar_l10_sched_cos     d_acc=+0.0423 acc=0.2889 [KEEP]
+    scalar_l10_trainable     d_acc=+0.0373 acc=0.2839 [KEEP]
+    head_l10                 d_acc=+0.0211 acc=0.2677 [KEEP]
+    scalar_l10_norm_node     d_acc=+0.0211 acc=0.2677 [KEEP]
+    scalar_l10_nonorm_detach d_acc=+0.0190 acc=0.2656 [KEEP]
+    scalar_l12_norm_detach   d_acc=+0.0000 acc=0.2466 [PRUNE]
+  med confirmed:
+    scalar_l10_norm_node     d_acc=+0.0802 acc=0.3269 loss=5.6350
+    scalar_l10_trainable     d_acc=+0.0772 acc=0.3238 loss=5.7499
+    scalar_l10_sched_cos     d_acc=+0.0757 acc=0.3223 loss=5.6278
+    head_l10                 d_acc=+0.0731 acc=0.3197 loss=5.6779
+    scalar_l10_norm_detach   d_acc=+0.0680 acc=0.3146 loss=5.7155
+    scalar_l10_nonorm_detach d_acc=+0.0566 acc=0.3032 loss=5.6855
+------------------------------------------------------------------------------------------------------------

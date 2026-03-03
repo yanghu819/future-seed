@@ -1,0 +1,24 @@
+================================================================================================================
+Round157 fastdiscover summary
+================================================================================================================
+[arc_mc_seed13_discovery]
+  quick baseline: 29.17%
+    scalar_l8_train8e5           d_acc=+20.83pp acc=50.00%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=29.17%
+    scalar_l8_sched_cos          d_acc=+0.00pp acc=29.17%
+  med:
+    baseline                     acc=29.17%
+    scalar_l8_train8e5           d_acc_vs_med=+20.83pp acc=50.00%
+----------------------------------------------------------------------------------------------------------------
+[hotpot_seed26_discovery]
+  quick baseline: 6.14%
+    scalar_l8_train8e5           d_acc=+7.16pp acc=13.30%
+    scalar_l8_train1e4           d_acc=+4.72pp acc=10.86%
+    head_l8                      d_acc=+2.56pp acc=8.70%
+  med:
+    baseline                     acc=9.10%
+    scalar_l8_train8e5           d_acc_vs_med=+4.20pp acc=13.30%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  arc_mc_seed13_discovery          stage=med   cfg=scalar_l8_train8e5       d_acc=+20.83pp
+  hotpot_seed26_discovery          stage=med   cfg=scalar_l8_train8e5       d_acc=+4.20pp

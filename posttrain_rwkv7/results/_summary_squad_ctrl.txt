@@ -1,0 +1,68 @@
+====================================================================================================
+seed=0 q_first=False train_data_seed=None val_data_seed=None n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=300
+  prompt_fs  best_loss=15.7402@950 best_acc=0.0998@1600 last_loss=17.1654 last_acc=0.0591 dir=runs/20260217-115302/squad_sft/prompt_fs
+====================================================================================================
+seed=0 q_first=False train_data_seed=None val_data_seed=None n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-4.0 alpha_lr=0.0 seed_scale=1.0 time_budget=300
+  no_fs      best_loss=16.0182@950 best_acc=0.0929@1150 last_loss=17.3972 last_acc=0.0531 dir=runs/20260217-114655/squad_sft/no_fs
+====================================================================================================
+seed=0 q_first=False train_data_seed=None val_data_seed=None n_train=512 n_val=256 max_prompt=512 max_ans=24 lr=5e-06 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=180
+  prompt_fs  best_loss=16.7241@1180 best_acc=0.0894@700 last_loss=18.7867 last_acc=0.0430 dir=runs/20260217-114126/squad_sft/prompt_fs
+====================================================================================================
+seed=0 q_first=False train_data_seed=None val_data_seed=None n_train=512 n_val=256 max_prompt=512 max_ans=24 lr=5e-06 alpha_init=-4.0 alpha_lr=0.0 seed_scale=1.0 time_budget=180
+  no_fs      best_loss=16.4334@1180 best_acc=0.0852@700 last_loss=18.7090 last_acc=0.0391 dir=runs/20260217-113209/squad_sft/no_fs
+  prompt_fs  best_loss=16.3594@1100 best_acc=0.0753@700 last_loss=17.3383 last_acc=0.0195 dir=runs/20260217-113641/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss -0.0741 | best_acc -0.0099
+====================================================================================================
+seed=0 q_first=False train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=0.0 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=5
+  no_fs      best_loss=34.2421@0 best_acc=0.0000@0 last_loss=34.2421 last_acc=0.0000 dir=runs/20260217-141450/squad_sft/no_fs
+====================================================================================================
+seed=0 q_first=False train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=16.0182@950 best_acc=0.0929@1150 last_loss=16.3499 last_acc=0.0783 dir=runs/20260217-141525/squad_sft/no_fs
+  prompt_fs  best_loss=15.7402@950 best_acc=0.0998@1600 last_loss=16.3558 last_acc=0.0816 dir=runs/20260217-141936/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss -0.2780 | best_acc +0.0069
+====================================================================================================
+seed=0 q_first=True train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=15.7250@950 best_acc=0.0807@1700 last_loss=17.6749 last_acc=0.0557 dir=runs/20260217-145750/squad_sft/no_fs
+  prompt_fs  best_loss=15.8228@950 best_acc=0.0772@1650 last_loss=16.4446 last_acc=0.0544 dir=runs/20260217-150202/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss +0.0978 | best_acc -0.0035
+====================================================================================================
+seed=1 q_first=False train_data_seed=None val_data_seed=None n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=300
+  prompt_fs  best_loss=16.1108@950 best_acc=0.1024@1650 last_loss=17.8107 last_acc=0.0408 dir=runs/20260217-120455/squad_sft/prompt_fs
+====================================================================================================
+seed=1 q_first=False train_data_seed=None val_data_seed=None n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-4.0 alpha_lr=0.0 seed_scale=1.0 time_budget=300
+  no_fs      best_loss=15.9970@1300 best_acc=0.0873@900 last_loss=18.4318 last_acc=0.0726 dir=runs/20260217-115925/squad_sft/no_fs
+====================================================================================================
+seed=1 q_first=False train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=15.9339@1650 best_acc=0.0688@1550 last_loss=16.4602 last_acc=0.0566 dir=runs/20260217-142348/squad_sft/no_fs
+  prompt_fs  best_loss=16.0802@1650 best_acc=0.0813@1550 last_loss=16.6576 last_acc=0.0577 dir=runs/20260217-142800/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss +0.1463 | best_acc +0.0125
+====================================================================================================
+seed=1 q_first=True train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=16.0720@1650 best_acc=0.0856@1650 last_loss=17.8198 last_acc=0.0442 dir=runs/20260217-150614/squad_sft/no_fs
+  prompt_fs  best_loss=15.9196@1300 best_acc=0.0828@1250 last_loss=16.4186 last_acc=0.0502 dir=runs/20260217-151026/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss -0.1524 | best_acc -0.0029
+====================================================================================================
+seed=2 q_first=False train_data_seed=None val_data_seed=None n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-4.0 alpha_lr=0.0 seed_scale=1.0 time_budget=300
+  no_fs      best_loss=15.7676@1300 best_acc=0.0822@900 last_loss=16.7678 last_acc=0.0605 dir=runs/20260217-140227/squad_sft/no_fs
+====================================================================================================
+seed=2 q_first=False train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=16.0790@950 best_acc=0.0776@1150 last_loss=16.9491 last_acc=0.0431 dir=runs/20260217-143212/squad_sft/no_fs
+  prompt_fs  best_loss=16.3279@1300 best_acc=0.0940@1600 last_loss=16.9580 last_acc=0.0940 dir=runs/20260217-143624/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss +0.2489 | best_acc +0.0164
+====================================================================================================
+seed=2 q_first=True train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=16.1953@1650 best_acc=0.0885@1650 last_loss=17.1770 last_acc=0.0562 dir=runs/20260217-151438/squad_sft/no_fs
+  prompt_fs  best_loss=16.1194@1650 best_acc=0.0750@1650 last_loss=16.1194 last_acc=0.0750 dir=runs/20260217-151850/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss -0.0759 | best_acc -0.0135
+====================================================================================================
+seed=3 q_first=False train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=15.9187@1650 best_acc=0.0886@1450 last_loss=17.5255 last_acc=0.0606 dir=runs/20260217-144037/squad_sft/no_fs
+  prompt_fs  best_loss=15.8726@950 best_acc=0.1028@1650 last_loss=16.0066 last_acc=0.1028 dir=runs/20260217-144449/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss -0.0460 | best_acc +0.0142
+====================================================================================================
+seed=4 q_first=False train_data_seed=0 val_data_seed=1234 n_train=2048 n_val=512 max_prompt=512 max_ans=24 lr=3e-05 alpha_init=-2.0 alpha_lr=0.0 seed_scale=1.0 time_budget=240
+  no_fs      best_loss=15.8878@950 best_acc=0.0906@1650 last_loss=17.5583 last_acc=0.0541 dir=runs/20260217-144902/squad_sft/no_fs
+  prompt_fs  best_loss=15.8535@1300 best_acc=0.0847@900 last_loss=16.0696 last_acc=0.0333 dir=runs/20260217-145313/squad_sft/prompt_fs
+  DELTA(prompt_fs - no_fs): best_loss -0.0344 | best_acc -0.0059
+
+Total runs parsed: 25

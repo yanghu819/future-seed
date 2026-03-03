@@ -1,0 +1,6 @@
+filter: {'ds': 'ai2_arc', 'ds_cfg': 'ARC-Challenge', 'train_split': 'train', 'val_split': 'validation', 'q_first': False, 'n_train': 1000, 'n_val': 200, 'max_prompt_tokens': 512, 'max_answer_tokens': 8, 'bsz': 8, 'time_budget_sec': 240, 'max_steps': 0, 'eval_every': 50, 'val_batches': 16, 'model_lr': 3e-05, 'alpha_init': -2.0, 'alpha_lr': 0.0, 'fs_variant': 'scalar', 'alpha_head_init': -2.0, 'alpha_head_lr': 0.0, 'seed_scale': 1.0, 'fs_layer_start': 1, 'fs_norm': False, 'fs_clip': 0.0, 'fs_detach': False}
+==========================================================================================
+L=512 pairs=3 mean d_acc=+0.0026 std=0.0242 | mean d_loss=+0.0174 std=0.0267
+  seed=0 d_acc=+0.0234 (no=0.3125 fs=0.3359) d_loss=+0.0081
+  seed=1 d_acc=-0.0312 (no=0.3438 fs=0.3125) d_loss=+0.0537
+  seed=2 d_acc=+0.0156 (no=0.3281 fs=0.3438) d_loss=-0.0096

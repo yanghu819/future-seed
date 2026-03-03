@@ -1,0 +1,27 @@
+================================================================================================================
+Round199 fastdiscover summary
+================================================================================================================
+[mbpp_seed35_headprobe]
+  quick baseline: 43.79%
+    scalar_l8_sched_cos          d_acc=-1.03pp acc=42.77%
+    scalar_l8_train8e5           d_acc=-2.23pp acc=41.57%
+    head_l10_strong              d_acc=-2.31pp acc=41.48%
+  med skipped: best_quick scalar_l8_sched_cos -1.03pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_sched_cos          quick_drop -1.03pp < -0.50pp
+    head_l10_strong              quick_drop -2.31pp < -0.50pp
+    scalar_l8_train8e5           quick_drop -2.23pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[punc_seed24_anchor]
+  quick baseline: 9.34%
+    scalar_l8_train8e5           d_acc=-0.39pp acc=8.95%
+    scalar_l8_train1e4           d_acc=-0.83pp acc=8.51%
+    head_l8                      d_acc=-0.91pp acc=8.43%
+  med skipped: best_quick scalar_l8_train8e5 -0.39pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -0.83pp < -0.50pp
+    head_l8                      quick_drop -0.91pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  punc_seed24_anchor               stage=quick cfg=scalar_l8_train8e5       d_acc=-0.39pp
+  mbpp_seed35_headprobe            stage=quick cfg=scalar_l8_sched_cos      d_acc=-1.03pp
