@@ -1,38 +1,114 @@
 # RWKV7 Future-Seed Post-Training Backup
 
-This folder is a backup snapshot of the current Future-Seed post-training work on AutoDL.
+This repo tracks end-to-end Future-Seed post-training experiments (single-GPU serial) with full raw records, summaries, and reproducible queue configs.
 
-## Contents
+## Start Here (New Readers)
 
-- `scripts/`: training, summarization, and run scripts used in the current iteration.
-- `results/`: exported summary text files from completed runs.
-- `paper/`: current paper/progress note.
-  - `paper/FS_POSTTRAIN_PROGRESS_2026-02-19.md`: short status note.
-  - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
-  - `paper/FS_POSTTRAIN_PAPER_DRAFT.md`: current paper draft synced with latest experiments.
+### 1) Repo purpose
 
-## Key Findings (latest snapshot)
+- prove whether Future-Seed gives stable gains on real tasks (not only toy tasks)
+- run under realistic budget constraints (single GPU, strict quick-prune, finite rounds)
+- keep all results auditable (round-level summary + JSONL record + rolling log)
 
-- ARC-Challenge options-first: stable positive gain with FS (`_summary_arc_optionsfirst_stabilized_r2.txt`), but schedule variant was weaker (`_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`).
-- HotpotQA L=4096:
-  - R6 baseline near zero mean with large seed variance (`_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`).
-  - R9/R10 did not improve mean accuracy.
-  - R11 grid showed either near-zero/no-op behavior (`lstart=12`) or mixed gains with regressions (`lstart=10`).
-- MBPP long-context:
-  - q-after and q-first both regressed under FS (`_summary_mbpp_qafter_stabilized_len4096_r1_s012.txt`, `_summary_mbpp_qfirst_stabilized_len4096_r1_s012.txt`).
-- Sudoku:
-  - 4x4 prefix: small consistent gain (`_summary_sudoku4_prefix_r1_s012.txt`).
-  - 4x4 suffix: near neutral (`_summary_sudoku4_suffix_r1_s012.txt`).
-  - 9x9 prefix: near neutral / unstable (`_summary_sudoku9_prefix_r1_s012.txt`).
-  - 9x9 suffix: strong regression (`_summary_sudoku9_suffix_r1_s012.txt`).
-- Protein real-task probes:
-  - SS spot labeling (q-after/q-first): near-zero, unstable deltas.
-  - Contact-pair QA:
-    - r1/r2: exact tie on token/seq acc.
-    - r3 balanced and r4 schedule: small negative mean deltas.
-- Round12 (5-seed high-util stability check):
-  - ARC options-first regressed (`_summary_arc_optionsfirst_stabilized_r5_s01234.txt`).
-  - Hotpot q-after/q-first both show small positive means but mixed signs (`_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`, `_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`).
+### 2) Fast navigation
+
+- `scripts/`: train/orchestration/audit scripts
+- `results/`: round summaries, records, queue files, audit ledgers
+- `paper/`: paper draft and longer research notes
+
+Most important files:
+- policy: `results/_codex53_team_policy.json`
+- rolling experiment log: `results/_rolling_round_log.md`
+- sprint closure report: `results/_summary_round545_568_sprint_closure.txt`
+- complete audit (good+bad): `results/_audit_round77_569_analysis.md`
+
+### 3) Quick reproducibility paths
+
+Path A (rerun a finite high-ROI packet):
+```bash
+bash scripts/run_repropack_569_574.sh
+```
+
+Path B (rebuild complete audit from raw records):
+```bash
+python3 scripts/generate_fastdiscover_audit.py \
+  --results_dir results \
+  --round_from 77 \
+  --round_to 569 \
+  --out_prefix results/_audit_round77_569
+```
+
+Path C (continue queued search):
+```bash
+./.venv/bin/python scripts/run_round77_82_fastdiscover.py \
+  --queue results/_search_queue_round545_552_fastloop.json \
+  --round_from 545 \
+  --round_to 552 \
+  --policy results/_codex53_team_policy.json
+```
+
+### 4) Core result dashboard (round77-569)
+
+Global:
+- quick mean/median: `+1.48pp / +0.76pp`
+- med mean/median: `+1.74pp / +1.19pp`
+- med positive rate: `69.6%`
+- all-time best med: `round157 arc_mc_seed13_discovery +20.83pp`
+- all-time worst med: `round457 arc_mc_seed167_discovery -12.50pp`
+
+By family (med):
+- `arc_mc`: mean `+3.72pp`, pos `55.3%`
+- `protein_ss`: mean `+2.40pp`, pos `88.3%`
+- `mbpp_longctx`: mean `+1.32pp`, pos `52.0%` (high variance)
+- `mbpp`: mean `+0.38pp`, pos `63.0%`
+- `protein_contact`: med coverage `0`, quick flat (`+0.00pp`)
+
+Top positive med examples:
+- `round157 arc_mc_seed13_discovery / scalar_l8_train8e5`: `+20.83pp`
+- `round163 arc_mc_seed16_discovery / scalar_l8_sched_cos`: `+16.67pp`
+- `round417 arc_mc_seed120_discovery / scalar_l8_sched_cos`: `+12.50pp`
+- `round534 mbpp_longctx_seed106_repair / head_l8`: `+8.69pp`
+- `round557 arc_mc_seed205_discovery / scalar_l8_train8e5`: `+8.33pp`
+
+Top negative med examples:
+- `round457 arc_mc_seed167_discovery / scalar_l8_train1e4`: `-12.50pp`
+- `round116 mbpp_longctx_seed0_repair / scalar_l8_train1e4`: `-6.45pp`
+- `round172 mbpp_seed25_anchor / scalar_l8_train8e5`: `-4.68pp`
+- `round513 arc_mc_seed187_discovery / scalar_l8_train1e4`: `-4.17pp`
+- `round568 protein_ss_seed279_discovery / head_l8`: `-2.11pp`
+
+Main failure mode:
+- quick>0 does not guarantee med>0; major reversals exist.
+- representative reversal: `round457 arc_mc_seed167`: quick `+4.17pp` -> med `-12.50pp`.
+
+### 5) Operational decisions from audit
+
+- keep as core lanes: `arc_mc`, `protein_ss`, `mbpp`
+- conditional keep: `mbpp_longctx` (must use stricter med gate/confirmation)
+- remove from core lane: `protein_contact` (flat quick, no med signal)
+- recommended strict gate for single-GPU ROI:
+  - promote `>= +1.0pp`
+  - prune `< -0.4pp`
+
+### 6) How to read result files
+
+Naming:
+- `_summary_roundXXX_fastdiscover.txt`: human-readable per-round report
+- `_roundXXX_fastdiscover_records.jsonl`: raw machine-readable events for that round
+- `_search_queue_roundA_B_fastloop.json`: queue definition (tasks/configs/budgets/gates)
+
+Status semantics in JSONL:
+- `stage=quick|med` + `status=ok`: actual run finished with metrics
+- `status=pruned` + `gate_reason=quick_prune`: candidate dropped by quick threshold
+- `status=pruned` + `gate_reason=med_skip`: best quick did not pass promote gate
+- `gate_reason=promote`: this run path was allowed to continue
+
+Most useful analysis artifacts:
+- complete report: `results/_audit_round77_569_analysis.md`
+- all med rows (good+bad): `results/_audit_round77_569_med_ledger.csv`
+- quick/med joined rows: `results/_audit_round77_569_task_combo.csv`
+
+## Detailed Round-by-Round History
 
 ## Latest Rapid-Iteration Update (2026-02-21, Round20/21)
 
