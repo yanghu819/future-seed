@@ -1,5 +1,11 @@
 # Results (2026-02-14)
 
+Navigation:
+- repo onboarding: `README.md`
+- fast setup: `GETTING_STARTED.md`
+- task->script map: `TASK_INDEX.md`
+- post-training campaign results: `posttrain_rwkv7/README.md`
+
 This repo contains a minimal Future-Seed implementation on RWKV7-CUDA, plus hard toy tasks to stress **in-place constraint repair** (future-aware infill + global consistency).
 
 ## Key Additions
