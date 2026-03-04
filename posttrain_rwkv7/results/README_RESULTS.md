@@ -2,6 +2,23 @@
 
 This folder stores curated experiment snapshots for reproducibility and paper writing.
 
+## 0) Unified effective report (start here)
+
+- `UNIFIED_EFFECTIVE_EXPERIMENTS.md`
+  - single consolidated report from earliest logged rounds to latest
+  - includes strict `med_vs_med` and legacy `med_vs_quick` fallback
+- `_unified_effective_med_runs.csv`
+  - all effective runs (`best_med_delta_vs_anchor_pp > 0`)
+- `_unified_med_comparisons.csv`
+  - all comparable rows (effective + non-effective)
+
+Regenerate:
+
+```bash
+cd posttrain_rwkv7
+./scripts/build_unified_effective_report.py
+```
+
 ## 1) Data flow (source of truth)
 
 - run-time outputs are produced in `runs/`

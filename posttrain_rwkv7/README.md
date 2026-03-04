@@ -11,6 +11,21 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
   - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
   - `paper/FS_POSTTRAIN_PAPER_DRAFT.md`: current paper draft synced with latest experiments.
 
+## Unified Effective Results (All Rounds)
+
+If you want one place that unifies all effective experiments from start to latest round, read:
+
+- `results/UNIFIED_EFFECTIVE_EXPERIMENTS.md`
+- `results/_unified_effective_med_runs.csv` (effective-only table)
+- `results/_unified_med_comparisons.csv` (full comparable table)
+
+Regenerate these files:
+
+```bash
+cd posttrain_rwkv7
+./scripts/build_unified_effective_report.py
+```
+
 ## Key Findings (latest snapshot)
 
 - ARC-Challenge options-first: stable positive gain with FS (`_summary_arc_optionsfirst_stabilized_r2.txt`), but schedule variant was weaker (`_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`).
