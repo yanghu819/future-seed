@@ -1,0 +1,290 @@
+{
+  "strategy": {
+    "search_mix": "100_tsp_targeted",
+    "quick_promote_pp": 0.8,
+    "quick_prune_pp": -0.5,
+    "strong_negative_quick_pp": -1.0,
+    "strong_negative_med_pp": -0.5,
+    "cooldown_rounds": 8,
+    "useful_rule": "single_positive_med"
+  },
+  "rounds": [
+    {
+      "round": 709,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "tsp_mask_seed0_targeted",
+          "seed": 0,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--tsp_n_cities", "10",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 180,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 320,
+          "med_steps": 400,
+          "med_eval_every": 20,
+          "med_val_batches": 8,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-3",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-3",
+                "--alpha_head_lr", "5e-4",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l10",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-2",
+                "--alpha_head_lr", "1e-3",
+                "--fs_layer_start", "10",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsp_mask_seed1_targeted",
+          "seed": 1,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--tsp_n_cities", "10",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 180,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 320,
+          "med_steps": 400,
+          "med_eval_every": 20,
+          "med_val_batches": 8,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-3",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-3",
+                "--alpha_head_lr", "5e-4",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l10",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-2",
+                "--alpha_head_lr", "1e-3",
+                "--fs_layer_start", "10",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 710,
+      "novelty_tier": "anchor",
+      "tasks": [
+        {
+          "name": "tsp_mask_seed2_targeted_anchor",
+          "seed": 2,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--tsp_n_cities", "10",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 180,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 320,
+          "med_steps": 400,
+          "med_eval_every": 20,
+          "med_val_batches": 8,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-3",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-3",
+                "--alpha_head_lr", "5e-4",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l10",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-2",
+                "--alpha_head_lr", "1e-3",
+                "--fs_layer_start", "10",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsp_mask_seed0_qfirst_targeted",
+          "seed": 0,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--q_first",
+            "--tsp_n_cities", "10",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 180,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 320,
+          "med_steps": 400,
+          "med_eval_every": 20,
+          "med_val_batches": 8,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-3",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-3",
+                "--alpha_head_lr", "5e-4",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "head_l10",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "head",
+                "--alpha_head_init", "-2",
+                "--alpha_head_lr", "1e-3",
+                "--fs_layer_start", "10",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

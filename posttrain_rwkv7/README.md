@@ -1,192 +1,38 @@
 # RWKV7 Future-Seed Post-Training Backup
 
-This repo tracks end-to-end Future-Seed post-training experiments (single-GPU serial) with full raw records, summaries, and reproducible queue configs.
+This folder is a backup snapshot of the current Future-Seed post-training work on AutoDL.
 
-## Start Here (New Readers)
+## Contents
 
-### 0) 5-minute onboarding checklist
+- `scripts/`: training, summarization, and run scripts used in the current iteration.
+- `results/`: exported summary text files from completed runs.
+- `paper/`: current paper/progress note.
+  - `paper/FS_POSTTRAIN_PROGRESS_2026-02-19.md`: short status note.
+  - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
+  - `paper/FS_POSTTRAIN_PAPER_DRAFT.md`: current paper draft synced with latest experiments.
 
-```bash
-# 1) verify required files + run orchestrator self-test
-bash scripts/repro_doctor.sh
+## Key Findings (latest snapshot)
 
-# 2) run a finite reproducible packet (round569-574)
-bash scripts/run_repropack_569_574.sh
-
-# 3) copy newly generated outputs from runs/ to results/
-bash scripts/sync_runs_to_results.sh
-
-# 4) rebuild audit from raw JSONL
-python3 scripts/generate_fastdiscover_audit.py \
-  --results_dir results \
-  --round_from 77 \
-  --round_to 569 \
-  --out_prefix results/_audit_round77_569
-```
-
-### 1) Repo purpose
-
-- prove whether Future-Seed gives stable gains on real tasks (not only toy tasks)
-- run under realistic budget constraints (single GPU, strict quick-prune, finite rounds)
-- keep all results auditable (round-level summary + JSONL record + rolling log)
-
-### 2) Fast navigation
-
-- `scripts/`: train/orchestration/audit scripts
-- `results/`: round summaries, records, queue files, audit ledgers
-- `paper/`: paper draft and longer research notes
-
-Most important files:
-- policy: `results/_codex53_team_policy.json`
-- rolling experiment log: `results/_rolling_round_log.md`
-- sprint closure report: `results/_summary_round545_568_sprint_closure.txt`
-- complete audit (good+bad): `results/_audit_round77_569_analysis.md`
-- results guide: `results/README_RESULTS.md`
-- scripts guide: `scripts/README_SCRIPTS.md`
-- reproducibility doctor: `scripts/repro_doctor.sh`
-- runs->results sync: `scripts/sync_runs_to_results.sh`
-
-### 3) Output path contract (important)
-
-- orchestrator always writes fresh outputs to `runs/` (raw run-time directory)
-- this backup repo stores curated snapshots under `results/`
-- after each round block, run:
-
-```bash
-bash scripts/sync_runs_to_results.sh --round-from 569 --round-to 574
-```
-
-Without this sync step, README/audit may describe old snapshots.
-
-### 4) Quick reproducibility paths
-
-Path 0 (sanity check before any run):
-
-```bash
-bash scripts/repro_doctor.sh
-```
-
-Path A (rerun a finite high-ROI packet):
-
-```bash
-bash scripts/run_repropack_569_574.sh
-```
-
-Path B (sync generated records into tracked snapshot directory):
-
-```bash
-bash scripts/sync_runs_to_results.sh --round-from 569 --round-to 574
-```
-
-Path C (rebuild complete audit from raw records):
-
-```bash
-python3 scripts/generate_fastdiscover_audit.py \
-  --results_dir results \
-  --round_from 77 \
-  --round_to 569 \
-  --out_prefix results/_audit_round77_569
-```
-
-Path D (continue queued search):
-
-```bash
-./.venv/bin/python scripts/run_round77_82_fastdiscover.py \
-  --queue results/_search_queue_round545_552_fastloop.json \
-  --round_from 545 \
-  --round_to 552 \
-  --policy results/_codex53_team_policy.json
-```
-
-Path E (dry-run queue only, no training):
-
-```bash
-./.venv/bin/python scripts/run_round77_82_fastdiscover.py \
-  --queue results/_search_queue_round569_576_fastloop.json \
-  --round_from 569 \
-  --round_to 574 \
-  --policy results/_codex53_team_policy.json \
-  --dry_run
-```
-
-### 5) Gate policy in one glance
-
-- quick promote threshold: `>= +0.8pp` (policy can override; current team policy uses stricter gates)
-- quick prune threshold: `< -0.5pp`
-- strong negative cooldown:
-  - quick `<= -1.0pp` or med `<= -0.5pp`
-  - cooldown length: 8 rounds
-- dedup key (signature): `(task, seed, ds, ds_cfg, cfg_name, quick_budget, med_budget, note_pool, prompt_len)`
-
-### 6) Core result dashboard (round77-569)
-
-Global:
-- quick mean/median: `+1.48pp / +0.76pp`
-- med mean/median: `+1.74pp / +1.19pp`
-- med positive rate: `69.6%`
-- all-time best med: `round157 arc_mc_seed13_discovery +20.83pp`
-- all-time worst med: `round457 arc_mc_seed167_discovery -12.50pp`
-
-By family (med):
-- `arc_mc`: mean `+3.72pp`, pos `55.3%`
-- `protein_ss`: mean `+2.40pp`, pos `88.3%`
-- `mbpp_longctx`: mean `+1.32pp`, pos `52.0%` (high variance)
-- `mbpp`: mean `+0.38pp`, pos `63.0%`
-- `protein_contact`: med coverage `0`, quick flat (`+0.00pp`)
-
-Top positive med examples:
-- `round157 arc_mc_seed13_discovery / scalar_l8_train8e5`: `+20.83pp`
-- `round163 arc_mc_seed16_discovery / scalar_l8_sched_cos`: `+16.67pp`
-- `round417 arc_mc_seed120_discovery / scalar_l8_sched_cos`: `+12.50pp`
-- `round534 mbpp_longctx_seed106_repair / head_l8`: `+8.69pp`
-- `round557 arc_mc_seed205_discovery / scalar_l8_train8e5`: `+8.33pp`
-
-Top negative med examples:
-- `round457 arc_mc_seed167_discovery / scalar_l8_train1e4`: `-12.50pp`
-- `round116 mbpp_longctx_seed0_repair / scalar_l8_train1e4`: `-6.45pp`
-- `round172 mbpp_seed25_anchor / scalar_l8_train8e5`: `-4.68pp`
-- `round513 arc_mc_seed187_discovery / scalar_l8_train1e4`: `-4.17pp`
-- `round568 protein_ss_seed279_discovery / head_l8`: `-2.11pp`
-
-Main failure mode:
-- quick>0 does not guarantee med>0; major reversals exist.
-- representative reversal: `round457 arc_mc_seed167`: quick `+4.17pp` -> med `-12.50pp`.
-
-### 7) Operational decisions from audit
-
-- keep as core lanes: `arc_mc`, `protein_ss`, `mbpp`
-- conditional keep: `mbpp_longctx` (must use stricter med gate/confirmation)
-- remove from core lane: `protein_contact` (flat quick, no med signal)
-- recommended strict gate for single-GPU ROI:
-  - promote `>= +1.0pp`
-  - prune `< -0.4pp`
-
-### 8) How to read result files
-
-Naming:
-- `_summary_roundXXX_fastdiscover.txt`: human-readable per-round report
-- `_roundXXX_fastdiscover_records.jsonl`: raw machine-readable events for that round
-- `_search_queue_roundA_B_fastloop.json`: queue definition (tasks/configs/budgets/gates)
-
-Status semantics in JSONL:
-- `stage=quick|med` + `status=ok`: actual run finished with metrics
-- `status=pruned` + `gate_reason=quick_prune`: candidate dropped by quick threshold
-- `status=pruned` + `gate_reason=med_skip`: best quick did not pass promote gate
-- `gate_reason=promote`: this run path was allowed to continue
-
-Most useful analysis artifacts:
-- complete report: `results/_audit_round77_569_analysis.md`
-- all med rows (good+bad): `results/_audit_round77_569_med_ledger.csv`
-- quick/med joined rows: `results/_audit_round77_569_task_combo.csv`
-
-Per-round reproducibility acceptance:
-- `runs/_roundXXX_fastdiscover_records.jsonl` generated
-- `runs/_summary_roundXXX_fastdiscover.txt` generated
-- sync done: same files appear in `results/`
-- rolling log updated: `results/_rolling_round_log.md`
-- if round closes a block: audit regeneration command completed
-
-## Detailed Round-by-Round History
+- ARC-Challenge options-first: stable positive gain with FS (`_summary_arc_optionsfirst_stabilized_r2.txt`), but schedule variant was weaker (`_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`).
+- HotpotQA L=4096:
+  - R6 baseline near zero mean with large seed variance (`_summary_hotpot_qafter_stabilized_len4096_r6_s012.txt`).
+  - R9/R10 did not improve mean accuracy.
+  - R11 grid showed either near-zero/no-op behavior (`lstart=12`) or mixed gains with regressions (`lstart=10`).
+- MBPP long-context:
+  - q-after and q-first both regressed under FS (`_summary_mbpp_qafter_stabilized_len4096_r1_s012.txt`, `_summary_mbpp_qfirst_stabilized_len4096_r1_s012.txt`).
+- Sudoku:
+  - 4x4 prefix: small consistent gain (`_summary_sudoku4_prefix_r1_s012.txt`).
+  - 4x4 suffix: near neutral (`_summary_sudoku4_suffix_r1_s012.txt`).
+  - 9x9 prefix: near neutral / unstable (`_summary_sudoku9_prefix_r1_s012.txt`).
+  - 9x9 suffix: strong regression (`_summary_sudoku9_suffix_r1_s012.txt`).
+- Protein real-task probes:
+  - SS spot labeling (q-after/q-first): near-zero, unstable deltas.
+  - Contact-pair QA:
+    - r1/r2: exact tie on token/seq acc.
+    - r3 balanced and r4 schedule: small negative mean deltas.
+- Round12 (5-seed high-util stability check):
+  - ARC options-first regressed (`_summary_arc_optionsfirst_stabilized_r5_s01234.txt`).
+  - Hotpot q-after/q-first both show small positive means but mixed signs (`_summary_hotpot_qafter_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`, `_summary_hotpot_qfirst_stabilized_len4096_r12_lstart10_alpha-3_s01234.txt`).
 
 ## Latest Rapid-Iteration Update (2026-02-21, Round20/21)
 
@@ -1548,102 +1394,165 @@ Recent round signal snapshot:
   - active: `run_round77_82_fastdiscover.py --queue results/_search_queue_round433_440_fastloop.json`
   - waiting chainer: `runs/autochain_round441_448.sh` (trigger on `_summary_round440_fastdiscover.txt`)
 
-### Round459-568 Consolidated Closure (2026-03-03)
+### ROI-Explore v5 Extension (2026-03-02, Round473+)
 
-- Execution was continued in fastdiscover mode through `round568` with strict quick-to-med gating and cooldown.
-- Policy was upgraded to GPT-5.3 codex policy file:
+- Based on rounds `409-433` med/quick conversion, `protein_contact` was de-prioritized (quick promote rate ~`0%`, mostly flat `+0.00pp`).
+- Added profile `roi_explore_v5` in `scripts/rebuild_fastloop_queues_broad.py`:
+  - focus: `protein_ss`, `arc_mc`, `mbpp`, `mbpp_longctx`
+  - exploration slots: `squad`, `hotpot`, `wiki`
+  - search mix: `80_new_20_anchor_roi_explore_v5`
+- Generated and deployed queues:
+  - `results/_search_queue_round473_480_fastloop.json`
+  - `results/_search_queue_round481_488_fastloop.json`
+  - `results/_search_queue_round489_496_fastloop.json`
+  - `results/_search_queue_round497_504_fastloop.json`
+  - `results/_search_queue_round505_512_fastloop.json`
+  - `results/_search_queue_round513_520_fastloop.json`
+- Deployed and started remote autochains:
+  - `runs/autochain_round473_480.sh`
+  - `runs/autochain_round481_488.sh`
+  - `runs/autochain_round489_496.sh`
+  - `runs/autochain_round497_504.sh`
+  - `runs/autochain_round505_512.sh`
+  - `runs/autochain_round513_520.sh`
+- Current live run remains `round433-440` (single-GPU serial), with seamless handoff now armed through `round520`.
+
+### Ruthless Prune + Immediate Restart (2026-03-02, Round449+)
+
+- Aggressive kill of low-value lanes (based on `409-445` conversion):
+  - removed from main search cycle: `protein_contact` (quick promote `0%`, mostly `+0.00pp`)
+  - removed from main search cycle: `hotpot` (med transfer unstable/negative in recent window)
+- Added profile `ruthless_v6` in `scripts/rebuild_fastloop_queues_broad.py`:
+  - core: `protein_ss`, `arc_mc`, `mbpp`, `mbpp_longctx`
+  - exploration: `squad`, `wiki`
+  - mix: `85_new_15_anchor_ruthless_v6`
+- Rebuilt and deployed queues `round441-560` with new seeds and no `protein_contact/hotpot` in cycle.
+- Restarted active execution immediately on new queue:
+  - active runner: `--queue results/_search_queue_round449_456_fastloop.json --round_from 449 --round_to 456`
+  - round449 now running on `protein_ss_seed232_discovery` / `arc_mc_seed164_discovery`.
+
+### GPT-5.3 Codex Policy + Best-of-N Replan (2026-03-02, Round561+)
+
+- Added strategy policy file (Spark disabled):
   - `results/_codex53_team_policy.json`
-  - final sprint gates: quick promote `+1.00pp`, quick prune `< -0.40pp`, cooldown `8`.
-- Search scheduling evolved to prioritize ROI:
-  - broad BFS phase (`bfs_v7/bfs_v8`) to expand task coverage.
-  - sprint phase (`sprint_v9`) for high-ROI lanes only: `mbpp_longctx / mbpp / arc_mc / protein_ss`.
-- Sprint block (`round545-568`) reached planned cap and was cleanly stopped (no open worker loops).
+  - `model: gpt-5.3-codex` with fixed gates:
+    - quick promote `+0.80pp`
+    - quick prune `< -0.50pp`
+    - strong negative cooldown: quick `<= -1.00pp`, med `<= -0.50pp`
+- Updated orchestrator:
+  - `scripts/run_round77_82_fastdiscover.py` now supports `--policy` and writes active policy in round summary header.
+- Added Best-of-N planner:
+  - `scripts/plan_bestofn_fastloop.py`
+  - scores candidate profiles from recent history and applies hard suppression on killed tasks.
+- Replanned and generated queues `round561-640` using Best-of-N:
+  - plan artifact: `results/_bestofn_plan_round561_640.json`
+  - selected profile: `ruthless_v6`
+  - generated: `_search_queue_round561_568_fastloop.json` ... `_search_queue_round633_640_fastloop.json`
+- Remote chain extension deployed:
+  - `runs/autochain_round561_568.sh` ... `runs/autochain_round633_640.sh`
+  - each launcher uses `--policy results/_codex53_team_policy.json`.
 
-Key sprint outcomes (`round545-568`):
-- med comparisons: `22`, med positive rate: `63.6%`, med mean delta: `+1.10pp`.
-- best in-window result:
-  - `round557 arc_mc_seed205_discovery` / `scalar_l8_train8e5`: **`+8.33pp`**.
-- other notable positives:
-  - `round551 arc_mc_seed202_discovery`: **`+4.17pp`**
-  - `round557 mbpp_longctx_seed113_repair`: **`+3.57pp`**
-  - `round552 protein_ss_seed271_discovery`: **`+2.34pp`**
+### Latest Progress Snapshot (2026-03-02, Round455-457)
 
-Primary artifacts:
-- rolling log: `results/_rolling_round_log.md`
-- sprint closure report: `results/_summary_round545_568_sprint_closure.txt`
-- terminal round files:
-  - `results/_summary_round568_fastdiscover.txt`
-  - `results/_round568_fastdiscover_records.jsonl`
+- `round455` produced a small positive:
+  - `squad_seed81_anchor` / `scalar_l8_train1e4` med **`+0.69pp`**
+- `round456` produced a positive on protein and a negative on long-context MBPP:
+  - `protein_ss_seed235_discovery` / `scalar_l8_train1e4` med **`+1.33pp`**
+  - `mbpp_longctx_seed86_repair` / `scalar_l8_sched_cos` med **`-1.46pp`** (flagged)
+- `round457` exposed high-variance ARC behavior:
+  - `arc_mc_seed167_discovery` quick all **`+4.17pp`** but med **`-12.50pp`**
+  - `protein_ss_seed236_discovery` best quick **`+0.00pp`**, med skipped
+- Current live run has moved to `round458` (`mbpp_seed129_headprobe`, `wiki_seed36_discovery`) under `ruthless_v6`.
 
-### Complete Good/Bad Audit (round77-569, detailed)
+### BFS-First Switch (2026-03-02, Round459+)
 
-This section is the full consolidated梳理 of good and bad outcomes from the fastdiscover line.
+- Per request, switched from repeated high-ROI lanes to breadth-first exploration first.
+- Added queue profile `bfs_v7` in `scripts/rebuild_fastloop_queues_broad.py`:
+  - search mix: `70_new_30_anchor_bfs_v7`
+  - cycle covers all active tasks in rotation:
+    - `arc_mc`, `mbpp`, `protein_ss`, `squad`, `wiki`, `hotpot`, `mbpp_longctx`, `protein_contact`
+- Rebuilt and deployed BFS queues for `round457-640`.
+- Hard cutover executed:
+  - stopped old `457-464` runner
+  - relaunched from `round459` with policy:
+    - `--queue results/_search_queue_round457_464_fastloop.json`
+    - `--round_from 459 --round_to 464`
+    - `--policy results/_codex53_team_policy.json`
+- Current BFS round sequence (`459-464`) is:
+  - `459: wiki + hotpot`
+  - `460: mbpp_longctx + protein_contact`
+  - `461: arc_mc + squad`
+  - `462: protein_ss + mbpp`
+  - `463: wiki + mbpp_longctx`
+  - `464: hotpot + protein_contact`
 
-Data scope:
-- parsed all `results/_round*_fastdiscover_records.jsonl` in round range `77-569`
-- files parsed: `259`
-- quick rows: `495`
-- med rows: `237`
-- quick prune decisions: `477`
-- med skip decisions: `253`
+### NT + SAT/TSP Exploratory Update (2026-03-03, Round701-708)
 
-Full ledgers (all entries, not sampled):
-- med ledger (all good/bad med rows): `results/_audit_round77_569_med_ledger.csv`
-- quick ledger (all good/bad quick rows): `results/_audit_round77_569_quick_ledger.csv`
-- per-task quick/med joined table: `results/_audit_round77_569_task_combo.csv`
-- analysis report: `results/_audit_round77_569_analysis.md`
+- Added new task adapters:
+  - `scripts/train_nt_seqcls_sft.py` for Nucleotide Transformer downstream tasks (`InstaDeepAI/nucleotide_transformer_downstream_tasks_revised`)
+  - `scripts/train_np_sat_tsp_sft.py` for SAT/TSP probes (`sat3`, `tsp_mask`)
+- Added queues:
+  - `results/_search_queue_round701_704_nt_bfs.json`
+  - `results/_search_queue_round705_708_sat_tsp.json`
 
-Global metrics:
-- quick mean/median: `+1.48pp / +0.76pp`
-- quick positive rate: `63.0%`
-- med mean/median: `+1.74pp / +1.19pp`
-- med positive rate: `69.6%`
-- all-time best med: `round157 arc_mc_seed13_discovery +20.83pp`
-- all-time worst med: `round457 arc_mc_seed167_discovery -12.50pp`
+Round outcomes:
+- `round701` (NT seed0 start):
+  - `nt_splice_sites_all_seed0`: quick best **`+0.00pp`**, med skipped
+  - `nt_enhancers_types_seed0`: baseline failed (initial prompt-length gate too strict), fixed in later queue patch
+- `round702` (NT seed0 continue):
+  - `nt_h3k4me3_seed0`: quick baseline hit **`100.00%`**, all FS variants `<= +0.00pp`, med skipped
+  - `nt_promoter_all_seed0`: quick best **`+5.56pp`**, but med collapsed to **`+0.00pp`**
+- `round705` (SAT/TSP seed0):
+  - `sat3_seed0_discovery`: quick best **`+0.00pp`**, med skipped
+  - `tsp_mask_seed0_discovery`: med **`+4.17pp`** (FS `25.00%` vs baseline `20.83%`)
+- `round706` (SAT/TSP seed1):
+  - `sat3_seed1_discovery`: quick `+12.50pp`, med **`+0.00pp`**
+  - `tsp_mask_seed1_discovery`: quick best **`+0.00pp`**, med skipped
+- `round707` (anchor seed2):
+  - `sat3_seed2_anchor`: quick best **`+0.00pp`**, med skipped
+  - `tsp_mask_seed2_anchor`: quick best **`+0.00pp`**, med skipped
+- `round708` (`q_first` controls):
+  - `sat3_seed0_qfirst_control`: quick `+18.75pp`, med **`+0.00pp`**
+  - `tsp_mask_seed0_qfirst_control`: quick best **`+0.00pp`**, med skipped
 
-Family-level performance:
+Current takeaways:
+- NT line currently shows strong ceiling/instability effects (not a stable positive branch).
+- SAT line shows quick gains but does not transfer to med under current recipe.
+- TSP line produced one meaningful med gain (`+4.17pp`, seed0) but has not yet shown cross-seed stability.
+- Next high-ROI follow-up is TSP-focused stabilization (same task, tighter recipe sweep) rather than broad SAT expansion.
 
-| Family | Quick n | Quick mean(pp) | Quick pos% | Med n | Med mean(pp) | Med pos% |
-|---|---:|---:|---:|---:|---:|---:|
-| arc_mc | 90 | +2.73 | 52.2% | 47 | +3.72 | 55.3% |
-| hotpot | 60 | +1.32 | 63.3% | 30 | +0.86 | 73.3% |
-| mbpp | 85 | +1.02 | 77.6% | 46 | +0.38 | 63.0% |
-| mbpp_longctx | 40 | +2.18 | 77.5% | 25 | +1.32 | 52.0% |
-| protein_ss | 114 | +1.58 | 66.7% | 60 | +2.40 | 88.3% |
-| squad | 31 | +0.57 | 74.2% | 10 | +0.45 | 80.0% |
-| protein_contact | 32 | +0.00 | 0.0% | 0 | +0.00 | 0.0% |
+### TSP Stabilization Sweep (2026-03-03, Round709-710)
 
-Top positive med runs (selected):
-- round157 `arc_mc_seed13_discovery` / `scalar_l8_train8e5`: `+20.83pp`
-- round163 `arc_mc_seed16_discovery` / `scalar_l8_sched_cos`: `+16.67pp`
-- round136 `arc_mc_seed3_discovery` / `scalar_l8_sched_cos`: `+12.50pp`
-- round405 `arc_mc_seed115_discovery` / `scalar_l8_train1e4`: `+12.50pp`
-- round417 `arc_mc_seed120_discovery` / `scalar_l8_sched_cos`: `+12.50pp`
-- round222 `mbpp_longctx_seed13_repair` / `scalar_l8_train8e5`: `+10.00pp`
-- round534 `mbpp_longctx_seed106_repair` / `head_l8`: `+8.69pp`
-- round557 `arc_mc_seed205_discovery` / `scalar_l8_train8e5`: `+8.33pp`
-- round569 `arc_mc_seed211_repro` / `scalar_l8_train1e4`: `+8.33pp`
-- round528 `protein_ss_seed261_discovery` / `scalar_l8_sched_cos`: `+8.14pp`
+- Added queue:
+  - `results/_search_queue_round709_710_tsp_targeted.json`
+- Purpose:
+  - verify whether the earlier `tsp_mask` positive (`+4.17pp`) can be stabilized across seeds,
+  - test `head_l8/head_l10` against scalar baseline under larger train/val budget.
 
-Top negative med runs (selected):
-- round457 `arc_mc_seed167_discovery` / `scalar_l8_train1e4`: `-12.50pp`
-- round116 `mbpp_longctx_seed0_repair` / `scalar_l8_train1e4`: `-6.45pp`
-- round172 `mbpp_seed25_anchor` / `scalar_l8_train8e5`: `-4.68pp`
-- round197 `arc_mc_seed33_discovery` / `scalar_l8_sched_cos`: `-4.17pp`
-- round513 `arc_mc_seed187_discovery` / `scalar_l8_train1e4`: `-4.17pp`
-- round189 `arc_mc_seed29_discovery` / `scalar_l8_train1e4`: `-4.17pp`
-- round502 `mbpp_longctx_seed98_repair` / `scalar_l8_train1e4`: `-3.89pp`
-- round517 `mbpp_seed145_anchor` / `scalar_l8_train1e4`: `-3.28pp`
-- round91 `hotpot_seed2_discovery` / `scalar_l8_train8e5`: `-2.74pp`
-- round568 `protein_ss_seed279_discovery` / `head_l8`: `-2.11pp`
+Results:
+- `round709`:
+  - `tsp_mask_seed0_targeted`: quick all candidates **`-6.25pp`** (all pruned)
+  - `tsp_mask_seed1_targeted`: quick best `+6.25pp`, but med **`+0.00pp`**
+- `round710`:
+  - `tsp_mask_seed2_targeted_anchor`: quick best **`+0.00pp`**, med skipped
+  - `tsp_mask_seed0_qfirst_targeted`: quick all candidates **`-6.25pp`** (all pruned)
 
-Core failure mode analysis:
-- high quick does not guarantee med positive; strong quick->med reversals occurred repeatedly.
-- representative reversal: `round457 arc_mc_seed167_discovery` quick `+4.17pp` -> med `-12.50pp`.
-- longctx variance is real: multiple runs with quick `+3pp~+5pp` later drop to near-zero or negative med.
+Conclusion:
+- Current TSP gain is not yet stable under seed/control sweeps.
+- `head` variants did not rescue stability in this pass.
+- Keep `tsp_mask` as a tentative candidate task, but do not claim robust FS gain yet.
 
-Execution decisions from this audit:
-- keep as core lanes: `arc_mc`, `protein_ss`, `mbpp`.
-- conditional keep: `mbpp_longctx` (only under stricter med gate / confirmation due variance).
-- prune from main line: `protein_contact` (quick flat, med coverage zero).
-- gate recommendation: keep strict policy (`promote >= +1.0pp`, `prune < -0.4pp`) for single-GPU ROI.
+### Fail-Backup Cut (2026-03-04)
+
+- Per stability policy, unstable experiment families were removed from active search paths and archived:
+  - unstable: `nt / sat / tsp`
+  - stable whitelist kept active: `protein_ss / mbpp / squad / punc`
+- Archived location:
+  - `fail-backup/scripts/`
+  - `fail-backup/results/`
+  - `fail-backup/runs/`
+  - manifest: `fail-backup/manifests/ARCHIVE_NOTES.md`
+- This cut includes:
+  - scripts: `train_nt_seqcls_sft.py`, `train_np_sat_tsp_sft.py`
+  - queues: `_search_queue_round701_704_nt_bfs.json`, `_search_queue_round705_708_sat_tsp.json`, `_search_queue_round709_710_tsp_targeted.json`
+  - run artifacts: `round701/702/705/706/707/708/709/710` summaries + records

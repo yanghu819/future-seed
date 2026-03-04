@@ -1,0 +1,26 @@
+================================================================================================================
+Round706 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[sat3_seed1_discovery]
+  quick baseline: 56.25%
+    scalar_l8_train1e4           d_acc=+12.50pp acc=68.75%
+    scalar_l8_train8e5           d_acc=+12.50pp acc=68.75%
+    scalar_l8_sched_cos          d_acc=-6.25pp acc=50.00%
+  med:
+    baseline                     acc=70.83%
+    scalar_l8_train1e4           d_acc_vs_med=+0.00pp acc=70.83%
+  pruned:
+    scalar_l8_sched_cos          quick_drop -6.25pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[tsp_mask_seed1_discovery]
+  quick baseline: 25.00%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=25.00%
+    scalar_l8_train8e5           d_acc=+0.00pp acc=25.00%
+    scalar_l8_sched_cos          d_acc=+0.00pp acc=25.00%
+  med skipped: best_quick scalar_l8_train1e4 +0.00pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  sat3_seed1_discovery             stage=med   cfg=scalar_l8_train1e4       d_acc=+0.00pp
+  tsp_mask_seed1_discovery         stage=quick cfg=scalar_l8_train1e4       d_acc=+0.00pp

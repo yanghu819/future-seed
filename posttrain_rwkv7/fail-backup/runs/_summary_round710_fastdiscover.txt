@@ -1,0 +1,29 @@
+================================================================================================================
+Round710 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[tsp_mask_seed0_qfirst_targeted]
+  quick baseline: 25.00%
+    scalar_l8_train1e4           d_acc=-6.25pp acc=18.75%
+    head_l8                      d_acc=-6.25pp acc=18.75%
+    head_l10                     d_acc=-6.25pp acc=18.75%
+  med skipped: best_quick scalar_l8_train1e4 -6.25pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -6.25pp < -0.50pp
+    head_l8                      quick_drop -6.25pp < -0.50pp
+    head_l10                     quick_drop -6.25pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[tsp_mask_seed2_targeted_anchor]
+  quick baseline: 25.00%
+    head_l8                      d_acc=+0.00pp acc=25.00%
+    scalar_l8_train1e4           d_acc=-6.25pp acc=18.75%
+    head_l10                     d_acc=-6.25pp acc=18.75%
+  med skipped: best_quick head_l8 +0.00pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train1e4           quick_drop -6.25pp < -0.50pp
+    head_l10                     quick_drop -6.25pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  tsp_mask_seed2_targeted_anchor   stage=quick cfg=head_l8                  d_acc=+0.00pp
+  tsp_mask_seed0_qfirst_targeted   stage=quick cfg=scalar_l8_train1e4       d_acc=-6.25pp

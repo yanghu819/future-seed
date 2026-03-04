@@ -1,0 +1,589 @@
+{
+  "strategy": {
+    "search_mix": "70_new_30_anchor",
+    "quick_promote_pp": 0.8,
+    "quick_prune_pp": -0.5,
+    "strong_negative_quick_pp": -1.0,
+    "strong_negative_med_pp": -0.5,
+    "cooldown_rounds": 8,
+    "useful_rule": "single_positive_med"
+  },
+  "rounds": [
+    {
+      "round": 701,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "nt_splice_sites_all_seed0",
+          "seed": 0,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "splice_sites_all",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "64",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "nt_enhancers_types_seed0",
+          "seed": 0,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "enhancers_types",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "64",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 702,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "nt_h3k4me3_seed0",
+          "seed": 0,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "H3K4me3",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "2400",
+            "--n_val", "600",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "64",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "nt_promoter_all_seed0",
+          "seed": 0,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "promoter_all",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "48",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "6"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 703,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "nt_h3k27ac_seed0",
+          "seed": 0,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "H3K27ac",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "64",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "nt_splice_sites_donors_seed0",
+          "seed": 0,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "splice_sites_donors",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "64",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 704,
+      "novelty_tier": "anchor",
+      "tasks": [
+        {
+          "name": "nt_splice_sites_all_seed1_anchor",
+          "seed": 1,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "splice_sites_all",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "64",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "nt_promoter_all_seed1_anchor",
+          "seed": 1,
+          "trainer": "train_nt_seqcls_sft.py",
+          "ds": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds", "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
+            "--task_name", "promoter_all",
+            "--train_split", "train",
+            "--val_split", "test",
+            "--n_train", "3200",
+            "--n_val", "800",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "48",
+            "--min_seq_len", "200",
+            "--max_seq_len", "1200",
+            "--bsz", "6"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

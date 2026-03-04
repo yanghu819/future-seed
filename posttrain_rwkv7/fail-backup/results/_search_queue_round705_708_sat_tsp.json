@@ -1,0 +1,567 @@
+{
+  "strategy": {
+    "search_mix": "70_new_30_anchor",
+    "quick_promote_pp": 0.8,
+    "quick_prune_pp": -0.5,
+    "strong_negative_quick_pp": -1.0,
+    "strong_negative_med_pp": -0.5,
+    "cooldown_rounds": 8,
+    "useful_rule": "single_positive_med"
+  },
+  "rounds": [
+    {
+      "round": 705,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "sat3_seed0_discovery",
+          "seed": 0,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_sat3",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "sat3",
+            "--sat_n_vars", "12",
+            "--sat_n_clauses", "50",
+            "--sat_balance_labels",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "256",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsp_mask_seed0_discovery",
+          "seed": 0,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--tsp_n_cities", "10",
+            "--n_train", "900",
+            "--n_val", "240",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 150,
+          "quick_steps": 170,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 280,
+          "med_steps": 340,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 706,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "sat3_seed1_discovery",
+          "seed": 1,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_sat3",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "sat3",
+            "--sat_n_vars", "12",
+            "--sat_n_clauses", "50",
+            "--sat_balance_labels",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "256",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsp_mask_seed1_discovery",
+          "seed": 1,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--tsp_n_cities", "10",
+            "--n_train", "900",
+            "--n_val", "240",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 150,
+          "quick_steps": 170,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 280,
+          "med_steps": 340,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 707,
+      "novelty_tier": "anchor",
+      "tasks": [
+        {
+          "name": "sat3_seed2_anchor",
+          "seed": 2,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_sat3",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "sat3",
+            "--sat_n_vars", "12",
+            "--sat_n_clauses", "50",
+            "--sat_balance_labels",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "256",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsp_mask_seed2_anchor",
+          "seed": 2,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--tsp_n_cities", "10",
+            "--n_train", "900",
+            "--n_val", "240",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 150,
+          "quick_steps": 170,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 280,
+          "med_steps": 340,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 708,
+      "novelty_tier": "new",
+      "tasks": [
+        {
+          "name": "sat3_seed0_qfirst_control",
+          "seed": 0,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_sat3",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "sat3",
+            "--q_first",
+            "--sat_n_vars", "12",
+            "--sat_n_clauses", "50",
+            "--sat_balance_labels",
+            "--n_train", "1400",
+            "--n_val", "320",
+            "--max_prompt_tokens", "1536",
+            "--min_prompt_tokens", "256",
+            "--bsz", "4"
+          ],
+          "quick_budget": 140,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tsp_mask_seed0_qfirst_control",
+          "seed": 0,
+          "trainer": "train_np_sat_tsp_sft.py",
+          "ds": "synthetic_tsp_mask",
+          "ds_cfg": "",
+          "base_args": [
+            "--task", "tsp_mask",
+            "--q_first",
+            "--tsp_n_cities", "10",
+            "--n_train", "900",
+            "--n_val", "240",
+            "--max_prompt_tokens", "1024",
+            "--min_prompt_tokens", "128",
+            "--bsz", "4"
+          ],
+          "quick_budget": 150,
+          "quick_steps": 170,
+          "quick_eval_every": 20,
+          "quick_val_batches": 4,
+          "med_budget": 280,
+          "med_steps": 340,
+          "med_eval_every": 20,
+          "med_val_batches": 6,
+          "candidates": [
+            {
+              "name": "scalar_l8_train1e4",
+              "args": [
+                "--alpha_lr", "1e-4",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr", "8e-5",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr", "0",
+                "--alpha_init", "-2",
+                "--fs_variant", "scalar",
+                "--fs_layer_start", "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip", "1.0",
+                "--fs_alpha_schedule", "cosine",
+                "--fs_alpha_min", "0.4",
+                "--fs_alpha_max", "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
