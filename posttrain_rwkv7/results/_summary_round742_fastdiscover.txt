@@ -1,0 +1,29 @@
+================================================================================================================
+Round742 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[arc_mc_seed238_qfirst_anchor]
+  quick baseline: 33.33%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=33.33%
+    scalar_l8_train8e5           d_acc=-2.08pp acc=31.25%
+    scalar_l8_sched_cos          d_acc=-4.17pp acc=29.17%
+  med skipped: best_quick scalar_l8_train1e4 +0.00pp < promote_gate +0.80pp
+  pruned:
+    scalar_l8_train8e5           quick_drop -2.08pp < -0.50pp
+    scalar_l8_sched_cos          quick_drop -4.17pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_longctx_seed20_qfirst_anchor]
+  quick baseline: 11.77%
+    scalar_l8_sched_cos          d_acc=+4.81pp acc=16.58%
+    scalar_l8_train1e4           d_acc=+1.86pp acc=13.63%
+    scalar_l8_train8e5           d_acc=-2.72pp acc=9.05%
+  med:
+    baseline                     acc=12.91%
+    scalar_l8_sched_cos          d_acc_vs_med=+1.84pp acc=14.75%
+  pruned:
+    scalar_l8_train8e5           quick_drop -2.72pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_longctx_seed20_qfirst_anchor stage=med   cfg=scalar_l8_sched_cos      d_acc=+1.84pp
+  arc_mc_seed238_qfirst_anchor     stage=quick cfg=scalar_l8_train1e4       d_acc=+0.00pp

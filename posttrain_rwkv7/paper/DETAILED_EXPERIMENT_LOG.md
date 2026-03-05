@@ -2096,3 +2096,76 @@ Major positive findings (med vs baseline):
 
 Conclusion:
 - The search window produced a new strongest real-task gain (`arc_mc_seed13`), while also yielding multiple independent positive tasks (`protein_ss`, `hotpot`, `mbpp_longctx`, `mbpp`) under the same gating policy.
+
+## 2026-03-05 Round736-743 (constraint BFS, completed)
+
+Outputs:
+- `results/_summary_round736_fastdiscover.txt` ... `results/_summary_round743_fastdiscover.txt`
+- `results/_round736_fastdiscover_records.jsonl` ... `results/_round743_fastdiscover_records.jsonl`
+- queue/policy:
+  - `results/_search_queue_round735_742_constraint_bfs.json`
+  - `results/_search_queue_round743_750_constraint_bfs_v2.json`
+  - `results/_codex53_team_policy_strict_08_05.json`
+
+Policy:
+- quick promote: `+0.80pp`
+- quick prune: `< -0.50pp`
+- cooldown: `8` rounds
+
+Round-by-round highlights:
+
+1) Round736 (`sat3_seed1_balanced`, `tsp_mask_seed1_balanced`)
+- `sat3`: quick best `+25.00pp`, but med `+0.00pp` (no transfer).
+- `tsp_mask`: quick all `+0.00pp`; med skipped.
+
+2) Round737 (`zebra_seed2_bfs`, `countdown_seed2_bfs`)
+- `zebra`: quick all `+0.00pp`; med skipped.
+- `countdown`: baseline failed due sample-build starvation (`Only built 0 Countdown examples`).
+
+3) Round738 (`graph_color_seed3_qfirst`, `nqueens_seed3_qfirst`)
+- `graph_color`: med **`+4.17pp`**.
+- `nqueens`: quick strong (`+25.00pp`) but med **`-16.67pp`**.
+
+4) Round739 (`arc_mc_seed237_anchor`, `mbpp_longctx_seed19_anchor`)
+- `arc_mc`: no promote (`+0.00pp` best quick), med skipped.
+- `mbpp_longctx`: med **`-3.22pp`**.
+
+5) Round740 (`punc_seed38_anchor`, `squad_seed11_anchor`)
+- `punc`: med **`+0.41pp`**.
+- `squad`: quick non-positive, med skipped.
+
+6) Round741 (`graph_color_seed5_dense`, `nqueens_seed5_hard`)
+- `graph_color`: med **`+4.17pp`**.
+- `nqueens`: med **`-4.17pp`**.
+
+7) Round742 (`arc_mc_seed238_qfirst_anchor`, `mbpp_longctx_seed20_qfirst_anchor`)
+- `arc_mc`: quick non-positive, med skipped.
+- `mbpp_longctx`: med **`+1.84pp`**.
+
+8) Round743 (`graph_color_seed6_phase`, `countdown_seed3_retry`)
+- `graph_color`: quick all `+0.00pp`, med skipped.
+- `countdown` (after fix): quick best `+18.75pp`, but med **`-4.17pp`**.
+
+Engineering fixes merged during this window:
+- `scripts/train_np_sat_tsp_probe_sft.py`
+  - added `graph_color` and `nqueens` tasks.
+  - fixed prompt-length starvation for `nqueens` and `countdown` via deterministic prompt recap expansion.
+- `scripts/train_sft.py`
+  - added `--train_data_seed` / `--val_data_seed` orchestrator-compatible arguments.
+
+Window conclusion:
+- `graph_color` is currently the most useful new constraint task (two med-positive rounds at `+4.17pp`).
+- `nqueens` and `countdown` show quick gains but unstable/negative med transfer.
+- `mbpp_longctx` regained a positive branch in q-first anchor (`+1.84pp`), but remains variance-sensitive.
+
+## 2026-03-05 Round744 (in progress)
+
+Current output:
+- `results/_round744_fastdiscover_records.jsonl` (live, partial)
+- launcher: `results/_launcher_round743_750_constraint_bfs_v2.log`
+
+Partial status:
+- `graph_color_seed7_qfirst_phase` finished with med-positive result:
+  - baseline med `91.67%`
+  - FS med (`scalar_l8_train8e5`) `95.83%` (**`+4.17pp`**)
+- second task `tsp_mask_seed2_qfirst_retry` is still running.

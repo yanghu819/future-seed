@@ -339,6 +339,8 @@ def main():
     ap.add_argument("--eval_every", type=int, default=200)
     ap.add_argument("--val_batches", type=int, default=4, help="Number of validation batches per eval.")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--train_data_seed", type=int, default=None)
+    ap.add_argument("--val_data_seed", type=int, default=1234)
     ap.add_argument("--seq_len", type=int, default=256)
     ap.add_argument("--bsz", type=int, default=8)
     ap.add_argument("--model_lr", type=float, default=1e-4)
@@ -377,6 +379,8 @@ def main():
     args = ap.parse_args()
 
     assert args.seq_len % 16 == 0
+    if args.train_data_seed is not None:
+        args.seed = int(args.train_data_seed)
 
     rng = random.Random(args.seed)
 
@@ -421,7 +425,7 @@ def main():
     step = 0
 
     # small fixed val set
-    val_rng = random.Random(1234)
+    val_rng = random.Random(int(args.val_data_seed))
 
     while True:
         now = time.time()

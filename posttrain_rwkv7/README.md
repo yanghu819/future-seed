@@ -11,21 +11,6 @@ This folder is a backup snapshot of the current Future-Seed post-training work o
   - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
   - `paper/FS_POSTTRAIN_PAPER_DRAFT.md`: current paper draft synced with latest experiments.
 
-## Unified Effective Results (All Rounds)
-
-If you want one place that unifies all effective experiments from start to latest round, read:
-
-- `results/UNIFIED_EFFECTIVE_EXPERIMENTS.md`
-- `results/_unified_effective_med_runs.csv` (effective-only table)
-- `results/_unified_med_comparisons.csv` (full comparable table)
-
-Regenerate these files:
-
-```bash
-cd posttrain_rwkv7
-./scripts/build_unified_effective_report.py
-```
-
 ## Key Findings (latest snapshot)
 
 - ARC-Challenge options-first: stable positive gain with FS (`_summary_arc_optionsfirst_stabilized_r2.txt`), but schedule variant was weaker (`_summary_arc_optionsfirst_stabilized_r4_sched_linear.txt`).
@@ -1571,3 +1556,168 @@ Conclusion:
   - scripts: `train_nt_seqcls_sft.py`, `train_np_sat_tsp_sft.py`
   - queues: `_search_queue_round701_704_nt_bfs.json`, `_search_queue_round705_708_sat_tsp.json`, `_search_queue_round709_710_tsp_targeted.json`
   - run artifacts: `round701/702/705/706/707/708/709/710` summaries + records
+
+### Bi-Encoder Fastdiscover Burst (2026-03-04, Round711-714)
+
+Scope (new tasks only):
+- `squad` (extractive QA)
+- `glue/mrpc` (sentence-pair classification)
+- `glue/stsb` (semantic similarity binning)
+- `google/code_x_glue_cc_defect_detection` (code understanding)
+
+Execution policy:
+- quick promote: `+0.80pp`
+- quick prune: `< -0.50pp`
+- useful task rule: `med > baseline` (pp)
+
+Engineering updates for this burst:
+- Added `scripts/train_hf_pair_cls_sft.py` (generic pair/text classification probe).
+- Updated `scripts/train_hotpot_longctx_sft.py` to support SQuAD (`answers.text`) + empty `ds_cfg`.
+- Added queue/policy:
+  - `results/_search_queue_round711_714_bi_encoder.json`
+  - `results/_policy_round711_bi.json`
+
+Round highlights:
+- `round711`
+  - `mrpc_seed0_bicls`: quick best `+0.00pp`, med skipped.
+  - `squad_seed0_biqa`: first pass failed at sample build gate (`min_prompt_tokens` too strict), then fixed in later rounds.
+- `round712`
+  - `stsb_seed0_bisim`: quick best `+4.17pp`, but med `+0.00pp`.
+  - `code_defect_seed0_bicode`: quick best `+0.00pp`, med skipped.
+- `round713`
+  - `squad_seed1_biqa`:
+    - quick best `+10.32pp` (`scalar_l8_train8e5`)
+    - med **`+0.73pp`** (`10.86%` vs baseline `10.13%`)
+  - `mrpc_seed1_bicls`: quick best `+0.00pp`; strong negatives pruned (`-4.17pp`, `-12.50pp`); med skipped.
+- `round714`
+  - `stsb_seed1_bisim`: quick best `+8.33pp`, but med `+0.00pp`.
+  - `code_defect_seed1_bicode`: quick best `+0.00pp`, med skipped.
+
+Current takeaway:
+- In this bi-encoder burst, only `squad_seed1_biqa` converted to a positive med gain (**`+0.73pp`**).
+- `stsb` shows consistent quick gains but fails to hold advantage at med.
+- `mrpc` and `code_defect` remain flat or negative under current FS settings.
+
+### Constraint BFS Quick-Attack (2026-03-05, Round735-742, running)
+
+Goal:
+- switch to breadth-first constraint tasks quickly, keep strict quick->med gates, and avoid repeated low-yield confirmations.
+
+Code/infra updates applied:
+- `scripts/train_np_sat_tsp_probe_sft.py`
+  - added new tasks: `graph_color` (k-colorability Y/N), `nqueens` (partial completion Y/N)
+  - extended parser/cache/build dispatch for new task args and metadata
+  - hotfix: N-Queens prompt auto-recap when `min_prompt_tokens` is high (avoid sample-build starvation)
+- `scripts/train_sft.py`
+  - added orchestrator-compatible args: `--train_data_seed`, `--val_data_seed`
+  - keeps backward behavior while enabling seed-controlled data generation from fastdiscover
+- new queue: `results/_search_queue_round735_742_constraint_bfs.json`
+- strict policy file: `results/_codex53_team_policy_strict_08_05.json`
+  - quick promote `+0.80pp`
+  - quick prune `< -0.50pp`
+  - cooldown `8` rounds
+
+Live run:
+- launcher: `runs/_launcher_round735_742_constraint_bfs.log`
+- records:
+  - `runs/_round735_fastdiscover_records.jsonl` (completed)
+  - `runs/_round736_fastdiscover_records.jsonl` (in progress)
+
+Round735 outcomes:
+- `graph_color_seed0_bfs`
+  - quick baseline: `100.00%`
+  - FS quick candidates: `81.25%`, `75.00%`, `81.25%` (all heavily negative, pruned)
+  - med skipped by gate
+- `nqueens_seed0_bfs`
+  - baseline failed in first pass due prompt-length gate starvation (`Only built 0 NQueens examples`)
+  - fix applied immediately in trainer (prompt recap expansion) for subsequent N-Queens rounds
+
+Round736 (partial while running):
+- `sat3_seed1_balanced`
+  - quick best: `+25.00pp` (`87.50%` vs baseline `62.50%`)
+  - med: `+0.00pp` (no transfer)
+- `tsp_mask_seed1_balanced`
+  - quick currently flat (`+0.00pp` best so far)
+
+Current interpretation:
+- SAT keeps showing a recurring pattern: strong quick uplift, weak med transfer.
+- Graph-color baseline can saturate under current setting (needs harder instance regime in next queue revision).
+- N-Queens pipeline is now unblocked after prompt-length hotfix; next evidence comes from upcoming rounds (`738/741`).
+
+### Constraint BFS v2 Continuation (2026-03-05, Round743-750, running)
+
+Completed outcomes from `round736-742`:
+- Positive med gains:
+  - `graph_color_seed3_qfirst`: **`+4.17pp`**
+  - `graph_color_seed5_dense`: **`+4.17pp`**
+  - `mbpp_longctx_seed20_qfirst_anchor`: **`+1.84pp`**
+  - `punc_seed38_anchor`: **`+0.41pp`**
+- Negative/unstable:
+  - `nqueens_seed3_qfirst`: `-16.67pp` med
+  - `nqueens_seed5_hard`: `-4.17pp` med
+  - `mbpp_longctx_seed19_anchor`: `-3.22pp` med
+- Flat lanes:
+  - `sat3_seed1_balanced`: quick `+25.00pp` but med `+0.00pp`
+  - `tsp_mask_seed1_balanced`, `zebra_seed2_bfs`, `arc_mc_seed238_qfirst_anchor`: no med conversion
+- Engineering fix:
+  - `countdown` build starvation fixed by prompt-recap expansion in `train_np_sat_tsp_probe_sft.py` (same class fix as N-Queens).
+
+New queue launched:
+- `results/_search_queue_round743_750_constraint_bfs_v2.json`
+- launcher: `runs/_launcher_round743_750_constraint_bfs_v2.log`
+- policy unchanged: quick promote `+0.80pp`, quick prune `< -0.50pp`, cooldown `8`.
+
+Live signal (`round743` in progress):
+- `graph_color_seed6_phase` quick baseline `87.50%`
+- FS quick candidates currently flat (`+0.00pp` best so far)
+- next task in round: `countdown_seed3_retry` (post-fix retry)
+
+### GitHub Full Sync (2026-03-05, Round736-744)
+
+This section supersedes earlier partial notes and lists all newly synced artifacts in this push.
+
+Synced artifacts:
+- summaries: `results/_summary_round736_fastdiscover.txt` ... `results/_summary_round743_fastdiscover.txt`
+- records: `results/_round736_fastdiscover_records.jsonl` ... `results/_round744_fastdiscover_records.jsonl`
+- queues/policy:
+  - `results/_search_queue_round735_742_constraint_bfs.json`
+  - `results/_search_queue_round743_750_constraint_bfs_v2.json`
+  - `results/_codex53_team_policy_strict_08_05.json`
+- launcher log:
+  - `results/_launcher_round743_750_constraint_bfs_v2.log`
+
+Completed round outcomes:
+- round736:
+  - `sat3_seed1_balanced`: quick `+25.00pp`, med `+0.00pp`
+  - `tsp_mask_seed1_balanced`: quick `+0.00pp` best, med skipped
+- round737:
+  - `zebra_seed2_bfs`: quick ties baseline, med skipped
+  - `countdown_seed2_bfs`: baseline failed (build starvation)
+- round738:
+  - `graph_color_seed3_qfirst`: med **`+4.17pp`**
+  - `nqueens_seed3_qfirst`: med **`-16.67pp`**
+- round739:
+  - `arc_mc_seed237_anchor`: no promote
+  - `mbpp_longctx_seed19_anchor`: med **`-3.22pp`**
+- round740:
+  - `punc_seed38_anchor`: med **`+0.41pp`**
+  - `squad_seed11_anchor`: no promote
+- round741:
+  - `graph_color_seed5_dense`: med **`+4.17pp`**
+  - `nqueens_seed5_hard`: med **`-4.17pp`**
+- round742:
+  - `arc_mc_seed238_qfirst_anchor`: no promote
+  - `mbpp_longctx_seed20_qfirst_anchor`: med **`+1.84pp`**
+- round743:
+  - `graph_color_seed6_phase`: quick all `+0.00pp`, med skipped
+  - `countdown_seed3_retry`: quick `+18.75pp` best, med **`-4.17pp`**
+
+In-progress (round744, partial from records):
+- `graph_color_seed7_qfirst_phase` already med-positive:
+  - baseline med `91.67%`
+  - FS med (`scalar_l8_train8e5`) `95.83%` (**`+4.17pp`**)
+- `tsp_mask_seed2_qfirst_retry` is still running at sync time.
+
+Current practical takeaway:
+- `graph_color` has become the strongest new constraint task in this window (multiple med-positive confirmations at `+4.17pp`).
+- `nqueens` and `countdown` currently show quick-stage uplift but unstable or negative med transfer.

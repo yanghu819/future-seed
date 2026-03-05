@@ -109,3 +109,24 @@ Weights:
 ## Negative / Lessons
 - `FS_MASK_ONLY=1` (train only seed-alpha + mask embedding) fails on Sudoku (solve≈0).
 - `SUDOKU_MASK_MODE=prefix` is unstable in current one-shot argmax infill setting (solve≈0).
+
+## Post-Training Update (2026-03-05, round736-744)
+
+Full details are in:
+- `posttrain_rwkv7/README.md`
+- `posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`
+- `posttrain_rwkv7/results/_summary_round736_fastdiscover.txt` ... `_summary_round743_fastdiscover.txt`
+- `posttrain_rwkv7/results/_round736_fastdiscover_records.jsonl` ... `_round744_fastdiscover_records.jsonl`
+
+Latest high-signal med deltas (FS vs baseline, pp):
+- `graph_color_seed3_qfirst`: `+4.17pp`
+- `graph_color_seed5_dense`: `+4.17pp`
+- `graph_color_seed7_qfirst_phase` (round744 partial): `+4.17pp`
+- `mbpp_longctx_seed20_qfirst_anchor`: `+1.84pp`
+- `punc_seed38_anchor`: `+0.41pp`
+
+Key negatives / prune evidence:
+- `nqueens_seed3_qfirst`: `-16.67pp` med after strong quick gain.
+- `nqueens_seed5_hard`: `-4.17pp` med.
+- `countdown_seed3_retry`: quick `+18.75pp` but med `-4.17pp` (no transfer).
+- `arc_mc_seed238_qfirst_anchor`: quick non-positive; med skipped.
