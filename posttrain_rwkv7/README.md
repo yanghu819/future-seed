@@ -1721,3 +1721,34 @@ In-progress (round744, partial from records):
 Current practical takeaway:
 - `graph_color` has become the strongest new constraint task in this window (multiple med-positive confirmations at `+4.17pp`).
 - `nqueens` and `countdown` currently show quick-stage uplift but unstable or negative med transfer.
+
+### Incremental Sync (2026-03-05, Round744-746)
+
+Newly synced artifacts:
+- `results/_summary_round744_fastdiscover.txt`
+- `results/_summary_round745_fastdiscover.txt`
+- `results/_round745_fastdiscover_records.jsonl`
+- `results/_round746_fastdiscover_records.jsonl` (running snapshot)
+
+Round744 (completed):
+- `graph_color_seed7_qfirst_phase`:
+  - quick best `+6.25pp`
+  - med **`+4.17pp`** (`95.83%` vs baseline `91.67%`)
+- `tsp_mask_seed2_qfirst_retry`:
+  - quick best **`-6.25pp`** (all variants negative)
+  - med skipped; all FS variants pruned
+
+Round745 (completed):
+- `graph_color_seed8_k4_dense`:
+  - quick best `+6.25pp`
+  - med **`-4.17pp`** (transfer failed)
+- `sat3_seed3_harder`:
+  - quick all `+0.00pp`
+  - med skipped
+
+Round746 (partial while running):
+- `zebra_seed4_qfirst_retry`:
+  - baseline quick `50.00%`
+  - FS quick best currently `+0.00pp` (one variant `-18.75pp` pruned)
+  - med currently skipped by gate
+- next subtask: `countdown_seed4_retry` in same round.

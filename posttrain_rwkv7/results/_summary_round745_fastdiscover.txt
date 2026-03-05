@@ -1,0 +1,24 @@
+================================================================================================================
+Round745 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[graph_color_seed8_k4_dense]
+  quick baseline: 93.75%
+    scalar_l8_train8e5           d_acc=+6.25pp acc=100.00%
+    scalar_l8_sched_cos          d_acc=+6.25pp acc=100.00%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=93.75%
+  med:
+    baseline                     acc=95.83%
+    scalar_l8_train8e5           d_acc_vs_med=-4.17pp acc=91.67%
+----------------------------------------------------------------------------------------------------------------
+[sat3_seed3_harder]
+  quick baseline: 62.50%
+    scalar_l8_train1e4           d_acc=+0.00pp acc=62.50%
+    scalar_l8_train8e5           d_acc=+0.00pp acc=62.50%
+    scalar_l8_sched_cos          d_acc=+0.00pp acc=62.50%
+  med skipped: best_quick scalar_l8_train1e4 +0.00pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  sat3_seed3_harder                stage=quick cfg=scalar_l8_train1e4       d_acc=+0.00pp
+  graph_color_seed8_k4_dense       stage=med   cfg=scalar_l8_train8e5       d_acc=-4.17pp

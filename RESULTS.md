@@ -130,3 +130,10 @@ Key negatives / prune evidence:
 - `nqueens_seed5_hard`: `-4.17pp` med.
 - `countdown_seed3_retry`: quick `+18.75pp` but med `-4.17pp` (no transfer).
 - `arc_mc_seed238_qfirst_anchor`: quick non-positive; med skipped.
+
+Incremental additions (2026-03-05, round744-746):
+- `graph_color_seed7_qfirst_phase`: med **`+4.17pp`**
+- `graph_color_seed8_k4_dense`: med **`-4.17pp`** (negative transfer)
+- `tsp_mask_seed2_qfirst_retry`: quick best **`-6.25pp`**, med skipped
+- `sat3_seed3_harder`: quick ties baseline, med skipped
+- `zebra_seed4_qfirst_retry` (round746 partial): quick best `+0.00pp`, currently no promote

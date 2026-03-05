@@ -2169,3 +2169,39 @@ Partial status:
   - baseline med `91.67%`
   - FS med (`scalar_l8_train8e5`) `95.83%` (**`+4.17pp`**)
 - second task `tsp_mask_seed2_qfirst_retry` is still running.
+
+## 2026-03-05 Round744-745 (completed) + Round746 (running)
+
+Outputs:
+- `results/_summary_round744_fastdiscover.txt`
+- `results/_summary_round745_fastdiscover.txt`
+- `results/_round744_fastdiscover_records.jsonl`
+- `results/_round745_fastdiscover_records.jsonl`
+- `results/_round746_fastdiscover_records.jsonl` (partial snapshot)
+
+Round744:
+- `graph_color_seed7_qfirst_phase`
+  - quick best `+6.25pp`
+  - med **`+4.17pp`** (`95.83%` vs baseline `91.67%`)
+- `tsp_mask_seed2_qfirst_retry`
+  - quick best **`-6.25pp`**
+  - med skipped; all FS variants quick-pruned
+
+Round745:
+- `graph_color_seed8_k4_dense`
+  - quick best `+6.25pp`
+  - med **`-4.17pp`** (negative transfer)
+- `sat3_seed3_harder`
+  - quick all `+0.00pp`
+  - med skipped
+
+Round746 (partial):
+- `zebra_seed4_qfirst_retry`
+  - baseline quick `50.00%`
+  - FS quick best currently `+0.00pp`
+  - one variant pruned at `-18.75pp`
+  - med currently skipped by gate
+
+Current interpretation:
+- `graph_color` remains the only consistently converting new constraint task in this window.
+- `tsp_mask/sat3/zebra` continue to show weak or non-converting behavior under current recipe.
