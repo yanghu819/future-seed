@@ -1,0 +1,28 @@
+================================================================================================================
+Round784 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[arc_mc_seed257_depthmix_qfirst]
+  quick baseline: 35.42%
+    scalar_l10_train1e4          d_acc=-2.08pp acc=33.33%
+    scalar_l8_train1e4           d_acc=-4.17pp acc=31.25%
+    scalar_l6_train1e4           d_acc=-6.25pp acc=29.17%
+  med skipped: best_quick scalar_l10_train1e4 -2.08pp < promote_gate +0.80pp
+  pruned:
+    scalar_l6_train1e4           quick_drop -6.25pp < -0.50pp
+    scalar_l8_train1e4           quick_drop -4.17pp < -0.50pp
+    scalar_l10_train1e4          quick_drop -2.08pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_longctx_seed37_depthmix_anchor]
+  quick baseline: 13.23%
+    scalar_l6_train1e4           d_acc=+5.97pp acc=19.20%
+    scalar_l10_train1e4          d_acc=+4.29pp acc=17.52%
+    scalar_l8_train1e4           d_acc=+0.56pp acc=13.79%
+  med:
+    baseline                     acc=19.08%
+    scalar_l6_train1e4           d_acc_vs_med=-1.69pp acc=17.38%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_longctx_seed37_depthmix_anchor stage=med   cfg=scalar_l6_train1e4       d_acc=-1.69pp
+  arc_mc_seed257_depthmix_qfirst   stage=quick cfg=scalar_l10_train1e4      d_acc=-2.08pp

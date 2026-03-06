@@ -1,0 +1,15 @@
+================================================================================================================
+Round801 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[arc_mc_seed271_finalconfirm]
+  quick baseline: 33.33%
+    scalar_l6_train1e4           d_acc=+2.08pp acc=35.42%
+    scalar_l10_train1e4          d_acc=+2.08pp acc=35.42%
+  med:
+    baseline                     acc=39.06%
+    scalar_l6_train1e4           d_acc_vs_med=-1.56pp acc=37.50%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  arc_mc_seed271_finalconfirm      stage=med   cfg=scalar_l6_train1e4       d_acc=-1.56pp

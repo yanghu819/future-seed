@@ -1,0 +1,12 @@
+================================================================================================================
+Round802 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[tsp_mask_seed13_finalconfirm]
+  quick baseline: 31.25%
+    scalar_l10_train1e4          d_acc=+0.00pp acc=31.25%
+  med skipped: best_quick scalar_l10_train1e4 +0.00pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  tsp_mask_seed13_finalconfirm     stage=quick cfg=scalar_l10_train1e4      d_acc=+0.00pp

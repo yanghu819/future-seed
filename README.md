@@ -1,105 +1,75 @@
-# Future-Seed (RWKV Diffusion + Post-Training)
+# Future-Seed
 
-This repository now has **two tracks**:
+This repository has two active tracks:
 
-- `rwkv-diff-future-seed/`: core Future-Seed method, toy stress tests, and prefix-infill benchmarks.
-- `posttrain_rwkv7/`: real-task post-training search (ARC / protein / MBPP / others) with full round logs.
+- `rwkv-diff-future-seed/`: core Future-Seed method, toy stress tests, and prefix-infill experiments
+- `posttrain_rwkv7/`: single-GPU post-training search on real tasks, with auditable round logs
 
-If you only remember one thing: choose one track first, then follow that track's README.
+If you are new here, choose one track first and follow that path end-to-end.
 
-## Start Here (10 minutes)
+## Current Snapshot
 
-### Path A: quick method sanity (toy tasks)
+The post-training campaign is closed through `round808`.
+
+Current judgment:
+- toy and synthetic constraint tasks clearly support Future-Seed
+- strongest repeatable real-task family under the current recipe: `protein_ss`
+- smaller positive real-task signals: `hotpot`, `mbpp_longctx`, `squad`, `punc`
+- high-upside but high-variance: `arc_mc`
+- low-ROI or negative under the current recipe: `protein_contact`, `wiki`, `hotpot_longctx`, `countdown`, `nqueens`, `zebra`, `sat3`
+
+## Start Here
+
+1. global results: [`RESULTS.md`](RESULTS.md)
+2. quick onboarding: [`GETTING_STARTED.md`](GETTING_STARTED.md)
+3. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
+4. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
+5. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+
+## Most Important Results
+
+| Bucket | Task | Best gain |
+|---|---|---:|
+| real-task, repeatable | `protein_ss` | `+8.14pp` |
+| real-task, small positive breadth signal | `hotpot` | `+4.20pp` |
+| real-task, promising but not locked | `mbpp_longctx` | `+10.00pp` |
+| real-task, high variance | `arc_mc` | `+20.83pp` |
+| diagnostic constraint task | `graph_color` | `+8.33pp` |
+| appendix-only spike | `tsp_mask` | `+25.00pp` |
+
+## Quick Paths
+
+### Path A: toy and method sanity
 
 ```bash
 bash run.sh
+bash run_qa.sh
 ```
 
-Outputs:
-- `rwkv-diff-future-seed/logs/rightcopy_base_big.log`
-- `rwkv-diff-future-seed/logs/rightcopy_future_seed_big.log`
-- `rwkv-diff-future-seed/logs/constr_base_big.log`
-- `rwkv-diff-future-seed/logs/constr_future_seed_big.log`
-
-### Path B: real-data prefix infill (WikiText / MBPP)
-
-Build byte-level bins first:
+### Path B: prefix infill on real data
 
 ```bash
 python tools/build_hf_bins.py --dataset wikitext --config wikitext-2-raw-v1 \
   --train_split train --val_split validation --fields text --out_dir data/wikitext2_bytes
-
 python tools/build_hf_bins.py --dataset mbpp \
   --train_split train --val_split test --fields code --out_dir data/mbpp_bytes
-```
-
-Run:
-
-```bash
 bash rwkv-diff-future-seed/run_wikitext_prefix.sh /abs/path/to/data/wikitext2_bytes
 bash rwkv-diff-future-seed/run_mbpp_prefix.sh /abs/path/to/data/mbpp_bytes
 ```
 
-Outputs:
-- `rwkv-diff-future-seed/exp/wikitext2_prefix_*.log`
-- `rwkv-diff-future-seed/exp/mbpp_prefix_*.log`
-
-### Path C: post-training search (ARC/protein/MBPP)
+### Path C: post-training runner sanity
 
 ```bash
 cd posttrain_rwkv7
-bash scripts/repro_doctor.sh
-bash scripts/run_repropack_569_574.sh
-bash scripts/sync_runs_to_results.sh --round-from 569 --round-to 574
+python3 scripts/run_round77_82_fastdiscover.py --self_test
+python3 scripts/run_round77_82_fastdiscover.py \
+  --queue results/_search_queue_round805_808_breadth_roi.json \
+  --round_from 805 --round_to 808 --dry_run
 ```
 
-Then read:
-- `posttrain_rwkv7/README.md`
-- `posttrain_rwkv7/results/README_RESULTS.md`
-- `posttrain_rwkv7/scripts/README_SCRIPTS.md`
+## Repository Map
 
-## Quick Navigation
-
-- project onboarding: `GETTING_STARTED.md`
-- task-to-script map: `TASK_INDEX.md`
-- main method results: `RESULTS.md`
-- paper/report assets: `paper/`
-- implementation notes: `future-seed.md`
-
-## Core Idea
-
-Future-Seed passes previous layer final state `s_T` to next layer initial state `s_0`.
-
-```text
-baseline:    s=0              ; for t: s=f(s, x[t])
-future-seed: s=prev_layer_s_T ; for t: s=f(s, x[t])
-```
-
-In non-causal diffusion-style denoising, this acts like cross-depth re-reading and strengthens future-context usage.
-
-## Current Snapshot (high level)
-
-From `RESULTS.md` and `posttrain_rwkv7/README.md`:
-
-- toy stress tasks show clear gains on future-aware in-place repair settings.
-- prefix-infill scripts exist for real text/code datasets:
-  - `rwkv-diff-future-seed/run_wikitext_prefix.sh`
-  - `rwkv-diff-future-seed/run_mbpp_prefix.sh`
-- post-training track contains large-scale ARC/protein/MBPP search history and auditable ledgers.
-
-## Where specific scripts live
-
-- WikiText/MBPP prefix infill scripts: `rwkv-diff-future-seed/`
-- ARC/protein/MBPP post-training scripts: `posttrain_rwkv7/scripts/`
-- top-level helper entrypoints: `run.sh`, `run_qa.sh`
-
-This split is intentional: core-method experiments and post-training campaigns are kept separate to keep each workflow reproducible.
-
-## Practical Principles Used For This Repo Layout
-
-Inspired by the "andrej-karpathy-skills" style:
-
-- goal-first navigation: pick task goal, then one command path.
-- simple defaults: finite packets and explicit outputs.
-- verify before scale: doctor/self-test before long runs.
-- keep artifacts auditable: command -> output file path is explicit.
+- [`rwkv-diff-future-seed/`](rwkv-diff-future-seed): method code and toy experiments
+- [`posttrain_rwkv7/`](posttrain_rwkv7): post-training experiments, logs, and queues
+- [`RESULTS.md`](RESULTS.md): unified results page
+- [`posttrain_rwkv7/runs/`](posttrain_rwkv7/runs): synced latest summaries and raw JSONL records

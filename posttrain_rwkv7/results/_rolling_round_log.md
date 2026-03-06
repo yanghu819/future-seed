@@ -1561,3 +1561,133 @@ Window summary (round545-568):
 Latest round (568):
 - `mbpp_longctx_seed117_repair`: quick strong positive but med **`-0.02pp`**.
 - `protein_ss_seed279_discovery`: med **`-2.11pp`**.
+
+## Round711-714 Bi-Encoder Burst (2026-03-04)
+
+Best config vs baseline:
+- `round713`: `squad_seed1_biqa` / `scalar_l8_train8e5` med **`+0.73pp`** (`10.86%` vs `10.13%`).
+- `round714`: `stsb_seed1_bisim` quick peak **`+8.33pp`** (but med **`+0.00pp`**).
+- `round712`: `stsb_seed0_bisim` quick peak **`+4.17pp`** (but med **`+0.00pp`**).
+
+Failed/pruned highlights:
+- `round711`: `squad_seed0_biqa` baseline failed due sample gate (`min_prompt_tokens=640` too strict).
+- `round713`: `mrpc_seed1_bicls` pruned strong negatives (`scalar_l8_train1e4 -4.17pp`, `scalar_l8_sched_cos -12.50pp`).
+- `round712/714`: `code_defect_seed0/1_bicode` all FS candidates quick `+0.00pp`, med skipped.
+
+Current run status:
+- burst `round711-714` completed and synchronized to migration snapshot.
+- artifacts present in `runs/`:
+  - `_round711_fastdiscover_records.jsonl` ... `_round714_fastdiscover_records.jsonl`
+  - `_summary_round711_fastdiscover.txt` ... `_summary_round714_fastdiscover.txt`
+
+Next round plan:
+1. run `squad` follow-up seed check around winning config (`scalar_l8_train8e5`) to verify stability.
+2. keep `stsb` as quick-positive candidate only; deprioritize `mrpc/code_defect` under current FS recipe.
+
+## 2026-03-06 Closure Pass Started (round783-802)
+
+Goal:
+- stop broad BFS after one last high-value sweep and finish with narrow confirmation only.
+- keep the claim centered on real-task evidence instead of further toy expansion.
+
+Evidence snapshot before closure:
+- `mbpp_longctx` is the most credible real-task line so far:
+  - recent med positives include `round762 +1.90pp`, `round768 +1.81pp`, `round782 +3.09pp`
+  - variance remains real (`round750 -4.10pp`, `round779 -2.65pp`)
+- `arc_mc` remains mixed:
+  - positives at `round765 +3.12pp`, `round781 +3.12pp`
+  - negatives at `round759 -3.12pp`, `round776 -6.25pp`, `round779 -3.12pp`
+- `squad` still has one large spike (`round755 +7.31pp`) but rechecks have not held up.
+- `tsp_mask` still has one large spike (`round764 +25.00pp`) but weak follow-up conversion.
+
+Closure policy:
+1. `round783-790`: only `arc_mc + mbpp_longctx` depth-focused exploitation.
+2. `round791-798`: hybrid exploit queue (`arc`: `l6/l10/l8_train8e5`; `mbpp`: `l6/l10/sched_cos`; tiny `tsp` lane).
+3. `round799-802`: final confirmation only, then stop expansion.
+
+Current partial outcomes:
+- `round783`
+  - `arc_mc_seed256_depthmix_qfirst`: all quick variants `+0.00pp`, med skipped
+  - `mbpp_longctx_seed36_depthmix_anchor`: all FS variants quick-negative, hard-pruned
+- `round784`
+  - `arc_mc_seed257_depthmix_qfirst`: quick all negative, full prune
+  - `mbpp_longctx_seed37_depthmix_anchor`: quick strong positive but med **`-1.69pp`**
+- `round785`
+  - `arc_mc_seed258_depthmix_qfirst` / `scalar_l10_train1e4`: med **`+3.12pp`**
+  - `mbpp_longctx_seed38_depthmix_anchor` / `scalar_l6_train1e4`: med **`+5.01pp`**
+
+Decision:
+- stop spending on `graph_color / countdown / punc / broad squad` for this closure window.
+- let `arc_mc + mbpp_longctx` finish the exploit block.
+- treat `mbpp_longctx` as the primary candidate for final headline if `round799-800` confirms.
+- to shorten wall-clock closure, the queued `round791-798` hybrid block was manually canceled before launch; after `round790` the runner now jumps directly into `round799-802` final confirmation.
+
+Final closure outcomes:
+- `round786`
+  - `arc_mc_seed259_depthmix_qfirst` / `scalar_l8_train1e4`: med **`-1.56pp`**
+  - `mbpp_longctx_seed39_depthmix_anchor` / `scalar_l10_train1e4`: med **`+0.54pp`**
+- `round787`
+  - `arc_mc_seed260_depthmix_qfirst` / `scalar_l6_train1e4`: med **`+9.38pp`**
+  - `mbpp_longctx_seed40_depthmix_anchor` / `scalar_l6_train1e4`: med **`-0.63pp`**
+- `round788`
+  - `arc_mc_seed261_depthmix_qfirst` / `scalar_l6_train1e4`: med **`+3.12pp`**
+  - `mbpp_longctx_seed41_depthmix_anchor` / `scalar_l6_train1e4`: med **`+0.97pp`**
+- `round789`
+  - `arc_mc_seed262_depthmix_qfirst`: quick best **`-4.17pp`**, med skipped
+  - `mbpp_longctx_seed42_depthmix_anchor` / `scalar_l10_train1e4`: med **`+1.87pp`**
+- `round790`
+  - `arc_mc_seed263_depthmix_qfirst` / `scalar_l10_train1e4`: med **`+6.25pp`**
+  - `mbpp_longctx_seed43_depthmix_anchor`: best quick **`-0.47pp`**, med skipped
+- `round799`
+  - `mbpp_longctx_seed51_finalconfirm` / `scalar_l6_train1e4`: quick **`+0.38pp`**, below promote gate, med skipped
+- `round800`
+  - `mbpp_longctx_seed52_finalconfirm` / `scalar_l6_train1e4`: quick **`+0.60pp`**, below promote gate, med skipped
+- `round801`
+  - `arc_mc_seed271_finalconfirm` / `scalar_l6_train1e4`: med **`-1.56pp`**
+- `round802`
+  - `tsp_mask_seed13_finalconfirm` / `scalar_l10_train1e4`: quick **`+0.00pp`**, med skipped
+
+Final closure readout:
+- `mbpp_longctx` remained the most credible real-task line in the exploit block, but strict final confirmation did not pass the `+0.80pp` promote gate; claim should stay at "promising/mixed" rather than "stable confirmed".
+- `arc_mc` stayed high-variance: several strong exploit positives (`+9.38pp`, `+6.25pp`, `+3.12pp`) but held-out confirm flipped negative (`-1.56pp`).
+- `tsp_mask` did not replicate its earlier spike and should remain appendix-only.
+- search is now intentionally stopped at `round802`; next work is documentation and paper-table cleanup, not more BFS.
+
+## 2026-03-06 Breadth Pivot (round803-808)
+
+Pivot reason:
+- `round803-804` alt-confirm on `mbpp_longctx` failed to clear the promote gate under alternative recipes.
+- `round803`: best quick `scalar_l8_train8e5 +0.07pp`; `head_l8 -1.17pp`; `scalar_l8_sched_cos -1.39pp`.
+- `round804`: best quick `scalar_l8_sched_cos +0.63pp`; still below `+0.80pp`; no med conversion.
+
+Action taken:
+- stopped spending on additional `mbpp_longctx` confirmation under the same recipe family.
+- relaunched breadth-first real-task exploration at `round805-808`.
+- task mix now emphasizes `protein_ss`, `hotpot`, `squad`, `hotpot_longctx`, and `wiki`; `protein_contact` was deprioritized because historical quick deltas are almost always `0.00pp`.
+
+
+Outcomes:
+- `round805`
+  - `hotpot_seed95_breadth` / `scalar_l8_train8e5`: med **`+0.11pp`**
+  - `protein_ss_seed283_breadth`: best quick **`+0.58pp`**, below promote gate
+- `round806`
+  - `hotpot_longctx_seed12_breadth`: all quick **`+0.00pp`**, med skipped
+  - `squad_seed104_breadth`: best quick **`+0.76pp`**, below promote gate
+- `round807`
+  - `hotpot_seed96_breadth` / `head_l8`: med **`+1.00pp`**
+  - `protein_ss_seed284_breadth`: best quick **`+0.40pp`**, below promote gate
+- `round808`
+  - `squad_seed105_breadth`: best quick **`+0.76pp`**, below promote gate
+  - `wiki_seed41_breadth`: baseline failed
+
+Breadth-pivot readout:
+- `hotpot` is the only family in this pivot that converted to med-positive results.
+- `protein_ss` stayed near the gate but did not convert in the two breadth probes.
+- `squad` stayed just under the `+0.80pp` promote threshold twice.
+- `hotpot_longctx` and `wiki` remain low-ROI under the current recipe.
+- after `round808`, the campaign is better framed as:
+  - strongest repeatable real-task family: `protein_ss`
+  - smaller positive breadth signal: `hotpot`
+  - promising but not locked: `mbpp_longctx`, `squad`, `punc`
+  - high-upside but unstable: `arc_mc`
+  - stop list under the same recipe: `protein_contact`, `wiki`, `hotpot_longctx`, `countdown`, `nqueens`, `zebra`, `sat3`

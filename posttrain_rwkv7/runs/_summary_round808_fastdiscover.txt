@@ -1,0 +1,19 @@
+================================================================================================================
+Round808 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[squad_seed105_breadth]
+  quick baseline: 13.83%
+    scalar_l8_train8e5           d_acc=+0.76pp acc=14.58%
+    scalar_l8_train1e4           d_acc=+0.32pp acc=14.15%
+    head_l8                      d_acc=-0.51pp acc=13.32%
+  med skipped: best_quick scalar_l8_train8e5 +0.76pp < promote_gate +0.80pp
+  pruned:
+    head_l8                      quick_drop -0.51pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[wiki_seed41_breadth]
+  quick baseline failed
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  squad_seed105_breadth            stage=quick cfg=scalar_l8_train8e5       d_acc=+0.76pp

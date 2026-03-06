@@ -1,45 +1,37 @@
-# Task Index (What to run for what)
+# Task Index
 
-## A) Core method / toy stress tests
+This index maps task family to backend trainer, representative queue, and current judgment.
 
-| Goal | Script | Output location |
+## Active Post-Training Families
+
+| Task family | Trainer | Representative queue | Current status |
+|---|---|---|---|
+| `protein_ss` | `posttrain_rwkv7/scripts/train_protein_ss_spot_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | strongest repeatable real-task family; best med `+8.14pp` |
+| `hotpot` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | small but repeatable positive line; breadth pivot med `+0.11pp`, `+1.00pp` |
+| `mbpp_longctx` | `posttrain_rwkv7/scripts/train_mbpp_longctx_sft.py` | `posttrain_rwkv7/results/_search_queue_round783_790_realtask_exploit_v3.json` | promising but strict confirmation failed in `round799-800` |
+| `arc_mc` | `posttrain_rwkv7/scripts/train_arc_mc_sft.py` | `posttrain_rwkv7/results/_search_queue_round783_790_realtask_exploit_v3.json` | high upside, high variance; final confirm failed in `round801` |
+| `squad` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | mixed; best spike `+7.31pp`, breadth quicks stalled at `+0.76pp` |
+| `punc` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round77_82.json` | small stable positive family, but not headline evidence |
+| `protein_contact` | `posttrain_rwkv7/scripts/train_protein_contact_pair_sft.py` | `posttrain_rwkv7/results/_search_queue_round77_82.json` | mostly no-op or negative under current recipe |
+| `hotpot_longctx` | `posttrain_rwkv7/scripts/train_hotpot_longctx_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | current breadth probe flat |
+
+## Constraint / Diagnostic Families
+
+| Task family | Trainer | Representative queue | Current status |
+|---|---|---|---|
+| `graph_color` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round743_750_constraint_bfs_v2.json` | useful diagnostic task; med positives up to `+8.33pp`, but not a real-task claim |
+| `tsp_mask` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round799_802_final_confirm.json` | one large spike `+25.00pp`, final confirm flat; appendix only |
+| `countdown` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round743_750_constraint_bfs_v2.json` | quick spikes did not convert; current status negative |
+| `nqueens` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round735_742_constraint_bfs.json` | hard negative at med |
+| `sat3` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round735_742_constraint_bfs.json` | current recipe near zero |
+| `zebra` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round743_750_constraint_bfs_v2.json` | no useful conversion so far |
+
+## Method / Toy Track
+
+| Goal | Script | Location |
 |---|---|---|
-| rightcopy + constr sanity | `run.sh` | `rwkv-diff-future-seed/logs/*.log` |
-| QA bidirectional masking | `run_qa.sh` | `rwkv-diff-future-seed/logs/qa_*.log` |
-| sudoku sweep | `rwkv-diff-future-seed/run_sudoku.sh` | `rwkv-diff-future-seed/exp/*.jsonl` |
-| kvsort baselines | `rwkv-diff-future-seed/run_kvsort_baselines.sh` | `rwkv-diff-future-seed/exp/*.jsonl` |
-| kvsort + sinkhorn | `rwkv-diff-future-seed/run_kvsort_sinkhorn.sh` | `rwkv-diff-future-seed/exp/*.jsonl` |
-| permfill anchor sweep | `rwkv-diff-future-seed/run_permfill_anchor_sweep.sh` | `rwkv-diff-future-seed/exp/*.jsonl` |
-
-## B) Real-data prefix infill (the scripts you asked about)
-
-| Goal | Script | Required input |
-|---|---|---|
-| WikiText prefix infill | `rwkv-diff-future-seed/run_wikitext_prefix.sh` | path to `train.bin`/`val.bin` |
-| MBPP prefix infill | `rwkv-diff-future-seed/run_mbpp_prefix.sh` | path to `train.bin`/`val.bin` |
-
-Build bins with:
-- `tools/build_hf_bins.py`
-
-## C) Post-training real tasks (ARC/protein/MBPP)
-
-| Goal | Script |
-|---|---|
-| ARC MC training backend | `posttrain_rwkv7/scripts/train_arc_mc_sft.py` |
-| Protein SS backend | `posttrain_rwkv7/scripts/train_protein_ss_spot_sft.py` |
-| Protein contact backend | `posttrain_rwkv7/scripts/train_protein_contact_pair_sft.py` |
-| MBPP longctx backend | `posttrain_rwkv7/scripts/train_mbpp_longctx_sft.py` |
-| fastdiscover orchestrator | `posttrain_rwkv7/scripts/run_round77_82_fastdiscover.py` |
-| finite repro packet | `posttrain_rwkv7/scripts/run_repropack_569_574.sh` |
-
-Representative historical launchers:
-- ARC: `posttrain_rwkv7/scripts/run_arc_qfirst_stabilized_round13_canonical_s01234.sh`
-- protein ss: `posttrain_rwkv7/scripts/run_protein_ss_spot_qfirst_len2048_round1_s012.sh`
-- protein contact: `posttrain_rwkv7/scripts/run_protein_contact_pair_qafter_len2048_round4_sched_s012.sh`
-- mbpp: `posttrain_rwkv7/scripts/run_mbpp_qfirst_stabilized_len4096_round1_s012.sh`
-
-## D) Where to read outcomes
-
-- method/toy consolidated: `RESULTS.md`
-- post-training consolidated: `posttrain_rwkv7/README.md`
-- post-training audit ledgers: `posttrain_rwkv7/results/_audit_round77_569_*.{md,csv}`
+| WikiText prefix infill | `run_wikitext_prefix.sh` | `rwkv-diff-future-seed/` |
+| MBPP prefix infill | `run_mbpp_prefix.sh` | `rwkv-diff-future-seed/` |
+| rightcopy + constr sanity | `run.sh` | repo root |
+| QA sanity | `run_qa.sh` | repo root |
+| Sudoku / KVSORT / PERMFILL | `run_sudoku.sh`, `run_kvsort_baselines.sh`, `run_permfill_anchor_sweep.sh` | `rwkv-diff-future-seed/` |

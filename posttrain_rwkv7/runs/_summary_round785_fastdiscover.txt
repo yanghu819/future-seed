@@ -1,0 +1,28 @@
+================================================================================================================
+Round785 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[arc_mc_seed258_depthmix_qfirst]
+  quick baseline: 35.42%
+    scalar_l10_train1e4          d_acc=+2.08pp acc=37.50%
+    scalar_l6_train1e4           d_acc=+0.00pp acc=35.42%
+    scalar_l8_train1e4           d_acc=-6.25pp acc=29.17%
+  med:
+    baseline                     acc=35.94%
+    scalar_l10_train1e4          d_acc_vs_med=+3.12pp acc=39.06%
+  pruned:
+    scalar_l8_train1e4           quick_drop -6.25pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[mbpp_longctx_seed38_depthmix_anchor]
+  quick baseline: 10.46%
+    scalar_l6_train1e4           d_acc=+3.77pp acc=14.24%
+    scalar_l8_train1e4           d_acc=+2.54pp acc=13.00%
+    scalar_l10_train1e4          d_acc=+2.31pp acc=12.78%
+  med:
+    baseline                     acc=16.40%
+    scalar_l6_train1e4           d_acc_vs_med=+5.01pp acc=21.42%
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_longctx_seed38_depthmix_anchor stage=med   cfg=scalar_l6_train1e4       d_acc=+5.01pp
+  arc_mc_seed258_depthmix_qfirst   stage=med   cfg=scalar_l10_train1e4      d_acc=+3.12pp

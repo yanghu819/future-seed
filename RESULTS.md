@@ -1,139 +1,72 @@
-# Results (2026-02-14)
+# Global Results (2026-03-06, through round808)
 
-Navigation:
-- repo onboarding: `README.md`
-- fast setup: `GETTING_STARTED.md`
-- task->script map: `TASK_INDEX.md`
-- post-training campaign results: `posttrain_rwkv7/README.md`
+This page is the consolidated result index for the repository.
 
-This repo contains a minimal Future-Seed implementation on RWKV7-CUDA, plus hard toy tasks to stress **in-place constraint repair** (future-aware infill + global consistency).
+Primary sources:
+- [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
+- [`posttrain_rwkv7/results/_rolling_round_log.md`](posttrain_rwkv7/results/_rolling_round_log.md)
+- [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
 
-## Key Additions
-- `SUDOKU_TASK=1`: 4x4 Sudoku in-place masked infill (synthetic generator), with `sudoku_eval()` reporting:
-  - `solve`: valid 4x4 grid (rows/cols/2x2 blocks each contain {1,2,3,4})
-  - `exact`: matches the hidden synthetic solution exactly
-- `SUDOKU_CONS_LAMBDA`: optional soft constraint regularizer (row/col/block digit-count ~= 1)
-- Fixed behavior: `TRAIN=0` no longer silently trains if `WEIGHTS_PATH` is missing (now raises).
+## Bottom Line
 
-## Summary Findings (Single-GPU 4090, RWKV7 cuda_wind)
-- **RIGHTCOPY/CONSTR (sanity):** FS helps future-aware copy / constraint fill.
-- **KVSORT (in-place permutation repair):** FS can be the difference between complete failure and perfect exact-match.
-- **PERMFILL (in-place permutation fill):** adding a tiny anchor dramatically improves length generalization.
-- **SUDOKU (2D constraints):** FS shifts the phase transition to harder puzzles; a simple constraint regularizer further helps (holes=12).
+What the current evidence supports:
+- Future-Seed clearly helps on toy and synthetic tasks that stress future-aware constraint repair.
+- In post-training, the strongest repeatable real-task family under the current recipe is `protein_ss`.
+- `hotpot`, `mbpp_longctx`, `squad`, and `punc` show smaller positive pockets.
+- `arc_mc` has strong upside but is still too high-variance for a stability claim.
+- Under the current recipe, the repo should not claim stable held-out real-task confirmation yet.
 
-All logs referenced below are under `_autodl_logs/` (not committed).
+## Toy / Synthetic Results
 
-## RIGHTCOPY / CONSTR (Future-Aware Sanity Tasks)
-3 seeds, final-step accuracy (mean ± sd):
-
-| task | FS=0 | FS=1 |
-|---|---:|---:|
-| rightcopy acc | 0.1046 ± 0.0074 | 0.1550 ± 0.0176 |
-| constr acc | 0.0977 ± 0.0028 | 0.2114 ± 0.0179 |
-
-Logs:
-- `_autodl_logs/rightcopy_fs{0,1}_s{1,2,3}.log`
-- `_autodl_logs/constr_fs{0,1}_s{1,2,3}.log`
-
-## KVSORT (Key-Value Sort, In-Place)
-Setting (from log filename): `keys36`, `n_test=20`, `nosep`, `L8`, `SEQ_LEN=256`.
-
-| metric | FS=0 | FS=1 |
-|---|---:|---:|
-| kvsort_id exact | 0.0 | 1.0 |
-| kvsort_ood exact | 0.0 | 1.0 |
-
-Logs:
-- `_autodl_logs/kvsort_keys36_n20_nosep_fs0_L8_seq256.log`
-- `_autodl_logs/kvsort_keys36_n20_nosep_fs1_L8_seq256.log`
-
-## Attention Baselines (Transformer)
-Run date: **2026-02-15** (AutoDL 4090).
-
-We tested:
-- `MODEL=transformer` (Transformer-MLM, bidirectional)
-- `MODEL=transformer_causal` (decoder-only causal)
-- `MODEL=transformer_causal ATTN_FS=1` (attention-side Future-Seed via cross-layer global tokens; `ATTN_FS_K=32`)
-
-**KVSORT (n=20, keys-only, no-sep)**:
-- Transformer-MLM: `DECODE=hungarian` enforces uniqueness (`key_valid=1.0`) but **fails ordering** (`key_order=0.0`, `exact=0.0`).
-- Transformer-Causal (no future): `exact=0.0` (as expected); Hungarian can't fix ordering.
-- Transformer-Causal + ATTN_FS (K=32): **no improvement** over causal baseline (`exact=0.0`, Hungarian still `key_order=0.0`).
-- Iterative refinement (`REFINE_STEPS=8`, Mask-Predict style) does **not** fix ordering for Transformer-MLM (`exact=0.0`).
-- Transformer-MLM + structured permutation loss (`PERM_SINKHORN=1`, 800 iters) still fails (`exact=0.0`; Hungarian only gives `key_valid=1.0`).
-
-**PERMFILL (train n=24, anchor k=2; eval n_test=24/28/32/36)**:
-- Transformer-Causal + Hungarian: `valid=1.0` but **OOD exact=0.0** for all `n_test`.
-- Transformer-Causal + ATTN_FS (K=32): **OOD exact=0.0** for all `n_test` (Hungarian or argmax).
-
-Logs:
-- `_autodl_logs/attnfs/kvsort_keys36_n20_tfc_{fs0,attnfs}.jsonl`
-- `_autodl_logs/attnfs/permfill_anchor2_n24_tfc_{fs0,attnfs}.jsonl`
-- `_autodl_logs/sinkhorn/kvsort_keys36_n20_tfmlm_sinkhorn_it800.jsonl`
-
-## PERMFILL (Permutation Fill, In-Place)
-We evaluate exact/valid rates under **length extrapolation** by loading saved weights and running `TRAIN=0 PERMFILL_EVAL=1` with different `PERMFILL_N_TEST`.
-
-| weights | anchor | n_test=24 | n_test=28 | n_test=32 | n_test=36 |
-|---|---:|---:|---:|---:|---:|
-| `permfill_n24_fs1_L12_seq256.pt` | off | 1.000 | 0.000 | 0.000 | 0.000 |
-| `permfill_anchor2_n24_fs1_L12_seq256.pt` | k=2 | 0.990 | 0.830 | 0.120 | 0.000 |
-| `permfill_anchor2_n32_fs1_L12_seq256.pt` | k=2 | 1.000 | 1.000 | 1.000 | 0.935 |
-
-Interpretation: **a tiny anchor (k=2 visible tokens in the masked span)** + higher training max length pushes OOD generalization strongly.
-
-### Phase Curve (trials=2000)
-Weights:
-- FS=0: `weights/sudoku_fs0_curr4_12_L4_e128.pt` (L4, e128, curriculum holes∈[4,12])
-- FS=1: `weights/sudoku_fs1_curr4_12_L12_e128.pt` (L12, e128, curriculum holes∈[4,12])
-
-| holes | FS=0 solve | FS=1 solve |
-|---:|---:|---:|
-| 4  | 0.3530 | 1.0000 |
-| 6  | 0.1665 | 1.0000 |
-| 8  | 0.0520 | 1.0000 |
-| 10 | 0.0095 | 0.9510 |
-| 12 | 0.0000 | 0.5510 |
-| 14 | 0.0000 | 0.0000 |
-
-### Constraint Regularizer (FS=1, L12/e128, holes∈[4,14], trials=2000)
-Weights:
-- base: `weights/sudoku_fs1_curr4_14_L12_e128_base.pt` (lambda=0.0)
-- cons: `weights/sudoku_fs1_curr4_14_L12_e128_cons01.pt` (lambda=0.1)
-
-| setting | holes=10 | holes=12 | holes=14 |
+| Task | Baseline | Future-Seed | Gain |
 |---|---:|---:|---:|
-| lambda=0.0 | 0.9385 | 0.4795 | 0.0000 |
-| lambda=0.1 | 0.9515 | 0.5855 | 0.0000 |
+| `rightcopy` acc | `10.46%` | `15.50%` | `+5.04pp` |
+| `constr` acc | `9.77%` | `21.14%` | `+11.37pp` |
+| `kvsort` exact | `0.00%` | `100.00%` | `+100.00pp` |
+| `permfill` exact at `n_test=36` | `0.00%` | `93.50%` | `+93.50pp` |
+| `sudoku` solve at `holes=12` | `0.00%` | `55.10%` | `+55.10pp` |
+| `sudoku` constraint regularizer at `holes=12` | `47.95%` | `58.55%` | `+10.60pp` |
 
-## Negative / Lessons
-- `FS_MASK_ONLY=1` (train only seed-alpha + mask embedding) fails on Sudoku (solve≈0).
-- `SUDOKU_MASK_MODE=prefix` is unstable in current one-shot argmax infill setting (solve≈0).
+## Post-Training Scoreboard
 
-## Post-Training Update (2026-03-05, round736-744)
+| Task family | Best med gain | Med median | Positive med count | Current judgment |
+|---|---:|---:|---:|---|
+| `protein_ss` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable real-task family |
+| `hotpot` | `+4.20pp` | `+0.54pp` | `35/53` | small but repeatable positive family |
+| `mbpp_longctx` | `+10.00pp` | `+0.91pp` | `53/87` | promising, but strict confirmation failed |
+| `arc_mc` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, high variance; held-out confirm failed |
+| `squad` | `+7.31pp` | `+0.55pp` | `24/35` | mixed; one strong spike, not locked |
+| `punc` | `+2.16pp` | `+0.36pp` | `16/24` | small positive, useful support only |
+| `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task, not real-task evidence |
+| `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix only; spike did not confirm |
+| `countdown` | `-4.17pp` | `-4.17pp` | `0/2` | negative under current recipe |
+| `nqueens` | `-4.17pp` | `-10.42pp` | `0/2` | negative under current recipe |
+| `sat3` | `+0.00pp` | `+0.00pp` | `0/4` | no current signal |
 
-Full details are in:
-- `posttrain_rwkv7/README.md`
-- `posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`
-- `posttrain_rwkv7/results/_summary_round736_fastdiscover.txt` ... `_summary_round743_fastdiscover.txt`
-- `posttrain_rwkv7/results/_round736_fastdiscover_records.jsonl` ... `_round744_fastdiscover_records.jsonl`
+Additional low-ROI families:
+- `protein_contact`: mostly no-op or small negative; no useful med-positive line remained
+- `wiki`: latest breadth probe failed at baseline in `round808`
+- `hotpot_longctx`: latest breadth probe flat in `round806`
+- `zebra`: no useful conversion under the current recipe
 
-Latest high-signal med deltas (FS vs baseline, pp):
-- `graph_color_seed3_qfirst`: `+4.17pp`
-- `graph_color_seed5_dense`: `+4.17pp`
-- `graph_color_seed7_qfirst_phase` (round744 partial): `+4.17pp`
-- `mbpp_longctx_seed20_qfirst_anchor`: `+1.84pp`
-- `punc_seed38_anchor`: `+0.41pp`
+## Final Closure Window
 
-Key negatives / prune evidence:
-- `nqueens_seed3_qfirst`: `-16.67pp` med after strong quick gain.
-- `nqueens_seed5_hard`: `-4.17pp` med.
-- `countdown_seed3_retry`: quick `+18.75pp` but med `-4.17pp` (no transfer).
-- `arc_mc_seed238_qfirst_anchor`: quick non-positive; med skipped.
+The final narrow search and breadth pivot did three useful things:
 
-Incremental additions (2026-03-05, round744-746):
-- `graph_color_seed7_qfirst_phase`: med **`+4.17pp`**
-- `graph_color_seed8_k4_dense`: med **`-4.17pp`** (negative transfer)
-- `tsp_mask_seed2_qfirst_retry`: quick best **`-6.25pp`**, med skipped
-- `sat3_seed3_harder`: quick ties baseline, med skipped
-- `zebra_seed4_qfirst_retry` (round746 partial): quick best `+0.00pp`, currently no promote
+1. `round783-802` showed that the current `mbpp_longctx` and `arc_mc` recipes can still produce positives, but not stable held-out confirmation.
+2. `round803-804` killed further spending on repeated `mbpp_longctx` confirmation with the same `head_l8 / scalar_l8_*` family.
+3. `round805-808` breadth-first exploration found small new positive `hotpot` conversions and no new strong wins elsewhere.
+
+Latest final-window highlights:
+- `mbpp_longctx_seed38_depthmix_anchor`: `+5.01pp`
+- `arc_mc_seed260_depthmix_qfirst`: `+9.38pp`
+- `hotpot_seed96_breadth`: `+1.00pp`
+- `squad_seed104_breadth`: quick `+0.76pp`, below promote gate
+- `protein_ss_seed283/284_breadth`: near-gate quick positives, but no promote
+- `wiki_seed41_breadth`: baseline failed
+
+## Where To Verify Raw Artifacts
+
+- latest summaries and records: [`posttrain_rwkv7/runs/`](posttrain_rwkv7/runs)
+- rolling status log: [`posttrain_rwkv7/results/_rolling_round_log.md`](posttrain_rwkv7/results/_rolling_round_log.md)
+- full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)

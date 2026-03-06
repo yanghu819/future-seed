@@ -1,15 +1,107 @@
-# RWKV7 Future-Seed Post-Training Backup
+# RWKV7 Future-Seed Post-Training
 
-This folder is a backup snapshot of the current Future-Seed post-training work on AutoDL.
+This directory contains the local working copy of the Future-Seed post-training campaign on a single 4090.
 
-## Contents
+## Final Status (2026-03-06, through round808)
 
-- `scripts/`: training, summarization, and run scripts used in the current iteration.
-- `results/`: exported summary text files from completed runs.
-- `paper/`: current paper/progress note.
-  - `paper/FS_POSTTRAIN_PROGRESS_2026-02-19.md`: short status note.
-  - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure experiment record.
-  - `paper/FS_POSTTRAIN_PAPER_DRAFT.md`: current paper draft synced with latest experiments.
+Current state:
+- search is intentionally closed through `round808`
+- remote training is idle; latest artifacts are synced into `runs/`
+- current work is documentation, table cleanup, and repo hygiene, not more BFS under the same recipe
+
+## Current Best Evidence
+
+| Task family | Best med gain | Med median | Positive med count | Current judgment |
+|---|---:|---:|---:|---|
+| `protein_ss` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable real-task family |
+| `hotpot` | `+4.20pp` | `+0.54pp` | `35/53` | small but repeatable positive line |
+| `mbpp_longctx` | `+10.00pp` | `+0.91pp` | `53/87` | promising, but strict confirmation failed |
+| `arc_mc` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, high variance |
+| `squad` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
+| `punc` | `+2.16pp` | `+0.36pp` | `16/24` | small support signal only |
+| `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task only |
+| `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix-only spike |
+
+Low-ROI or negative families under the current recipe:
+- `protein_contact`
+- `wiki`
+- `hotpot_longctx`
+- `countdown`
+- `nqueens`
+- `zebra`
+- `sat3`
+
+## Final Closure And Breadth Pivot
+
+### Closure window (`round783-802`)
+
+- `mbpp_longctx` stayed promising but did not pass strict final confirmation:
+  - exploit positives: `round785 +5.01pp`, `round786 +0.54pp`, `round788 +0.97pp`, `round789 +1.87pp`
+  - strict confirms failed to promote:
+    - `round799`: quick `+0.38pp`
+    - `round800`: quick `+0.60pp`
+- `arc_mc` produced large positives but stayed unstable:
+  - positives: `round785 +3.12pp`, `round787 +9.38pp`, `round788 +3.12pp`, `round790 +6.25pp`
+  - held-out confirm failed:
+    - `round801`: med `-1.56pp`
+- `tsp_mask` did not confirm:
+  - earlier spike: `round764 +25.00pp`
+  - final confirm: `round802` quick `+0.00pp`
+
+### Breadth pivot (`round803-808`)
+
+- `round803-804` alt-confirm killed more spending on repeated `mbpp_longctx` confirmation with the same `head_l8 / scalar_l8_*` family
+- `round805-808` widened back out to `protein_ss`, `hotpot`, `squad`, `hotpot_longctx`, and `wiki`
+- new outcomes:
+  - `round805 hotpot_seed95_breadth`: med `+0.11pp`
+  - `round807 hotpot_seed96_breadth`: med `+1.00pp`
+  - `round805 protein_ss_seed283_breadth`: quick `+0.58pp`, no promote
+  - `round807 protein_ss_seed284_breadth`: quick `+0.40pp`, no promote
+  - `round806 squad_seed104_breadth`: quick `+0.76pp`, no promote
+  - `round808 squad_seed105_breadth`: quick `+0.76pp`, no promote
+  - `round806 hotpot_longctx_seed12_breadth`: flat at `+0.00pp`
+  - `round808 wiki_seed41_breadth`: baseline failed
+
+## What The Repo Can Defend
+
+1. Future-Seed clearly helps on toy and synthetic constraint-repair tasks.
+2. In post-training, `protein_ss` is the strongest repeatable real-task family under the current recipe.
+3. `hotpot`, `mbpp_longctx`, `squad`, and `punc` show real but smaller positive pockets.
+4. `arc_mc` and `tsp_mask` are exploratory, not stable headline evidence.
+
+## What The Repo Should Not Claim
+
+1. real-task gains are already stable across held-out confirmation seeds
+2. `mbpp_longctx` was strictly confirmed by the final confirmation queue
+3. `arc_mc` is already robust enough for a clean stability claim
+4. constraint-task wins alone prove the real-task story
+
+## Quick Reproduction Entrypoints
+
+```bash
+cd posttrain_rwkv7
+python3 scripts/run_round77_82_fastdiscover.py --self_test
+python3 scripts/run_round77_82_fastdiscover.py \
+  --queue results/_search_queue_round805_808_breadth_roi.json \
+  --round_from 805 --round_to 808 --dry_run
+```
+
+Useful queue files:
+- `results/_search_queue_round783_790_realtask_exploit_v3.json`
+- `results/_search_queue_round799_802_final_confirm.json`
+- `results/_search_queue_round803_804_mbpp_altconfirm.json`
+- `results/_search_queue_round805_808_breadth_roi.json`
+
+## Document Map
+
+- `runs/`: synced summaries and raw JSONL records
+- `results/_rolling_round_log.md`: round-by-round operator log
+- `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure ledger
+- `scripts/`: launchers, orchestrators, and trainers
+
+## Older Notes
+
+The historical per-round notes below are kept as archive chronology.
 
 ## Key Findings (latest snapshot)
 
@@ -1752,3 +1844,51 @@ Round746 (partial while running):
   - FS quick best currently `+0.00pp` (one variant `-18.75pp` pruned)
   - med currently skipped by gate
 - next subtask: `countdown_seed4_retry` in same round.
+
+### Final Closure Update (2026-03-06, round783-802 completed)
+
+Artifacts:
+- `results/_summary_round783_fastdiscover.txt` ... `results/_summary_round790_fastdiscover.txt`
+- `results/_summary_round799_fastdiscover.txt` ... `results/_summary_round802_fastdiscover.txt`
+- `results/_round783_fastdiscover_records.jsonl` ... `results/_round790_fastdiscover_records.jsonl`
+- `results/_round799_fastdiscover_records.jsonl` ... `results/_round802_fastdiscover_records.jsonl`
+
+Final closure outcomes:
+- `round783`
+  - `arc_mc_seed256_depthmix_qfirst`: quick tie (`+0.00pp`), med skipped
+  - `mbpp_longctx_seed36_depthmix_anchor`: all FS variants quick-negative, hard-pruned
+- `round784`
+  - `arc_mc_seed257_depthmix_qfirst`: all quick-negative, hard-pruned
+  - `mbpp_longctx_seed37_depthmix_anchor`: med **`-1.69pp`**
+- `round785`
+  - `arc_mc_seed258_depthmix_qfirst` / `scalar_l10_train1e4`: med **`+3.12pp`**
+  - `mbpp_longctx_seed38_depthmix_anchor` / `scalar_l6_train1e4`: med **`+5.01pp`**
+- `round786`
+  - `arc_mc_seed259_depthmix_qfirst` / `scalar_l8_train1e4`: med **`-1.56pp`**
+  - `mbpp_longctx_seed39_depthmix_anchor` / `scalar_l10_train1e4`: med **`+0.54pp`**
+- `round787`
+  - `arc_mc_seed260_depthmix_qfirst` / `scalar_l6_train1e4`: med **`+9.38pp`**
+  - `mbpp_longctx_seed40_depthmix_anchor` / `scalar_l6_train1e4`: med **`-0.63pp`**
+- `round788`
+  - `arc_mc_seed261_depthmix_qfirst` / `scalar_l6_train1e4`: med **`+3.12pp`**
+  - `mbpp_longctx_seed41_depthmix_anchor` / `scalar_l6_train1e4`: med **`+0.97pp`**
+- `round789`
+  - `arc_mc_seed262_depthmix_qfirst`: quick-negative, med skipped
+  - `mbpp_longctx_seed42_depthmix_anchor` / `scalar_l10_train1e4`: med **`+1.87pp`**
+- `round790`
+  - `arc_mc_seed263_depthmix_qfirst` / `scalar_l10_train1e4`: med **`+6.25pp`**
+  - `mbpp_longctx_seed43_depthmix_anchor`: best quick `-0.47pp`, med skipped
+- `round799`
+  - `mbpp_longctx_seed51_finalconfirm` / `scalar_l6_train1e4`: quick **`+0.38pp`**, below promote gate, med skipped
+- `round800`
+  - `mbpp_longctx_seed52_finalconfirm` / `scalar_l6_train1e4`: quick **`+0.60pp`**, below promote gate, med skipped
+- `round801`
+  - `arc_mc_seed271_finalconfirm` / `scalar_l6_train1e4`: med **`-1.56pp`**
+- `round802`
+  - `tsp_mask_seed13_finalconfirm` / `scalar_l10_train1e4`: quick **`+0.00pp`**, med skipped
+
+Final readout:
+- `mbpp_longctx` is still the best real-task lead, but the correct wording is "promising and repeatedly positive in exploitation," not "strictly confirmed stable gain."
+- `arc_mc` produced several strong positives in the exploit block, but the held-out confirm seed failed, so it remains mixed evidence.
+- `tsp_mask` should stay in appendix only.
+- broad expansion is stopped at `round802`; remaining work is documentation, paper tables, and repo cleanup instead of more search.

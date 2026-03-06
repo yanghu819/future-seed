@@ -1,0 +1,12 @@
+================================================================================================================
+Round800 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[mbpp_longctx_seed52_finalconfirm]
+  quick baseline: 19.38%
+    scalar_l6_train1e4           d_acc=+0.60pp acc=19.99%
+  med skipped: best_quick scalar_l6_train1e4 +0.60pp < promote_gate +0.80pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_longctx_seed52_finalconfirm stage=quick cfg=scalar_l6_train1e4       d_acc=+0.60pp

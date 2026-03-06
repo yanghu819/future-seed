@@ -2205,3 +2205,148 @@ Round746 (partial):
 Current interpretation:
 - `graph_color` remains the only consistently converting new constraint task in this window.
 - `tsp_mask/sat3/zebra` continue to show weak or non-converting behavior under current recipe.
+
+## 2026-03-06 Closure Pass (round783-802)
+
+Intent:
+- stop open-ended exploration and converge on a defensible final claim.
+- spend the last budget only on real-task confirmation and a minimal appendix check.
+
+What the data supports before final confirmation:
+- `mbpp_longctx` is the strongest real-task candidate:
+  - med positives at `round742 +1.84pp`, `round762 +1.90pp`, `round768 +1.81pp`, `round782 +3.09pp`
+  - but still with negative flips (`round750 -4.10pp`, `round779 -2.65pp`)
+- `arc_mc` is mixed rather than stable:
+  - positives at `round748 +1.56pp`, `round753 +1.56pp`, `round765 +3.12pp`, `round781 +3.12pp`
+  - negatives at `round759 -3.12pp`, `round776 -6.25pp`, `round779 -3.12pp`
+- `squad` has one notable positive (`round755 +7.31pp`) but follow-ups have not reproduced it.
+- `tsp_mask` has one large positive (`round764 +25.00pp`) but only appendix-level evidence so far.
+
+Closure queues:
+1. `round783-790`
+   - narrowed to `arc_mc + mbpp_longctx` depth-focused exploitation
+2. `round791-798`
+   - hybrid exploit queue:
+     - `arc`: `scalar_l6_train1e4`, `scalar_l10_train1e4`, `scalar_l8_train8e5`
+     - `mbpp_longctx`: `scalar_l6_train1e4`, `scalar_l10_train1e4`, `scalar_l8_sched_cos`
+     - tiny `tsp_mask` lane for replication pressure
+3. `round799-802`
+   - final confirmation only, then stop expansion
+
+Current closure outcomes:
+- `round783`
+  - `arc_mc_seed256_depthmix_qfirst`: all quick variants tied baseline (`+0.00pp`), med skipped
+  - `mbpp_longctx_seed36_depthmix_anchor`: all FS variants quick-negative and pruned
+- `round784`
+  - `arc_mc_seed257_depthmix_qfirst`: quick full negative prune
+  - `mbpp_longctx_seed37_depthmix_anchor`: quick positive, med **`-1.69pp`**
+- `round785`
+  - `arc_mc_seed258_depthmix_qfirst` / `scalar_l10_train1e4`: med **`+3.12pp`**
+  - `mbpp_longctx_seed38_depthmix_anchor` / `scalar_l6_train1e4`: med **`+5.01pp`**
+
+Tentative narrative before confirmation:
+- headline real-task evidence: `mbpp_longctx` with small-but-repeatable positive gains
+- secondary/mixed evidence: `arc_mc`
+- appendix only: `tsp_mask`
+- negative findings explicitly reported: `squad` follow-up, `punc`, `countdown`, unstable `graph_color`
+
+Final confirmation outcomes:
+- `round786`
+  - `arc_mc_seed259_depthmix_qfirst` / `scalar_l8_train1e4`: med **`-1.56pp`**
+  - `mbpp_longctx_seed39_depthmix_anchor` / `scalar_l10_train1e4`: med **`+0.54pp`**
+- `round787`
+  - `arc_mc_seed260_depthmix_qfirst` / `scalar_l6_train1e4`: med **`+9.38pp`**
+  - `mbpp_longctx_seed40_depthmix_anchor` / `scalar_l6_train1e4`: med **`-0.63pp`**
+- `round788`
+  - `arc_mc_seed261_depthmix_qfirst` / `scalar_l6_train1e4`: med **`+3.12pp`**
+  - `mbpp_longctx_seed41_depthmix_anchor` / `scalar_l6_train1e4`: med **`+0.97pp`**
+- `round789`
+  - `arc_mc_seed262_depthmix_qfirst`: quick best **`-4.17pp`**, med skipped
+  - `mbpp_longctx_seed42_depthmix_anchor` / `scalar_l10_train1e4`: med **`+1.87pp`**
+- `round790`
+  - `arc_mc_seed263_depthmix_qfirst` / `scalar_l10_train1e4`: med **`+6.25pp`**
+  - `mbpp_longctx_seed43_depthmix_anchor`: best quick **`-0.47pp`**, med skipped
+- `round799`
+  - `mbpp_longctx_seed51_finalconfirm` / `scalar_l6_train1e4`: quick **`+0.38pp`**, below promote gate, med skipped
+- `round800`
+  - `mbpp_longctx_seed52_finalconfirm` / `scalar_l6_train1e4`: quick **`+0.60pp`**, below promote gate, med skipped
+- `round801`
+  - `arc_mc_seed271_finalconfirm` / `scalar_l6_train1e4`: med **`-1.56pp`**
+- `round802`
+  - `tsp_mask_seed13_finalconfirm` / `scalar_l10_train1e4`: quick **`+0.00pp`**, med skipped
+
+Revised final narrative after confirmation:
+- `mbpp_longctx` remains the best real-task lead, but the strongest defensible wording is "promising and repeatedly positive in exploitation", not "stable real-task gain confirmed".
+- `arc_mc` is still mixed evidence: it can produce large positives, but not reliably enough across held-out confirmation seeds.
+- `tsp_mask` stays appendix-only because the earlier `+25.00pp` spike did not replicate.
+- the search should be considered closed at `round802`; additional value now comes from tightening tables, pruning stale claims, and making the repo easier to follow.
+
+## 2026-03-06 Breadth Pivot Follow-up (round803-808)
+
+Reason for the extra pass:
+- `round803-804` showed that repeating `mbpp_longctx` confirmation with the same `head_l8 / scalar_l8_*` family was no longer worth budget.
+- rather than continue tunnel vision on one task, the queue pivoted back to breadth-first real-task search.
+
+Artifacts:
+- `results/_summary_round803_fastdiscover.txt` ... `results/_summary_round808_fastdiscover.txt`
+- `runs/_round803_fastdiscover_records.jsonl` ... `runs/_round808_fastdiscover_records.jsonl`
+- queue file: `results/_search_queue_round805_808_breadth_roi.json`
+
+Round-by-round:
+
+1. `round803`
+- `mbpp_longctx_seed118_altconfirm`
+  - best quick: `scalar_l8_train8e5 +0.07pp`
+  - `head_l8 -1.17pp`, `scalar_l8_sched_cos -1.39pp`
+  - med skipped
+
+2. `round804`
+- `mbpp_longctx_seed119_altconfirm`
+  - best quick: `scalar_l8_sched_cos +0.63pp`
+  - `scalar_l8_train8e5 +0.00pp`
+  - `head_l8 -3.86pp`
+  - med skipped
+
+3. `round805`
+- `hotpot_seed95_breadth`
+  - quick best: `scalar_l8_train8e5 +1.02pp`
+  - med: **`+0.11pp`**
+- `protein_ss_seed283_breadth`
+  - quick best: `scalar_l8_sched_cos +0.58pp`
+  - med skipped
+
+4. `round806`
+- `hotpot_longctx_seed12_breadth`
+  - all quick variants: `+0.00pp`
+  - med skipped
+- `squad_seed104_breadth`
+  - quick best: `scalar_l8_train1e4 +0.76pp`
+  - med skipped
+
+5. `round807`
+- `hotpot_seed96_breadth`
+  - quick best: `head_l8 +0.87pp`
+  - med: **`+1.00pp`**
+- `protein_ss_seed284_breadth`
+  - quick best: `scalar_l8_train1e4 +0.40pp`
+  - med skipped
+
+6. `round808`
+- `squad_seed105_breadth`
+  - quick best: `scalar_l8_train8e5 +0.76pp`
+  - med skipped
+- `wiki_seed41_breadth`
+  - baseline failed
+
+Interpretation:
+- the breadth pivot found a modest new positive line on `hotpot`, but not a new headline win.
+- `protein_ss` remained strong historically, but this pivot only produced near-gate quick positives rather than new med conversions.
+- `squad` stayed close to the gate twice and remains mixed rather than clearly negative.
+- `wiki` and `hotpot_longctx` remain poor uses of budget under the current recipe.
+
+Updated final paper-facing judgment:
+1. strongest repeatable real-task family: `protein_ss`
+2. smaller positive supporting family: `hotpot`
+3. promising but not strictly confirmed: `mbpp_longctx`
+4. mixed / exploratory: `arc_mc`, `squad`, `punc`
+5. appendix or negative under current recipe: `tsp_mask`, `graph_color`, `countdown`, `nqueens`, `sat3`, `zebra`, `wiki`, `protein_contact`

@@ -1,0 +1,231 @@
+{
+  "strategy": {
+    "search_mix": "mbpp_altconfirm_nonqfirst_v1",
+    "quick_promote_pp": 0.8,
+    "quick_prune_pp": -0.5,
+    "strong_negative_quick_pp": -1.0,
+    "strong_negative_med_pp": -0.5,
+    "cooldown_rounds": 8,
+    "useful_rule": "single_positive_med"
+  },
+  "rounds": [
+    {
+      "round": 803,
+      "novelty_tier": "anchor",
+      "tasks": [
+        {
+          "name": "mbpp_longctx_seed118_altconfirm",
+          "seed": 118,
+          "trainer": "train_mbpp_longctx_sft.py",
+          "ds": "mbpp",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds",
+            "mbpp",
+            "--ds_cfg",
+            "",
+            "--train_split",
+            "train",
+            "--val_split",
+            "test",
+            "--n_train",
+            "320",
+            "--n_val",
+            "80",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "768",
+            "--max_prompt_tokens",
+            "2560",
+            "--min_prompt_tokens",
+            "1024",
+            "--max_answer_tokens",
+            "160",
+            "--bsz",
+            "1"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr",
+                "8e-5",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "round": 804,
+      "novelty_tier": "anchor",
+      "tasks": [
+        {
+          "name": "mbpp_longctx_seed119_altconfirm",
+          "seed": 119,
+          "trainer": "train_mbpp_longctx_sft.py",
+          "ds": "mbpp",
+          "ds_cfg": "",
+          "base_args": [
+            "--ds",
+            "mbpp",
+            "--ds_cfg",
+            "",
+            "--train_split",
+            "train",
+            "--val_split",
+            "test",
+            "--n_train",
+            "320",
+            "--n_val",
+            "80",
+            "--fill_notes_to_max",
+            "--note_pool_size",
+            "768",
+            "--max_prompt_tokens",
+            "2560",
+            "--min_prompt_tokens",
+            "1024",
+            "--max_answer_tokens",
+            "160",
+            "--bsz",
+            "1"
+          ],
+          "quick_budget": 160,
+          "quick_steps": 160,
+          "quick_eval_every": 20,
+          "quick_val_batches": 3,
+          "med_budget": 260,
+          "med_steps": 320,
+          "med_eval_every": 20,
+          "med_val_batches": 4,
+          "candidates": [
+            {
+              "name": "head_l8",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-3",
+                "--fs_variant",
+                "head",
+                "--alpha_head_init",
+                "-3",
+                "--alpha_head_lr",
+                "5e-4",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_train8e5",
+              "args": [
+                "--alpha_lr",
+                "8e-5",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0"
+              ]
+            },
+            {
+              "name": "scalar_l8_sched_cos",
+              "args": [
+                "--alpha_lr",
+                "0",
+                "--alpha_init",
+                "-2",
+                "--fs_variant",
+                "scalar",
+                "--fs_layer_start",
+                "8",
+                "--fs_norm",
+                "--fs_detach",
+                "--fs_clip",
+                "1.0",
+                "--fs_alpha_schedule",
+                "cosine",
+                "--fs_alpha_min",
+                "0.4",
+                "--fs_alpha_max",
+                "1.0"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

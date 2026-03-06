@@ -1,0 +1,28 @@
+================================================================================================================
+Round786 fastdiscover summary
+================================================================================================================
+policy model=gpt-5.3-codex promote=+0.80pp prune=-0.50pp cooldown=8
+================================================================================================================
+[arc_mc_seed259_depthmix_qfirst]
+  quick baseline: 35.42%
+    scalar_l8_train1e4           d_acc=+2.08pp acc=37.50%
+    scalar_l6_train1e4           d_acc=+0.00pp acc=35.42%
+    scalar_l10_train1e4          d_acc=+0.00pp acc=35.42%
+  med:
+    baseline                     acc=37.50%
+    scalar_l8_train1e4           d_acc_vs_med=-1.56pp acc=35.94%
+----------------------------------------------------------------------------------------------------------------
+[mbpp_longctx_seed39_depthmix_anchor]
+  quick baseline: 14.64%
+    scalar_l10_train1e4          d_acc=+1.46pp acc=16.10%
+    scalar_l8_train1e4           d_acc=+0.70pp acc=15.34%
+    scalar_l6_train1e4           d_acc=-2.40pp acc=12.24%
+  med:
+    baseline                     acc=19.51%
+    scalar_l10_train1e4          d_acc_vs_med=+0.54pp acc=20.05%
+  pruned:
+    scalar_l6_train1e4           quick_drop -2.40pp < -0.50pp
+----------------------------------------------------------------------------------------------------------------
+[useful_task_ranking_this_round]
+  mbpp_longctx_seed39_depthmix_anchor stage=med   cfg=scalar_l10_train1e4      d_acc=+0.54pp
+  arc_mc_seed259_depthmix_qfirst   stage=med   cfg=scalar_l8_train1e4       d_acc=-1.56pp
