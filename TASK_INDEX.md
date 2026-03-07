@@ -6,12 +6,12 @@ This index maps task family to backend trainer, representative queue, and curren
 
 | Task family | Trainer | Representative queue | Current status |
 |---|---|---|---|
-| `protein_ss` | `posttrain_rwkv7/scripts/train_protein_ss_spot_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | strongest repeatable real-task family; best med `+8.14pp` |
-| `hotpot` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | small but repeatable positive line; breadth pivot med `+0.11pp`, `+1.00pp` |
-| `mbpp_longctx` | `posttrain_rwkv7/scripts/train_mbpp_longctx_sft.py` | `posttrain_rwkv7/results/_search_queue_round783_790_realtask_exploit_v3.json` | promising but strict confirmation failed in `round799-800` |
-| `arc_mc` | `posttrain_rwkv7/scripts/train_arc_mc_sft.py` | `posttrain_rwkv7/results/_search_queue_round783_790_realtask_exploit_v3.json` | high upside, high variance; final confirm failed in `round801` |
-| `squad` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | mixed; best spike `+7.31pp`, breadth quicks stalled at `+0.76pp` |
-| `punc` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round77_82.json` | small stable positive family, but not headline evidence |
+| `protein_ss_spot` | `posttrain_rwkv7/scripts/train_protein_ss_spot_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | strongest repeatable real-task family; best med `+8.14pp` |
+| `hotpot_text_restore` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | small but repeatable positive line; breadth pivot med `+0.11pp`, `+1.00pp` |
+| `mbpp_longctx_probe` | `posttrain_rwkv7/scripts/train_mbpp_longctx_sft.py` | `posttrain_rwkv7/results/_search_queue_round783_790_realtask_exploit_v3.json` | promising but strict confirmation failed in `round799-800` |
+| `arc_mc_probe` | `posttrain_rwkv7/scripts/train_arc_mc_sft.py` | `posttrain_rwkv7/results/_search_queue_round783_790_realtask_exploit_v3.json` | high upside, high variance; final confirm failed in `round801` |
+| `squad_text_restore` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | mixed; best spike `+7.31pp`, breadth quicks stalled at `+0.76pp` |
+| `punc_restore` | `posttrain_rwkv7/scripts/train_punc_restore_sft.py` | `posttrain_rwkv7/results/_search_queue_round77_82.json` | small stable positive family, but not headline evidence |
 | `protein_contact` | `posttrain_rwkv7/scripts/train_protein_contact_pair_sft.py` | `posttrain_rwkv7/results/_search_queue_round77_82.json` | mostly no-op or negative under current recipe |
 | `hotpot_longctx` | `posttrain_rwkv7/scripts/train_hotpot_longctx_sft.py` | `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json` | current breadth probe flat |
 

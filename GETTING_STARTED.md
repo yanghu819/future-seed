@@ -66,4 +66,4 @@ sed -n '1,220p' runs/_summary_round808_fastdiscover.txt
 - `zebra`
 - `sat3`
 - `wiki`
-- repeated `mbpp_longctx` confirmation with the same `head_l8 / scalar_l8_*` family after `round803-804`
+- repeated `mbpp_longctx_probe` confirmation with the same `head_l8 / scalar_l8_*` family after `round803-804`

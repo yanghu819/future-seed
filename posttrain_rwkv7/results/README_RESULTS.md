@@ -1,6 +1,11 @@
 # Results Directory Guide
 
-This folder stores curated experiment snapshots for reproducibility and paper writing.
+This folder stores curated local experiment snapshots for reproducibility and paper writing.
+
+Boundary note:
+- these files are historical internal audit artifacts, not the paper's only source of truth
+- for active paper-facing summaries, start from `../../paper/neurips2025/README.md` and `../README.md`
+- raw chronology and audit tables remain here for provenance
 
 ## 0) Unified effective report (start here)
 
@@ -28,7 +33,7 @@ cd posttrain_rwkv7
 bash scripts/sync_runs_to_results.sh --round-from 569 --round-to 574
 ```
 
-- this `results/` folder is the tracked snapshot used by README, audit, and Git history
+- this `results/` folder is the tracked local snapshot used by README, audit, and Git history
 
 ## 2) Core file types
 

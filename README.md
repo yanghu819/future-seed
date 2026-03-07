@@ -16,7 +16,8 @@ The post-training campaign is closed through `round808`.
 Current judgment:
 - toy and synthetic constraint tasks clearly support Future-Seed
 - strongest repeatable real-task family under the current recipe: `protein_ss_spot`
-- smaller positive real-task signals: `hotpot_text_restore`, `mbpp_longctx_probe`, `squad_text_restore`, `punc_restore`
+- supporting positive real-task signals: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
+- mixed evidence only: `mbpp_longctx_probe`
 - high-upside but high-variance: `arc_mc_probe`
 - low-ROI or negative under the current recipe: `protein_contact`, `wiki`, `hotpot_longctx`, `countdown`, `nqueens`, `zebra`, `sat3`
 
@@ -79,4 +80,4 @@ python3 scripts/run_round77_82_fastdiscover.py \
 - [`RESULTS.md`](RESULTS.md): unified results page
 - [`paper/neurips2025/README.md`](paper/neurips2025/README.md): anonymous NeurIPS 2025 submission package
 - [`paper/neurips2025/REFERENCE_AUDIT.md`](paper/neurips2025/REFERENCE_AUDIT.md): source audit for all citations used in the paper
-- [`posttrain_rwkv7/runs/`](posttrain_rwkv7/runs): synced latest summaries and raw JSONL records
+- [`posttrain_rwkv7/runs/`](posttrain_rwkv7/runs): local snapshot summaries and raw JSONL records

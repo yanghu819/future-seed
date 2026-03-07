@@ -7,9 +7,12 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+from cache_defaults import apply_cache_env, ensure_cache_dirs
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNS = ROOT / "runs"
@@ -152,10 +155,8 @@ class HistoryIndex:
 
 def env() -> dict:
     e = os.environ.copy()
-    e["TORCH_EXTENSIONS_DIR"] = os.environ.get("TORCH_EXTENSIONS_DIR", "/root/autodl-tmp/torch_extensions")
-    e["HF_HOME"] = os.environ.get("HF_HOME", "/root/autodl-tmp/hf")
-    e["HF_DATASETS_CACHE"] = os.environ.get("HF_DATASETS_CACHE", "/root/autodl-tmp/hf_datasets")
-    e["TRANSFORMERS_CACHE"] = os.environ.get("TRANSFORMERS_CACHE", "/root/autodl-tmp/hf_transformers")
+    apply_cache_env(e)
+    ensure_cache_dirs(e)
     e["HF_ENDPOINT"] = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
     # Default to offline mode, but allow round-level override via shell env.
     e["HF_DATASETS_OFFLINE"] = os.environ.get("HF_DATASETS_OFFLINE", "1")
@@ -938,60 +939,63 @@ def main() -> None:
         run_self_tests()
         return
 
-    RUNS.mkdir(parents=True, exist_ok=True)
     policy = load_policy(Path(args.policy))
     queue = load_queue(Path(args.queue))
     hist = load_history(RUNS)
+    RUNS.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="future-seed-fastdiscover-") as tmpdir:
+        run_root = Path(tmpdir) if args.dry_run else RUNS
+        useful_pool_path = run_root / "_useful_task_pool_fastdiscover.json"
+        useful_pool: List[dict] = []
+        if useful_pool_path.exists():
+            try:
+                useful_pool = json.loads(useful_pool_path.read_text(encoding="utf-8"))
+            except Exception:
+                useful_pool = []
 
-    useful_pool_path = RUNS / "_useful_task_pool_fastdiscover.json"
-    useful_pool: List[dict] = []
-    if useful_pool_path.exists():
-        try:
-            useful_pool = json.loads(useful_pool_path.read_text(encoding="utf-8"))
-        except Exception:
-            useful_pool = []
-
-    for rd in queue:
-        if rd.round_id < args.round_from or rd.round_id > args.round_to:
-            continue
-
-        rec_path = RUNS / f"_round{rd.round_id}_fastdiscover_records.jsonl"
-        summary_path = RUNS / f"_summary_round{rd.round_id}_fastdiscover.txt"
-        rec_path.write_text("", encoding="utf-8")
-
-        for task in rd.tasks:
-            run_task(rd.round_id, rec_path, task, hist, dry_run=args.dry_run)
-
-        summarize_round(rd.round_id, rec_path, summary_path, policy=policy)
-
-        # refresh history index after each round so dedup/cooldown applies to subsequent rounds.
-        hist = load_history(RUNS)
-
-        # append useful pool entries from this round.
-        rows = [json.loads(x) for x in rec_path.read_text(encoding="utf-8", errors="ignore").splitlines() if x.strip()]
-        by_task = {}
-        for r in rows:
-            by_task.setdefault(r.get("task"), []).append(r)
-        for task, arr in by_task.items():
-            mb = [r for r in arr if r.get("stage") == "med" and r.get("config") == "baseline" and r.get("status") in {"ok", "skip_reuse"} and r.get("best_val_tok_acc") is not None]
-            mf = [r for r in arr if r.get("stage") == "med" and r.get("config") != "baseline" and r.get("status") in {"ok", "skip_reuse"} and r.get("best_val_tok_acc") is not None]
-            if not mb or not mf:
+        for rd in queue:
+            if rd.round_id < args.round_from or rd.round_id > args.round_to:
                 continue
-            bmed = float(mb[0]["best_val_tok_acc"])
-            best = max(mf, key=lambda x: float(x["best_val_tok_acc"]))
-            dpp = (float(best["best_val_tok_acc"]) - bmed) * 100.0
-            if dpp > 0:
-                useful_pool.append(
-                    {
-                        "round": rd.round_id,
-                        "task": task,
-                        "config": best.get("config"),
-                        "dpp": dpp,
-                        "signature": best.get("signature"),
-                    }
-                )
 
-        useful_pool_path.write_text(json.dumps(useful_pool, ensure_ascii=False, indent=2), encoding="utf-8")
+            rec_path = run_root / f"_round{rd.round_id}_fastdiscover_records.jsonl"
+            summary_path = run_root / f"_summary_round{rd.round_id}_fastdiscover.txt"
+            rec_path.write_text("", encoding="utf-8")
+
+            for task in rd.tasks:
+                run_task(rd.round_id, rec_path, task, hist, dry_run=args.dry_run)
+
+            summarize_round(rd.round_id, rec_path, summary_path, policy=policy)
+
+            # refresh history index after each real round so dedup/cooldown applies to subsequent rounds.
+            if not args.dry_run:
+                hist = load_history(RUNS)
+
+            # append useful pool entries from this round.
+            rows = [json.loads(x) for x in rec_path.read_text(encoding="utf-8", errors="ignore").splitlines() if x.strip()]
+            by_task = {}
+            for r in rows:
+                by_task.setdefault(r.get("task"), []).append(r)
+            for task, arr in by_task.items():
+                mb = [r for r in arr if r.get("stage") == "med" and r.get("config") == "baseline" and r.get("status") in {"ok", "skip_reuse"} and r.get("best_val_tok_acc") is not None]
+                mf = [r for r in arr if r.get("stage") == "med" and r.get("config") != "baseline" and r.get("status") in {"ok", "skip_reuse"} and r.get("best_val_tok_acc") is not None]
+                if not mb or not mf:
+                    continue
+                bmed = float(mb[0]["best_val_tok_acc"])
+                best = max(mf, key=lambda x: float(x["best_val_tok_acc"]))
+                dpp = (float(best["best_val_tok_acc"]) - bmed) * 100.0
+                if dpp > 0:
+                    useful_pool.append(
+                        {
+                            "round": rd.round_id,
+                            "task": task,
+                            "config": best.get("config"),
+                            "dpp": dpp,
+                            "signature": best.get("signature"),
+                        }
+                    )
+
+            if not args.dry_run:
+                useful_pool_path.write_text(json.dumps(useful_pool, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

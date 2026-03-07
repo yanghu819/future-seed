@@ -26,10 +26,10 @@ The synthetic suite supports a narrow but strong claim: Future-Seed is especiall
 \input{tables/appendix_negative_tasks.tex}
 
 \paragraph{Closure window.}
-The final narrow search focused on \texttt{mbpp\_longctx} and \texttt{arc\_mc} before a breadth pivot. The best closure-window results were \texttt{mbpp\_longctx\_seed38\_depthmix\_anchor} at $+5.01$pp and \texttt{arc\_mc\_seed260\_depthmix\_qfirst} at $+9.38$pp, but neither family held up as a clean held-out confirmation line. The strict confirmation queue failed on \texttt{mbpp\_longctx} and flipped negative on \texttt{arc\_mc}.
+The final narrow search focused on \texttt{mbpp\_longctx\_probe} and \texttt{arc\_mc\_probe} before a breadth pivot. The best closure-window results were \texttt{mbpp\_longctx\_seed38\_depthmix\_anchor} at $+5.01$pp and \texttt{arc\_mc\_seed260\_depthmix\_qfirst} at $+9.38$pp, but neither family held up as a clean held-out confirmation line. The strict confirmation queue failed on \texttt{mbpp\_longctx\_probe} and flipped negative on \texttt{arc\_mc\_probe}.
 
 \paragraph{Breadth pivot.}
-Rounds 805--808 were used to stop over-spending on the same \texttt{mbpp\_longctx} recipe family and test a wider set of real tasks. Only \texttt{hotpot\_text\_restore} converted to medium-stage positives in that pivot, with a best gain of $+1.00$pp. \texttt{protein\_ss\_spot} and \texttt{squad\_text\_restore} stayed near the promote gate but did not convert in those breadth rounds.
+Rounds 805--808 were used to stop over-spending on the same \texttt{mbpp\_longctx\_probe} recipe family and test a wider set of real tasks. Only \texttt{hotpot\_text\_restore} converted to medium-stage positives in that pivot, with a best gain of $+1.00$pp. \texttt{protein\_ss\_spot} and \texttt{squad\_text\_restore} stayed near the promote gate but did not convert in those breadth rounds.
 
 \section{Reproducibility and Artifact Layout}
 The repository snapshot and anonymous supplementary archive include:

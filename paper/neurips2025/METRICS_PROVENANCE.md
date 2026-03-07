@@ -7,6 +7,7 @@ This file explains what `data/metrics.json` is and is not.
 - `data/metrics.json` is the curated paper-side metrics snapshot used to render the LaTeX tables in `main.tex`.
 - `render_tables.py` converts `data/metrics.json` into `tables/*.tex`.
 - The file is version-controlled so the PDF can be rebuilt deterministically.
+- The curated values are tied to the shipped local snapshot artifacts for rounds `783-788` and `799-808`.
 
 ## What It Is Not
 

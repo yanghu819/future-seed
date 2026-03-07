@@ -1,6 +1,6 @@
 # Anonymous Artifact Guide
 
-Current supplementary contents in this repository snapshot:
+Current supplementary contents in this local repository snapshot:
 
 - `rwkv-diff-future-seed/`: synthetic task code and launch scripts
 - `posttrain_rwkv7/scripts/`: post-training trainers and orchestrators
@@ -37,7 +37,8 @@ Notes:
 - The paper tables are generated from committed `paper/neurips2025/data/metrics.json`.
 - The current paper tables are a curated paper-side summary; see `METRICS_PROVENANCE.md`.
 - The row-to-trainer mapping is documented in `TASK_MATRIX.md`.
+- The shipped round artifacts are the local snapshot for rounds `783-788` and `799-808`.
 - This anonymous snapshot supports paper rebuilds and artifact inspection, but not a turnkey end-to-end rerun of the full post-training campaign.
-- The paper build does not require access to the original remote training machine.
+- The paper build does not require access to any historical training machine.
 - The post-training commands above are dry-run checks for orchestration and path health, not full retraining.
 - The default post-training checkpoint path is referenced by the training scripts, but the checkpoint blob itself is not included in this anonymous snapshot.

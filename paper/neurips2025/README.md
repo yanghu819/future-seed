@@ -1,6 +1,6 @@
 # NeurIPS 2025 Paper Package
 
-This directory contains the anonymous NeurIPS main-track draft for Future-Seed.
+This directory contains the anonymous NeurIPS main-track draft for Future-Seed, backed by a local archival artifact snapshot.
 
 ## Template Source
 
@@ -45,9 +45,11 @@ The current submission build keeps the main content safely below the NeurIPS nin
 ## Notes
 
 - The paper is written as an anonymous submission draft.
-- The strongest headline claim is synthetic mechanism evidence plus repeatable `protein_ss` gains.
-- The draft intentionally keeps `mbpp_longctx` and `arc_mc` as mixed evidence, not stable confirmation.
+- The strongest headline claim is synthetic mechanism evidence plus repeatable `protein_ss_spot` gains.
+- The supporting real-task signals are `hotpot_text_restore`, `squad_text_restore`, and `punc_restore`.
+- The draft intentionally keeps `mbpp_longctx_probe` and `arc_mc_probe` as mixed evidence, not stable confirmation.
 - The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
 - For the supplementary layout, see `ARTIFACT_GUIDE.md`.
 - `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).
+- The shipped post-training round artifacts in this snapshot are `783-788` and `799-808`.
 - The default post-training checkpoint path is referenced in the scripts but the checkpoint blob is not included in this anonymous snapshot.

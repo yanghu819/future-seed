@@ -30,6 +30,7 @@ import torch.nn.functional as F
 
 from datasets import load_dataset
 
+from cache_defaults import apply_cache_env, ensure_cache_dirs
 from rwkv_tokenizer import RWKVWorldTokenizer
 from rwkv7_g1d import RWKV7G1DLM
 
@@ -312,9 +313,9 @@ def main() -> None:
     if args.alpha_head_init is None:
         args.alpha_head_init = float(args.alpha_init)
 
-    os.environ.setdefault("HF_HOME", "/root/autodl-tmp/hf")
-    os.environ.setdefault("HF_DATASETS_CACHE", "/root/autodl-tmp/hf_datasets")
-    os.environ.setdefault("TRANSFORMERS_CACHE", "/root/autodl-tmp/hf_transformers")
+    apply_cache_env()
+    ensure_cache_dirs()
+    os.environ.setdefault("HF_ENDPOINT", "https://huggingface.co")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     tok = RWKVWorldTokenizer(args.vocab)
@@ -580,4 +581,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -16,7 +16,8 @@ Primary sources:
 What the current evidence supports:
 - Future-Seed clearly helps on toy and synthetic tasks that stress future-aware constraint repair.
 - In post-training, the strongest repeatable real-task family under the current recipe is `protein_ss_spot`.
-- `hotpot_text_restore`, `mbpp_longctx_probe`, `squad_text_restore`, and `punc_restore` show smaller positive pockets.
+- `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
+- `mbpp_longctx_probe` remains promising but mixed rather than confirmed.
 - `arc_mc_probe` has strong upside but is still too high-variance for a stability claim.
 - Under the current recipe, the repo should not claim stable held-out real-task confirmation yet.
 

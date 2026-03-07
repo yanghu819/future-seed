@@ -1,24 +1,25 @@
 # RWKV7 Future-Seed Post-Training
 
-This directory contains the local working copy of the Future-Seed post-training campaign on a single 4090.
+This directory is the local archival snapshot of the Future-Seed post-training campaign on a single 4090.
 
 ## Final Status (2026-03-06, through round808)
 
 Current state:
 - search is intentionally closed through `round808`
-- remote training is idle; latest artifacts are synced into `runs/`
+- latest local snapshot artifacts live in `runs/`
 - current work is documentation, table cleanup, and repo hygiene, not more BFS under the same recipe
+- legacy AutoDL-era scripts and chronology remain for provenance only; see [`LEGACY_AUTODL.md`](LEGACY_AUTODL.md)
 
 ## Current Best Evidence
 
 | Task family | Best med gain | Med median | Positive med count | Current judgment |
 |---|---:|---:|---:|---|
-| `protein_ss` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable real-task family |
-| `hotpot` | `+4.20pp` | `+0.54pp` | `35/53` | small but repeatable positive line |
-| `mbpp_longctx` | `+10.00pp` | `+0.91pp` | `53/87` | promising, but strict confirmation failed |
-| `arc_mc` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, high variance |
-| `squad` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
-| `punc` | `+2.16pp` | `+0.36pp` | `16/24` | small support signal only |
+| `protein_ss_spot` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable real-task family |
+| `hotpot_text_restore` | `+4.20pp` | `+0.54pp` | `35/53` | small but repeatable positive line |
+| `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, but strict confirmation failed |
+| `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, high variance |
+| `squad_text_restore` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
+| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small support signal only |
 | `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task only |
 | `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix-only spike |
 
@@ -35,12 +36,12 @@ Low-ROI or negative families under the current recipe:
 
 ### Closure window (`round783-802`)
 
-- `mbpp_longctx` stayed promising but did not pass strict final confirmation:
+- `mbpp_longctx_probe` stayed promising but did not pass strict final confirmation:
   - exploit positives: `round785 +5.01pp`, `round786 +0.54pp`, `round788 +0.97pp`, `round789 +1.87pp`
   - strict confirms failed to promote:
     - `round799`: quick `+0.38pp`
     - `round800`: quick `+0.60pp`
-- `arc_mc` produced large positives but stayed unstable:
+- `arc_mc_probe` produced large positives but stayed unstable:
   - positives: `round785 +3.12pp`, `round787 +9.38pp`, `round788 +3.12pp`, `round790 +6.25pp`
   - held-out confirm failed:
     - `round801`: med `-1.56pp`
@@ -50,8 +51,8 @@ Low-ROI or negative families under the current recipe:
 
 ### Breadth pivot (`round803-808`)
 
-- `round803-804` alt-confirm killed more spending on repeated `mbpp_longctx` confirmation with the same `head_l8 / scalar_l8_*` family
-- `round805-808` widened back out to `protein_ss`, `hotpot`, `squad`, `hotpot_longctx`, and `wiki`
+- `round803-804` alt-confirm killed more spending on repeated `mbpp_longctx_probe` confirmation with the same `head_l8 / scalar_l8_*` family
+- `round805-808` widened back out to `protein_ss_spot`, `hotpot_text_restore`, `squad_text_restore`, `hotpot_longctx`, and `wiki`
 - new outcomes:
   - `round805 hotpot_seed95_breadth`: med `+0.11pp`
   - `round807 hotpot_seed96_breadth`: med `+1.00pp`
@@ -65,15 +66,15 @@ Low-ROI or negative families under the current recipe:
 ## What The Repo Can Defend
 
 1. Future-Seed clearly helps on toy and synthetic constraint-repair tasks.
-2. In post-training, `protein_ss` is the strongest repeatable real-task family under the current recipe.
-3. `hotpot`, `mbpp_longctx`, `squad`, and `punc` show real but smaller positive pockets.
-4. `arc_mc` and `tsp_mask` are exploratory, not stable headline evidence.
+2. In post-training, `protein_ss_spot` is the strongest repeatable real-task family under the current recipe.
+3. `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
+4. `mbpp_longctx_probe`, `arc_mc_probe`, and `tsp_mask` remain mixed or exploratory rather than stable headline evidence.
 
 ## What The Repo Should Not Claim
 
 1. real-task gains are already stable across held-out confirmation seeds
-2. `mbpp_longctx` was strictly confirmed by the final confirmation queue
-3. `arc_mc` is already robust enough for a clean stability claim
+2. `mbpp_longctx_probe` was strictly confirmed by the final confirmation queue
+3. `arc_mc_probe` is already robust enough for a clean stability claim
 4. constraint-task wins alone prove the real-task story
 
 ## Quick Reproduction Entrypoints
@@ -94,14 +95,15 @@ Useful queue files:
 
 ## Document Map
 
-- `runs/`: synced summaries and raw JSONL records
+- `runs/`: local snapshot summaries and raw JSONL records
 - `results/_rolling_round_log.md`: round-by-round operator log
 - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure ledger
 - `scripts/`: launchers, orchestrators, and trainers
+- `LEGACY_AUTODL.md`: boundary note for preserved AutoDL-era history
 
 ## Older Notes
 
-The historical per-round notes below are kept as archive chronology.
+The historical per-round notes below are kept as archive chronology. They may still mention legacy remote or AutoDL-era paths; see [`LEGACY_AUTODL.md`](LEGACY_AUTODL.md) for the boundary between supported local usage and preserved history.
 
 ## Key Findings (latest snapshot)
 
