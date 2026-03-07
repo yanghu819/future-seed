@@ -30,6 +30,8 @@ Recurrent and state-space language models are attractive for long-context proces
 \section{Introduction}
 Modern sequence models often need to edit an existing sequence rather than generate a new one from scratch. This includes infilling code, restoring structure, repairing permutations, or solving puzzles with hard constraints. These \emph{in-place} tasks are difficult because the masked region must depend on evidence that may only appear on the right side of the input, while the final prediction must remain globally consistent.
 
+This regime overlaps with span corruption and iterative refinement settings that have been studied in text-to-text transfer, non-autoregressive generation, and edit-based decoding~\citep{raffel2020t5,lee2018iterative,ghazvininejad2019maskpredict,gu2019levenshtein}. Our focus is narrower: we ask what happens when the backbone itself remains recurrent and causal at decode time, but deeper layers receive a compact summary of future context through cross-layer state feedback.
+
 Autoregressive Transformers~\citep{vaswani2017attention} and bidirectional masked models such as BERT~\citep{devlin2019bert} provide two different approaches to this problem, but recurrent models remain attractive when prompt length, memory, and streaming efficiency matter. Recent recurrent and state-space model families, including RWKV~\citep{peng2023rwkv} and Mamba~\citep{gu2024mamba}, still inherit a basic weakness: if the model processes tokens left-to-right, early states only see future information through whatever summaries survive in the recurrent state.
 
 This paper studies a minimal intervention, \textbf{Future-Seed}, in which the terminal state of layer $\ell-1$ becomes the initial state of layer $\ell$. The mechanism is tiny, architecture-local, and decode-compatible, but it creates an additional path for future information to influence early masked positions. We ask two practical questions: (1) does this mechanism genuinely help future-aware repair, and (2) does any of that signal survive when we move from toy constraints to real post-training tasks?
@@ -60,13 +62,16 @@ This design targets a specific failure mode: masked regions whose correct values
 
 \section{Experimental Setup}
 \paragraph{Backbone and compute.}
-All experiments use an RWKV7 backbone with prompt-time Future-Seed only. The post-training campaign is run on a single NVIDIA RTX 4090, using serial quick-to-medium screening to keep wall-clock budget bounded.
+All experiments use an RWKV7 backbone with prompt-time Future-Seed only, initialized from the repository checkpoint \texttt{rwkv7-g1d-0.1b-20260129-ctx8192.pth}. Decode remains left-to-right and causal. The real-task campaign is run on a single NVIDIA RTX 4090, using serial quick-to-medium screening to keep wall-clock budget bounded.
 
 \paragraph{Synthetic tasks.}
-We evaluate RIGHTCOPY/CONSTR as minimal future-aware probes, KVSORT as in-place permutation repair, PERMFILL as anchored permutation filling with length extrapolation, and 4$\times$4 Sudoku as structured constraint repair.
+We evaluate RIGHTCOPY and CONSTR as minimal future-aware probes. We use KVSORT for in-place permutation repair, PERMFILL for anchored permutation filling with length extrapolation, and 4$\times$4 Sudoku for structured constraint repair. Together these tasks span copy, permutation, and grid-style consistency repair.
 
 \paragraph{Real-task audit.}
-The real-task campaign covers protein secondary-structure labeling, HotpotQA-style multi-hop QA, long-context MBPP completion, ARC multiple choice, punctuation restoration, and a set of lower-ROI constraint proxies. The final fastdiscover queues use a two-stage policy: prune candidates below $-0.5$pp at quick stage, and only promote top candidates above $+0.8$pp to medium budget.
+The real-task campaign covers protein secondary-structure labeling, HotpotQA-style multi-hop QA, long-context MBPP completion, ARC multiple choice, punctuation restoration, and a set of lower-ROI constraint proxies. The late-stage queues primarily compare scalar or head-wise prompt gates starting at layers 6, 8, or 10, with common candidates such as \texttt{scalar\_l8\_train1e4}, \texttt{scalar\_l8\_sched\_cos}, \texttt{head\_l8}, and depth-shifted variants.
+
+\paragraph{Queue policy.}
+The final fastdiscover queues use a fixed two-stage policy. Quick stage budgets are task-dependent but typically 140--160 steps; medium stage budgets are typically 260--280 steps. We prune candidates below $-0.5$pp at quick stage, promote only the top candidate above $+0.8$pp, and then report medium-stage deltas against the same-task baseline.
 
 \paragraph{Evaluation summary.}
 For synthetic tasks we report direct task metrics such as token accuracy, exact match, and solve-rate. For the post-training audit we aggregate medium-stage Future-Seed vs. baseline deltas in percentage points (pp) by task family, together with positive-count summaries and qualitative judgments.
@@ -85,7 +90,7 @@ The synthetic suite also exposes a negative result: simply restoring bidirection
 \section{Real-Task Post-Training Evidence}
 \input{tables/posttrain_main.tex}
 
-Table~\ref{tab:posttrain-main} summarizes the full post-training archive by task family. Two patterns matter.
+Table~\ref{tab:posttrain-main} summarizes the full post-training archive by task family. These counts come from a sequential search archive, not from a balanced i.i.d. trial design, so they should be read as a stability audit rather than a classical multi-seed benchmark. Two patterns matter.
 
 First, the mechanism is \emph{not} a universal gain switch. The strongest repeatable family is \texttt{protein\_ss}, which shows both a strong best case and a positive median over a large number of medium-stage comparisons. \texttt{hotpot} is weaker in absolute magnitude but still consistently positive enough to remain a credible supporting family. \texttt{punc} and \texttt{squad} also show small positive pockets.
 
@@ -102,7 +107,7 @@ There are still two useful lessons in these negatives. One is scientific: Future
 The positive side of this work is better controllable structured editing: code completion, constrained infill, and sequence repair all benefit from mechanisms that preserve global consistency. The risk is that stronger infill and repair mechanisms could also help misuse cases such as stealthier document editing, constraint-satisfying synthetic content, or automated puzzle/benchmark overfitting. We therefore recommend releasing the mechanism together with explicit limitations, exact reproduction commands, and a clear separation between strong synthetic evidence and mixed real-task evidence.
 
 \section{Related Work}
-Future-Seed sits between three lines of work: recurrent or state-space sequence models such as RWKV~\citep{peng2023rwkv} and Mamba~\citep{gu2024mamba}; masked or non-autoregressive infill models such as BERT~\citep{devlin2019bert} and MaskGIT~\citep{chang2022maskgit}; and benchmark families that stress multi-hop reasoning, code completion, and protein sequence modeling~\citep{yang2018hotpotqa,clark2018arc,rajpurkar2016squad,austin2021program,rives2021biological}. Our contribution is not a new benchmark or a new backbone, but a controlled study of one lightweight cross-layer mechanism across both synthetic repair tasks and a realistic post-training search archive.
+Future-Seed sits between three lines of work. The first is recurrent or state-space sequence modeling, including RWKV~\citep{peng2023rwkv} and Mamba~\citep{gu2024mamba}. The second is masked, span-corruption, and edit-based generation, including BERT~\citep{devlin2019bert}, T5~\citep{raffel2020t5}, iterative refinement~\citep{lee2018iterative}, Mask-Predict~\citep{ghazvininejad2019maskpredict}, Levenshtein Transformer~\citep{gu2019levenshtein}, and MaskGIT~\citep{chang2022maskgit}. The third is benchmark families that stress multi-hop reasoning, code completion, and protein sequence modeling, including HotpotQA~\citep{yang2018hotpotqa}, ARC~\citep{clark2018arc}, SQuAD~\citep{rajpurkar2016squad}, MBPP~\citep{austin2021program}, TAPE~\citep{rao2019tape}, and large-scale protein language modeling~\citep{rives2021biological}. Our contribution is not a new benchmark or a new backbone, but a controlled study of one lightweight cross-layer mechanism across both synthetic repair tasks and a realistic post-training search archive.
 
 \section{Conclusion}
 Future-Seed adds a small amount of cross-layer state feedback to a recurrent stack, but its effect is highly structured. The synthetic evidence is strong: future-aware repair, permutation repair, and Sudoku all improve materially. The real-task evidence is narrower but still useful: \texttt{protein\_ss} is a robust positive family, while \texttt{hotpot}, \texttt{punc}, and \texttt{squad} provide supporting gains and \texttt{mbpp\_longctx}/\texttt{arc\_mc} remain mixed. The most defensible conclusion is therefore targeted rather than universal: Future-Seed is a practical mechanism for in-place constraint repair, and a promising but still unstable ingredient for broader post-training.

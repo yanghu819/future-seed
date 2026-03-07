@@ -1,6 +1,6 @@
 # Anonymous Artifact Guide
 
-Intended supplementary contents for the submission:
+Current supplementary contents in this repository snapshot:
 
 - `rwkv-diff-future-seed/`: synthetic task code and launch scripts
 - `posttrain_rwkv7/scripts/`: post-training trainers and orchestrators
@@ -27,4 +27,11 @@ The paper tables are regenerated with:
 ```bash
 cd paper/neurips2025
 python3 render_tables.py
+./build.sh submission
 ```
+
+Notes:
+
+- The paper tables are generated from committed `paper/neurips2025/data/metrics.json`.
+- The paper build does not require access to the original remote training machine.
+- The post-training commands above are dry-run checks for orchestration and path health, not full retraining.

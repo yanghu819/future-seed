@@ -26,6 +26,8 @@ Outputs:
 - `build/neurips2025-submission.pdf`
 - `build/neurips2025-preprint.pdf`
 
+The current submission build keeps the main content safely below the NeurIPS nine-page content limit; references, appendix, and checklist follow after the main text.
+
 ## Files
 
 - `main.tex`: paper body with build-time placeholders for submission vs preprint style
@@ -41,3 +43,6 @@ Outputs:
 - The paper is written as an anonymous submission draft.
 - The strongest headline claim is synthetic mechanism evidence plus repeatable `protein_ss` gains.
 - The draft intentionally keeps `mbpp_longctx` and `arc_mc` as mixed evidence, not stable confirmation.
+- The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
+- For the supplementary layout, see `ARTIFACT_GUIDE.md`.
+- `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).

@@ -27,12 +27,12 @@ The checklist is designed to encourage best practices for responsible machine le
 \item {\bf Open access to data and code}
     \item[] Question: Does the paper provide open access to the data and code, with sufficient instructions to faithfully reproduce the main experimental results, as described in supplemental material?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The submission package is intended to include an anonymized code snapshot, queue files, synced run artifacts for the final window, and exact paper build instructions; Appendix~D describes the layout.
+    \item[] Justification: The repository snapshot and anonymous supplementary archive include the synthetic task code, post-training launchers, final queue files, synced round-783--808 artifacts, and the paper build scripts; Appendix~D describes the layout.
 
 \item {\bf Experimental setting/details}
     \item[] Question: Does the paper specify all the training and test details (e.g., data splits, hyperparameters, how they were chosen, type of optimizer, etc.) necessary to understand the results?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The core paper states the model and evaluation setup, while Appendix~A and D describe the screening policy, task families, artifact layout, and reproduction commands.
+    \item[] Justification: The core paper states the model family, checkpoint, task families, queue gates, and budget ranges, while Appendix~A and D describe the screening policy, artifact layout, and reproduction commands.
 
 \item {\bf Experiment statistical significance}
     \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
@@ -42,7 +42,7 @@ The checklist is designed to encourage best practices for responsible machine le
 \item {\bf Experiments compute resources}
     \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Sections~3 and 6 state that the campaign uses a single RTX 4090 and fixed quick-to-medium budgets; Appendix~A clarifies the serial screening policy and artifact scope.
+    \item[] Justification: Sections~3 and 6 state that the campaign uses a single RTX 4090 and fixed quick-to-medium budgets; Appendix~A clarifies the serial screening policy, common budget ranges, and artifact scope.
 
 \item {\bf Code of ethics}
     \item[] Question: Does the research conducted in the paper conform, in every respect, with the NeurIPS Code of Ethics https://neurips.cc/public/EthicsGuidelines?
