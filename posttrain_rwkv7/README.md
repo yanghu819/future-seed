@@ -81,11 +81,16 @@ Low-ROI or negative families under the current recipe:
 
 ```bash
 cd posttrain_rwkv7
+export FUTURE_SEED_CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/future-seed"
 python3 scripts/run_round77_82_fastdiscover.py --self_test
 python3 scripts/run_round77_82_fastdiscover.py \
   --queue results/_search_queue_round805_808_breadth_roi.json \
   --round_from 805 --round_to 808 --dry_run
 ```
+
+Notes:
+- explicit `HF_HOME`, `HF_DATASETS_CACHE`, `TRANSFORMERS_CACHE`, and `TORCH_EXTENSIONS_DIR` override `FUTURE_SEED_CACHE_ROOT`
+- a `--dry_run` may still show baseline failures when the local dataset cache is empty; that indicates missing local data rather than a runner regression
 
 Useful queue files:
 - `results/_search_queue_round783_790_realtask_exploit_v3.json`

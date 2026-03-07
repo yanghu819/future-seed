@@ -45,6 +45,16 @@ python3 scripts/run_round77_82_fastdiscover.py \
   --round_from 805 --round_to 808 --dry_run
 ```
 
+Optional local cache override:
+
+```bash
+export FUTURE_SEED_CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/future-seed"
+```
+
+Notes:
+- explicit `HF_HOME`, `HF_DATASETS_CACHE`, `TRANSFORMERS_CACHE`, and `TORCH_EXTENSIONS_DIR` still override the shared root
+- `--dry_run` validates orchestration and paths; if local datasets are absent, task baselines may still fail without changing tracked artifacts
+
 ## 4. Latest finished artifacts to inspect
 
 ```bash
