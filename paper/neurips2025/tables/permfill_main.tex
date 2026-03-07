@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\small
+\caption{PERMFILL length extrapolation. A tiny anchor in the masked span materially improves out-of-distribution exact match.}
+\label{tab:permfill-main}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Weights & Anchor & n=24 & n=28 & n=32 & n=36 \\
+\midrule
+FS=1, train n=24 & off & 100.00\% & 0.00\% & 0.00\% & 0.00\% \\
+FS=1, train n=24 & k=2 & 99.00\% & 83.00\% & 12.00\% & 0.00\% \\
+FS=1, train n=32 & k=2 & 100.00\% & 100.00\% & 100.00\% & 93.50\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

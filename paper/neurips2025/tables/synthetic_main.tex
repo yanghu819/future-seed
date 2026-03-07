@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Synthetic mechanism evidence. Future-Seed consistently improves future-aware repair tasks and turns KVSORT from failure to exact recovery.}
+\label{tab:synthetic-main}
+\begin{tabular}{lccc}
+\toprule
+Task / metric & Baseline & Future-Seed & Delta \\
+\midrule
+RIGHTCOPY acc & 10.46\% & 15.50\% & +5.04pp \\
+CONSTR acc & 9.77\% & 21.14\% & +11.37pp \\
+KVSORT id exact & 0.00\% & 100.00\% & +100.00pp \\
+KVSORT ood exact & 0.00\% & 100.00\% & +100.00pp \\
+Sudoku solve @ holes=12 & 0.00\% & 55.10\% & +55.10pp \\
+\bottomrule
+\end{tabular}
+\end{table}

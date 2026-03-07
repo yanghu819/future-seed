@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Post-training summary across task families. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the full search archive.}
+\label{tab:posttrain-main}
+\begin{tabular}{lcccc}
+\toprule
+Task family & Best gain & Median gain & Positive med count & Current judgment \\
+\midrule
+protein\_ss & +8.14pp & +2.18pp & 103/126 & strongest repeatable \\
+hotpot & +4.20pp & +0.54pp & 35/53 & repeatable positive \\
+mbpp\_longctx & +10.00pp & +0.91pp & 53/87 & promising, unconfirmed \\
+arc\_mc & +20.83pp & +4.17pp & 70/116 & high upside, unstable \\
+squad & +7.31pp & +0.55pp & 24/35 & mixed, not locked \\
+punc & +2.16pp & +0.36pp & 16/24 & small support \\
+\bottomrule
+\end{tabular}
+\end{table*}

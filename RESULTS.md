@@ -6,6 +6,7 @@ Primary sources:
 - [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
 - [`posttrain_rwkv7/results/_rolling_round_log.md`](posttrain_rwkv7/results/_rolling_round_log.md)
 - [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+- [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
 
 ## Bottom Line
 

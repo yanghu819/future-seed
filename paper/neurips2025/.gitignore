@@ -1,0 +1,9 @@
+build/
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+.main_*.tex

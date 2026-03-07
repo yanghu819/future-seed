@@ -25,6 +25,7 @@ Current judgment:
 3. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
 4. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
 5. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+6. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
 
 ## Most Important Results
 
@@ -72,4 +73,5 @@ python3 scripts/run_round77_82_fastdiscover.py \
 - [`rwkv-diff-future-seed/`](rwkv-diff-future-seed): method code and toy experiments
 - [`posttrain_rwkv7/`](posttrain_rwkv7): post-training experiments, logs, and queues
 - [`RESULTS.md`](RESULTS.md): unified results page
+- [`paper/neurips2025/README.md`](paper/neurips2025/README.md): anonymous NeurIPS 2025 submission package
 - [`posttrain_rwkv7/runs/`](posttrain_rwkv7/runs): synced latest summaries and raw JSONL records

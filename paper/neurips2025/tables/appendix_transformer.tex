@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Transformer baselines on KVSORT. Hungarian decoding restores validity but not ordering.}
+\label{tab:appendix-transformer}
+\begin{tabular}{lcccc}
+\toprule
+Model & Decode & Exact & Key-valid & Key-order \\
+\midrule
+Transformer-MLM & argmax & 0.00\% & 0.00\% & 0.00\% \\
+Transformer-MLM & hungarian & 0.00\% & 100.00\% & 0.00\% \\
+Transformer-Causal & hungarian & 0.00\% & 100.00\% & 0.00\% \\
+Transformer-Causal + ATTN\_FS & hungarian & 0.00\% & 100.00\% & 0.00\% \\
+Transformer-MLM + Sinkhorn & hungarian & 0.00\% & 100.00\% & 0.00\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
