@@ -39,6 +39,12 @@ cd paper/neurips2025
 ./build.sh preprint
 ```
 
+## Whole-Repo Health Check
+
+```bash
+bash check_repo_health.sh
+```
+
 ## Minimal Repro Checks
 
 ```bash

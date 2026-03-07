@@ -9,6 +9,12 @@ The paper-facing post-training rows are teacher-forced token-accuracy probes, no
 
 If you are new here, choose one track first and follow that path end-to-end.
 
+One-shot repo sanity:
+
+```bash
+bash check_repo_health.sh
+```
+
 ## Current Snapshot
 
 The post-training campaign is closed through `round808`.
@@ -28,8 +34,9 @@ Current judgment:
 3. quick onboarding: [`GETTING_STARTED.md`](GETTING_STARTED.md)
 4. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
 5. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
-6. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
-7. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
+6. post-training archive chronology: [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
+7. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+8. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
 
 ## Most Important Results
 

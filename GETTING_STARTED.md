@@ -2,6 +2,14 @@
 
 Choose exactly one workflow first.
 
+## 0. Whole-repo health check
+
+```bash
+bash check_repo_health.sh
+```
+
+This runs link validation, the fastdiscover self-test, a non-mutating dry-run, and a submission paper build.
+
 ## 1. Workflow choice
 
 - choose `rwkv-diff-future-seed/` if your goal is method verification on toy and prefix-infill settings
@@ -13,7 +21,8 @@ Choose exactly one workflow first.
 2. [`RESULTS.md`](RESULTS.md)
 3. [`TASK_INDEX.md`](TASK_INDEX.md)
 4. [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
-5. [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+5. [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
+6. [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
 
 ## 3. Fast sanity commands
 
