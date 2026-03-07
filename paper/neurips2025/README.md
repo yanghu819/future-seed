@@ -37,6 +37,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - `render_tables.py`: generates LaTeX tables from `data/metrics.json`
 - `data/metrics.json`: curated metrics used by the paper draft
 - `tables/`: generated LaTeX tables
+- `REFERENCE_AUDIT.md`: official-source audit for all citations used in `main.tex`
 
 ## Notes
 

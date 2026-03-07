@@ -3,10 +3,12 @@
 This page is the consolidated result index for the repository.
 
 Primary sources:
+- [`PAPER.md`](PAPER.md)
 - [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
 - [`posttrain_rwkv7/results/_rolling_round_log.md`](posttrain_rwkv7/results/_rolling_round_log.md)
 - [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
 - [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
+- [`paper/neurips2025/REFERENCE_AUDIT.md`](paper/neurips2025/REFERENCE_AUDIT.md)
 
 ## Bottom Line
 

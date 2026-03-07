@@ -1,6 +1,6 @@
 # Future-Seed
 
-This repository has two active tracks:
+This repository is a unified Future-Seed paper-and-artifact snapshot with two active experimental tracks:
 
 - `rwkv-diff-future-seed/`: core Future-Seed method, toy stress tests, and prefix-infill experiments
 - `posttrain_rwkv7/`: single-GPU post-training search on real tasks, with auditable round logs
@@ -20,12 +20,13 @@ Current judgment:
 
 ## Start Here
 
-1. global results: [`RESULTS.md`](RESULTS.md)
-2. quick onboarding: [`GETTING_STARTED.md`](GETTING_STARTED.md)
-3. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
-4. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
-5. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
-6. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
+1. paper hub: [`PAPER.md`](PAPER.md)
+2. global results: [`RESULTS.md`](RESULTS.md)
+3. quick onboarding: [`GETTING_STARTED.md`](GETTING_STARTED.md)
+4. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
+5. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
+6. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+7. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
 
 ## Most Important Results
 
@@ -70,8 +71,10 @@ python3 scripts/run_round77_82_fastdiscover.py \
 
 ## Repository Map
 
+- [`PAPER.md`](PAPER.md): paper-first entry for the unified repo
 - [`rwkv-diff-future-seed/`](rwkv-diff-future-seed): method code and toy experiments
 - [`posttrain_rwkv7/`](posttrain_rwkv7): post-training experiments, logs, and queues
 - [`RESULTS.md`](RESULTS.md): unified results page
 - [`paper/neurips2025/README.md`](paper/neurips2025/README.md): anonymous NeurIPS 2025 submission package
+- [`paper/neurips2025/REFERENCE_AUDIT.md`](paper/neurips2025/REFERENCE_AUDIT.md): source audit for all citations used in the paper
 - [`posttrain_rwkv7/runs/`](posttrain_rwkv7/runs): synced latest summaries and raw JSONL records
