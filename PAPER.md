@@ -2,20 +2,25 @@
 
 This repository is the unified code, artifact, and paper snapshot for Future-Seed.
 
+All real-task paper numbers are teacher-forced token-accuracy probe results, not benchmark end metrics such as EM, F1, or pass@k.
+
 ## Primary Paper Entry
 
 - anonymous paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
 - submission source: [`paper/neurips2025/main.tex`](paper/neurips2025/main.tex)
+- preprint source: [`paper/neurips2025/main_preprint.tex`](paper/neurips2025/main_preprint.tex)
 - appendix and checklist: [`paper/neurips2025/appendix.tex`](paper/neurips2025/appendix.tex), [`paper/neurips2025/checklist.tex`](paper/neurips2025/checklist.tex)
 - artifact layout: [`paper/neurips2025/ARTIFACT_GUIDE.md`](paper/neurips2025/ARTIFACT_GUIDE.md)
 - reference audit: [`paper/neurips2025/REFERENCE_AUDIT.md`](paper/neurips2025/REFERENCE_AUDIT.md)
+- task matrix: [`paper/neurips2025/TASK_MATRIX.md`](paper/neurips2025/TASK_MATRIX.md)
+- metrics provenance: [`paper/neurips2025/METRICS_PROVENANCE.md`](paper/neurips2025/METRICS_PROVENANCE.md)
 
 ## What The Paper Claims
 
 - strong synthetic evidence for in-place constraint repair
-- strongest repeatable real-task family under the current recipe: `protein_ss`
-- supporting but smaller real-task positives: `hotpot`, `squad`, `punc`
-- mixed evidence only: `mbpp_longctx`, `arc_mc`
+- strongest repeatable real-task family under the current recipe: `protein_ss_spot`
+- supporting but smaller real-task positives: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
+- mixed evidence only: `mbpp_longctx_probe`, `arc_mc_probe`
 - no stable held-out real-task confirmation claim
 
 ## Where The Numbers Come From

@@ -8,8 +8,10 @@ Current supplementary contents in this repository snapshot:
 - `posttrain_rwkv7/results/_search_queue_round799_802_final_confirm.json`
 - `posttrain_rwkv7/results/_search_queue_round803_804_mbpp_altconfirm.json`
 - `posttrain_rwkv7/results/_search_queue_round805_808_breadth_roi.json`
-- `posttrain_rwkv7/runs/_summary_round783_fastdiscover.txt` ... `_summary_round808_fastdiscover.txt`
-- `posttrain_rwkv7/runs/_round783_fastdiscover_records.jsonl` ... `_round808_fastdiscover_records.jsonl`
+- `posttrain_rwkv7/runs/_summary_round783_fastdiscover.txt` ... `_summary_round788_fastdiscover.txt`
+- `posttrain_rwkv7/runs/_summary_round799_fastdiscover.txt` ... `_summary_round808_fastdiscover.txt`
+- `posttrain_rwkv7/runs/_round783_fastdiscover_records.jsonl` ... `_round788_fastdiscover_records.jsonl`
+- `posttrain_rwkv7/runs/_round799_fastdiscover_records.jsonl` ... `_round808_fastdiscover_records.jsonl`
 - `paper/neurips2025/`: the paper package itself
 
 Minimal reproduction steps:
@@ -33,5 +35,9 @@ python3 render_tables.py
 Notes:
 
 - The paper tables are generated from committed `paper/neurips2025/data/metrics.json`.
+- The current paper tables are a curated paper-side summary; see `METRICS_PROVENANCE.md`.
+- The row-to-trainer mapping is documented in `TASK_MATRIX.md`.
+- This anonymous snapshot supports paper rebuilds and artifact inspection, but not a turnkey end-to-end rerun of the full post-training campaign.
 - The paper build does not require access to the original remote training machine.
 - The post-training commands above are dry-run checks for orchestration and path health, not full retraining.
+- The default post-training checkpoint path is referenced by the training scripts, but the checkpoint blob itself is not included in this anonymous snapshot.

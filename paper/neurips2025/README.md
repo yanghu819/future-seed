@@ -30,7 +30,8 @@ The current submission build keeps the main content safely below the NeurIPS nin
 
 ## Files
 
-- `main.tex`: paper body with build-time placeholders for submission vs preprint style
+- `main.tex`: submission-ready anonymous paper source
+- `main_preprint.tex`: preprint-ready paper source
 - `appendix.tex`: appendices and reproducibility notes
 - `checklist.tex`: filled NeurIPS 2025 checklist
 - `references.bib`: bibliography
@@ -38,6 +39,8 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - `data/metrics.json`: curated metrics used by the paper draft
 - `tables/`: generated LaTeX tables
 - `REFERENCE_AUDIT.md`: official-source audit for all citations used in `main.tex`
+- `TASK_MATRIX.md`: mapping from paper rows to trainer scripts, datasets, and probe metrics
+- `METRICS_PROVENANCE.md`: provenance notes for the curated paper-side metrics snapshot
 
 ## Notes
 
@@ -47,3 +50,4 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
 - For the supplementary layout, see `ARTIFACT_GUIDE.md`.
 - `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).
+- The default post-training checkpoint path is referenced in the scripts but the checkpoint blob is not included in this anonymous snapshot.

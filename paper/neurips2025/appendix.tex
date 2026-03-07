@@ -1,6 +1,6 @@
 \section{Additional Experimental Details}
 \paragraph{Base setting.}
-All experiments use an RWKV7 backbone with prompt-time Future-Seed only: generation remains left-to-right and causal at decode time. The post-training scripts default to the checkpoint \texttt{assets/weights/rwkv7-g1d-0.1b-20260129-ctx8192.pth}. The real-task campaign uses a single NVIDIA RTX 4090 and serial quick-to-medium screening to conserve wall-clock budget.
+All experiments use an RWKV7 backbone with prompt-time Future-Seed only: generation remains left-to-right and causal at decode time. The post-training scripts default to the checkpoint \texttt{assets/weights/rwkv7-g1d-0.1b-20260129-ctx8192.pth}. That checkpoint path is referenced by the scripts but the blob itself is not included in this anonymous repository snapshot. The real-task campaign uses a single NVIDIA RTX 4090 and serial quick-to-medium screening to conserve wall-clock budget.
 
 \paragraph{Post-training search policy.}
 The late-stage queues use a two-stage policy: a quick stage for baseline and candidate screening, and a medium stage only for candidates that clear a positive gate. In the final fastdiscover queues, we prune candidates below $-0.5$pp at quick stage and only promote a top candidate above $+0.8$pp to medium budget. The dominant late-stage quick/medium budgets are 140/280 for ARC-like queues, 150/260 for SQuAD-like queues, and 160/260 for MBPP-longctx queues.
@@ -9,7 +9,10 @@ The late-stage queues use a two-stage policy: a quick stage for baseline and can
 The post-training audit does not search arbitrary architectures. It mainly compares a small family of prompt-time gates: scalar gates or head-wise gates starting at layer 6, 8, or 10, with variants such as fixed scalar gates, cosine-scheduled scalar gates, and head-wise gates. This narrow search space is deliberate: the goal is to test whether cross-layer state feedback survives repeated queue pressure, not to perform an unrestricted hyperparameter sweep.
 
 \paragraph{Task families.}
-The real-task audit covers protein secondary-structure labeling, multi-hop QA, code-generation-style long-context completion, ARC multiple choice, punctuation restoration, and a small set of constraint and planning proxies. The most stable family under this setup is protein secondary-structure labeling.
+The real-task audit covers protein secondary-structure spot labeling, Hotpot- or SQuAD-derived text restoration probes, punctuation restoration, long-context MBPP token-completion probes, ARC multiple-choice token probes, and a small set of constraint and planning proxies. The most stable family under this setup is protein secondary-structure spot labeling.
+
+\paragraph{Probe semantics.}
+All real-task numbers in the paper are teacher-forced answer/token-accuracy deltas on task-formatted probes. They are not benchmark end metrics such as EM, F1, or pass@k. A compact task matrix is provided in the supplementary repository snapshot at \texttt{paper/neurips2025/TASK\_MATRIX.md}.
 
 \section{Additional Synthetic Results}
 \input{tables/appendix_transformer.tex}
@@ -26,7 +29,7 @@ The synthetic suite supports a narrow but strong claim: Future-Seed is especiall
 The final narrow search focused on \texttt{mbpp\_longctx} and \texttt{arc\_mc} before a breadth pivot. The best closure-window results were \texttt{mbpp\_longctx\_seed38\_depthmix\_anchor} at $+5.01$pp and \texttt{arc\_mc\_seed260\_depthmix\_qfirst} at $+9.38$pp, but neither family held up as a clean held-out confirmation line. The strict confirmation queue failed on \texttt{mbpp\_longctx} and flipped negative on \texttt{arc\_mc}.
 
 \paragraph{Breadth pivot.}
-Rounds 805--808 were used to stop over-spending on the same \texttt{mbpp\_longctx} recipe family and test a wider set of real tasks. Only \texttt{hotpot} converted to medium-stage positives in that pivot, with a best gain of $+1.00$pp. \texttt{protein\_ss} and \texttt{squad} stayed near the promote gate but did not convert in those breadth rounds.
+Rounds 805--808 were used to stop over-spending on the same \texttt{mbpp\_longctx} recipe family and test a wider set of real tasks. Only \texttt{hotpot\_text\_restore} converted to medium-stage positives in that pivot, with a best gain of $+1.00$pp. \texttt{protein\_ss\_spot} and \texttt{squad\_text\_restore} stayed near the promote gate but did not convert in those breadth rounds.
 
 \section{Reproducibility and Artifact Layout}
 The repository snapshot and anonymous supplementary archive include:
@@ -37,11 +40,11 @@ The repository snapshot and anonymous supplementary archive include:
     \item the final queue file \path{_search_queue_round799_802_final_confirm.json};
     \item the final queue file \path{_search_queue_round803_804_mbpp_altconfirm.json};
     \item the final queue file \path{_search_queue_round805_808_breadth_roi.json};
-    \item the synced summary files for rounds 783--808 under \texttt{posttrain\_rwkv7/runs/};
-    \item the synced JSONL records for rounds 783--808 under \texttt{posttrain\_rwkv7/runs/};
+    \item the synced summary files for rounds 783--788 and 799--808 under \texttt{posttrain\_rwkv7/runs/};
+    \item the synced JSONL records for rounds 783--788 and 799--808 under \texttt{posttrain\_rwkv7/runs/};
     \item this paper package under \texttt{paper/neurips2025/}.
 \end{itemize}
-A compact build path is provided in the paper package via \texttt{build.sh}. The paper tables are regenerated deterministically from committed metrics in \texttt{data/metrics.json} using \texttt{render\_tables.py}. The build does not scrape external services.
+A compact build path is provided in the paper package via \texttt{build.sh}. The paper tables are regenerated deterministically from committed metrics in \texttt{data/metrics.json} using \texttt{render\_tables.py}. Those paper-side metrics are curated for this submission; they are not regenerated from the raw run archive by the current snapshot.
 
 \section{Assets, Licenses, and Scope}
 The real-task audit uses publicly available datasets and benchmark snapshots, including ARC, HotpotQA, SQuAD, MBPP, and a public protein secondary-structure dataset snapshot. We cite the original benchmark creators in the main paper. We do not claim to have completed a full legal audit of every upstream redistribution license inside this submission; this is one reason the checklist answer on explicit license coverage is conservative.

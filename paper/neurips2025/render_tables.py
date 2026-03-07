@@ -73,11 +73,11 @@ for r in DATA['posttrain']['main_summary']:
 """\\begin{table*}[t]
 \\centering
 \\small
-\\caption{Post-training summary across task families. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the full search archive.}
+\\caption{Curated post-training summary used in this paper. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the internal search archive snapshot behind the paper tables.}
 \\label{tab:posttrain-main}
 \\begin{tabular}{lcccc}
 \\toprule
-Task family & Best gain & Median gain & Positive med count & Current judgment \\\\
+Probe family & Best gain & Median gain & Positive med count & Current judgment \\\\
 \\midrule
 """ + "\n".join(rows) + """
 \\bottomrule

@@ -5,6 +5,8 @@ This repository is a unified Future-Seed paper-and-artifact snapshot with two ac
 - `rwkv-diff-future-seed/`: core Future-Seed method, toy stress tests, and prefix-infill experiments
 - `posttrain_rwkv7/`: single-GPU post-training search on real tasks, with auditable round logs
 
+The paper-facing post-training rows are teacher-forced token-accuracy probes, not benchmark end metrics such as EM, F1, or pass@k.
+
 If you are new here, choose one track first and follow that path end-to-end.
 
 ## Current Snapshot
@@ -13,9 +15,9 @@ The post-training campaign is closed through `round808`.
 
 Current judgment:
 - toy and synthetic constraint tasks clearly support Future-Seed
-- strongest repeatable real-task family under the current recipe: `protein_ss`
-- smaller positive real-task signals: `hotpot`, `mbpp_longctx`, `squad`, `punc`
-- high-upside but high-variance: `arc_mc`
+- strongest repeatable real-task family under the current recipe: `protein_ss_spot`
+- smaller positive real-task signals: `hotpot_text_restore`, `mbpp_longctx_probe`, `squad_text_restore`, `punc_restore`
+- high-upside but high-variance: `arc_mc_probe`
 - low-ROI or negative under the current recipe: `protein_contact`, `wiki`, `hotpot_longctx`, `countdown`, `nqueens`, `zebra`, `sat3`
 
 ## Start Here
@@ -32,10 +34,10 @@ Current judgment:
 
 | Bucket | Task | Best gain |
 |---|---|---:|
-| real-task, repeatable | `protein_ss` | `+8.14pp` |
-| real-task, small positive breadth signal | `hotpot` | `+4.20pp` |
-| real-task, promising but not locked | `mbpp_longctx` | `+10.00pp` |
-| real-task, high variance | `arc_mc` | `+20.83pp` |
+| real-task, repeatable | `protein_ss_spot` | `+8.14pp` |
+| real-task, small positive breadth signal | `hotpot_text_restore` | `+4.20pp` |
+| real-task, promising but not locked | `mbpp_longctx_probe` | `+10.00pp` |
+| real-task, high variance | `arc_mc_probe` | `+20.83pp` |
 | diagnostic constraint task | `graph_color` | `+8.33pp` |
 | appendix-only spike | `tsp_mask` | `+25.00pp` |
 
