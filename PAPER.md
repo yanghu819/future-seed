@@ -11,6 +11,7 @@ All real-task paper numbers are teacher-forced token-accuracy probe results, not
 - preprint source: [`paper/neurips2025/main_preprint.tex`](paper/neurips2025/main_preprint.tex)
 - appendix and checklist: [`paper/neurips2025/appendix.tex`](paper/neurips2025/appendix.tex), [`paper/neurips2025/checklist.tex`](paper/neurips2025/checklist.tex)
 - artifact layout: [`paper/neurips2025/ARTIFACT_GUIDE.md`](paper/neurips2025/ARTIFACT_GUIDE.md)
+- local reproduction boundary: [`paper/neurips2025/LOCAL_REPRO.md`](paper/neurips2025/LOCAL_REPRO.md)
 - reference audit: [`paper/neurips2025/REFERENCE_AUDIT.md`](paper/neurips2025/REFERENCE_AUDIT.md)
 - task matrix: [`paper/neurips2025/TASK_MATRIX.md`](paper/neurips2025/TASK_MATRIX.md)
 - metrics provenance: [`paper/neurips2025/METRICS_PROVENANCE.md`](paper/neurips2025/METRICS_PROVENANCE.md)

@@ -37,6 +37,7 @@ Notes:
 - The paper tables are generated from committed `paper/neurips2025/data/metrics.json`.
 - The current paper tables are a curated paper-side summary; see `METRICS_PROVENANCE.md`.
 - The row-to-trainer mapping is documented in `TASK_MATRIX.md`.
+- The local reproduction boundary is documented in `LOCAL_REPRO.md`.
 - The shipped round artifacts are the local snapshot for rounds `783-788` and `799-808`.
 - This anonymous snapshot supports paper rebuilds and artifact inspection, but not a turnkey end-to-end rerun of the full post-training campaign.
 - The paper build does not require access to any historical training machine.

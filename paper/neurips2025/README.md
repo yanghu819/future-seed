@@ -41,6 +41,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - `REFERENCE_AUDIT.md`: official-source audit for all citations used in `main.tex`
 - `TASK_MATRIX.md`: mapping from paper rows to trainer scripts, datasets, and probe metrics
 - `METRICS_PROVENANCE.md`: provenance notes for the curated paper-side metrics snapshot
+- `LOCAL_REPRO.md`: exact boundary of what this local snapshot can and cannot reproduce
 
 ## Notes
 
@@ -50,6 +51,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - The draft intentionally keeps `mbpp_longctx_probe` and `arc_mc_probe` as mixed evidence, not stable confirmation.
 - The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
 - For the supplementary layout, see `ARTIFACT_GUIDE.md`.
+- For reproduction boundaries and local sanity commands, see `LOCAL_REPRO.md`.
 - `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).
 - The shipped post-training round artifacts in this snapshot are `783-788` and `799-808`.
 - The default post-training checkpoint path is referenced in the scripts but the checkpoint blob is not included in this anonymous snapshot.
