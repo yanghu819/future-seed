@@ -1,18 +1,19 @@
 \begin{table*}[t]
 \centering
 \small
-\caption{Curated post-training summary used in this paper. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the internal search archive snapshot behind the paper tables.}
+\caption{Curated post-training summary used in this paper. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the internal search archive snapshot behind the paper tables. The final column summarizes whether a family survived the deliberate confirmation queues used near the end of the search.}
 \label{tab:posttrain-main}
-\begin{tabular}{lcccc}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lccccc}
 \toprule
-Probe family & Best gain & Median gain & Positive med count & Current judgment \\
+Probe family & Best gain & Median gain & Positive med count & Current judgment & Confirmation \\
 \midrule
-protein\_ss\_spot & +8.14pp & +2.18pp & 103/126 & strongest repeatable \\
-hotpot\_text\_restore & +4.20pp & +0.54pp & 35/53 & repeatable positive \\
-mbpp\_longctx\_probe & +10.00pp & +0.91pp & 53/87 & promising, unconfirmed \\
-arc\_mc\_probe & +20.83pp & +4.17pp & 70/116 & high upside, unstable \\
-squad\_text\_restore & +7.31pp & +0.55pp & 24/35 & mixed, not locked \\
-punc\_restore & +2.16pp & +0.36pp & 16/24 & small support \\
+protein\_ss\_spot & +8.14pp & +2.18pp & 103/126 & strongest repeatable & repeatable \\
+hotpot\_text\_restore & +4.20pp & +0.54pp & 35/53 & repeatable positive & repeatable \\
+mbpp\_longctx\_probe & +10.00pp & +0.91pp & 53/87 & promising, unconfirmed & strict confirm failed \\
+arc\_mc\_probe & +20.83pp & +4.17pp & 70/116 & high upside, unstable & held-out confirm failed \\
+squad\_text\_restore & +7.31pp & +0.55pp & 24/35 & mixed, not locked & not strictly confirmed \\
+punc\_restore & +2.16pp & +0.36pp & 16/24 & small support & historical support \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table*}

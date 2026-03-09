@@ -10,6 +10,7 @@ RUN_LINKS=1
 RUN_SELF_TEST=1
 RUN_DRY_RUN=1
 RUN_PAPER=1
+RUN_METRICS=1
 
 usage() {
   cat <<'EOF'
@@ -19,6 +20,7 @@ options:
   --skip-links       skip markdown link validation
   --skip-self-test   skip fastdiscover self-test
   --skip-dry-run     skip fastdiscover dry-run
+  --skip-metrics     skip paper metrics snapshot verification
   --skip-paper       skip paper submission build
   --queue PATH       override dry-run queue path
   --python PATH      override python executable
@@ -42,6 +44,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-dry-run)
       RUN_DRY_RUN=0
+      shift
+      ;;
+    --skip-metrics)
+      RUN_METRICS=0
       shift
       ;;
     --skip-paper)
@@ -130,6 +136,14 @@ if [[ "$RUN_DRY_RUN" -eq 1 ]]; then
   echo "[health] dry-run output saved to /tmp/future_seed_repo_health_dry_run.log"
 else
   echo "[health] fastdiscover dry-run: skipped"
+fi
+
+if [[ "$RUN_METRICS" -eq 1 ]]; then
+  echo "[health] paper metrics snapshot verification"
+  "$PY_BIN" paper/neurips2025/verify_metrics_snapshot.py >/tmp/future_seed_repo_health_metrics.log
+  echo "[health] metrics verification log saved to /tmp/future_seed_repo_health_metrics.log"
+else
+  echo "[health] paper metrics snapshot verification: skipped"
 fi
 
 if [[ "$RUN_PAPER" -eq 1 ]]; then

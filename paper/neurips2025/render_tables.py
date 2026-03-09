@@ -68,20 +68,24 @@ Weights & Anchor & n=24 & n=28 & n=32 & n=36 \\\\
 # Posttrain main table
 rows = []
 for r in DATA['posttrain']['main_summary']:
-    rows.append(f"{latex_escape(r['task'])} & +{fmt(r['best'])}pp & +{fmt(r['median'])}pp & {r['pos']}/{r['total']} & {latex_escape(r['judgment'])} {NL}")
+    rows.append(
+        f"{latex_escape(r['task'])} & +{fmt(r['best'])}pp & +{fmt(r['median'])}pp & "
+        f"{r['pos']}/{r['total']} & {latex_escape(r['judgment'])} & {latex_escape(r['confirm'])} {NL}"
+    )
 (TABLES / 'posttrain_main.tex').write_text(
 """\\begin{table*}[t]
 \\centering
 \\small
-\\caption{Curated post-training summary used in this paper. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the internal search archive snapshot behind the paper tables.}
+\\caption{Curated post-training summary used in this paper. Counts aggregate medium-stage Future-Seed vs. baseline comparisons from the internal search archive snapshot behind the paper tables. The final column summarizes whether a family survived the deliberate confirmation queues used near the end of the search.}
 \\label{tab:posttrain-main}
-\\begin{tabular}{lcccc}
+\\resizebox{\\linewidth}{!}{%
+\\begin{tabular}{lccccc}
 \\toprule
-Probe family & Best gain & Median gain & Positive med count & Current judgment \\\\
+Probe family & Best gain & Median gain & Positive med count & Current judgment & Confirmation \\\\
 \\midrule
 """ + "\n".join(rows) + """
 \\bottomrule
-\\end{tabular}
+\\end{tabular}}
 \\end{table*}
 """)
 

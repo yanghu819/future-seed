@@ -15,7 +15,7 @@ Primary sources:
 
 What the current evidence supports:
 - Future-Seed clearly helps on toy and synthetic tasks that stress future-aware constraint repair.
-- In post-training, the strongest repeatable real-task family under the current recipe is `protein_ss_spot`.
+- In post-training, the strongest repeatable family under the current recipe is `protein_ss_spot`.
 - `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
 - `mbpp_longctx_probe` remains promising but mixed rather than confirmed.
 - `arc_mc_probe` has strong upside but is still too high-variance for a stability claim.
@@ -36,12 +36,12 @@ What the current evidence supports:
 
 | Task family | Best med gain | Med median | Positive med count | Current judgment |
 |---|---:|---:|---:|---|
-| `protein_ss_spot` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable real-task family |
-| `hotpot_text_restore` | `+4.20pp` | `+0.54pp` | `35/53` | small but repeatable positive family |
-| `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, but strict confirmation failed |
-| `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, high variance; held-out confirm failed |
-| `squad_text_restore` | `+7.31pp` | `+0.55pp` | `24/35` | mixed; one strong spike, not locked |
-| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small positive, useful support only |
+| `protein_ss_spot` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable |
+| `hotpot_text_restore` | `+4.20pp` | `+0.54pp` | `35/53` | repeatable positive |
+| `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, unconfirmed |
+| `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, unstable |
+| `squad_text_restore` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
+| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small support |
 | `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task, not real-task evidence |
 | `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix only; spike did not confirm |
 | `countdown` | `-4.17pp` | `-4.17pp` | `0/2` | negative under current recipe |

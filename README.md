@@ -21,10 +21,10 @@ The post-training campaign is closed through `round808`.
 
 Current judgment:
 - toy and synthetic constraint tasks clearly support Future-Seed
-- strongest repeatable real-task family under the current recipe: `protein_ss_spot`
+- strongest repeatable family under the current recipe: `protein_ss_spot`
 - supporting positive real-task signals: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
-- mixed evidence only: `mbpp_longctx_probe`
-- high-upside but high-variance: `arc_mc_probe`
+- promising but unconfirmed: `mbpp_longctx_probe`
+- high-upside but unstable: `arc_mc_probe`
 - low-ROI or negative under the current recipe: `protein_contact`, `wiki`, `hotpot_longctx`, `countdown`, `nqueens`, `zebra`, `sat3`
 
 ## Start Here
@@ -43,9 +43,9 @@ Current judgment:
 | Bucket | Task | Best gain |
 |---|---|---:|
 | real-task, repeatable | `protein_ss_spot` | `+8.14pp` |
-| real-task, small positive breadth signal | `hotpot_text_restore` | `+4.20pp` |
-| real-task, promising but not locked | `mbpp_longctx_probe` | `+10.00pp` |
-| real-task, high variance | `arc_mc_probe` | `+20.83pp` |
+| real-task, repeatable positive | `hotpot_text_restore` | `+4.20pp` |
+| real-task, promising and unconfirmed | `mbpp_longctx_probe` | `+10.00pp` |
+| real-task, high upside but unstable | `arc_mc_probe` | `+20.83pp` |
 | diagnostic constraint task | `graph_color` | `+8.33pp` |
 | appendix-only spike | `tsp_mask` | `+25.00pp` |
 

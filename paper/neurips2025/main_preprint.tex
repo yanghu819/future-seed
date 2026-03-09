@@ -49,6 +49,9 @@ Let $h_t^{(\ell)}$ denote the hidden state of layer $\ell$ after processing toke
 \end{equation}
 where $g^{(\ell)}$ is a scalar or head-wise gate and $T$ is the sequence length. Decode remains causal; the mechanism only changes how deeper layers are initialized while scanning the prompt.
 
+\paragraph{Gate variants.}
+The post-training search only varies small prompt-time gates. In the scalar variant, each eligible layer has one learned logit whose sigmoid controls the amount of terminal-state feedback for that layer. In the head-wise variant, each eligible layer has one learned logit per head, again passed through a sigmoid. The late-stage queues mainly search layer starts in $\{6, 8, 10\}$, optional cosine or linear schedule modulation, and a small set of normalization / detach / clipping choices. Decode itself is never modified.
+
 \begin{figure}[t]
     \centering
     \fbox{\begin{minipage}{0.93\linewidth}
@@ -73,6 +76,9 @@ We evaluate RIGHTCOPY and CONSTR as minimal future-aware probes. We use KVSORT f
 \paragraph{Real-task audit.}
 The real-task campaign covers protein secondary-structure spot labeling, Hotpot- and SQuAD-derived text restoration, long-context MBPP code probes, ARC multiple-choice token probes, punctuation restoration, and a set of lower-ROI constraint proxies. The late-stage queues primarily compare scalar or head-wise prompt gates starting at layers 6, 8, or 10, with common candidates such as \texttt{scalar\_l8\_train1e4}, \texttt{scalar\_l8\_sched\_cos}, \texttt{head\_l8}, and depth-shifted variants.
 
+\paragraph{Concrete probe example.}
+In \texttt{hotpot\_text\_restore}, the prompt gives background notes plus a noisy, lowercased passage such as ``battle of hastings was fought in 1066 and william won'', and the target is the clean string ``The Battle of Hastings was fought in 1066, and William won.'' In \texttt{protein\_ss\_spot}, the prompt gives an amino-acid sequence and queried residue indices, and the target is one secondary-structure symbol per queried index. These are probe-style teacher-forced repairs, not benchmark EM/F1 or structure-prediction end metrics.
+
 \paragraph{Queue policy.}
 The final fastdiscover queues use a fixed two-stage policy. Quick stage budgets are task-dependent but typically 140--160 steps; medium stage budgets are typically 260--280 steps. We prune candidates below $-0.5$pp at quick stage, promote only the top candidate above $+0.8$pp, and then report medium-stage deltas against the same-task baseline.
 
@@ -93,7 +99,7 @@ The synthetic suite also exposes a negative result: simply restoring bidirection
 \section{Real-Task Post-Training Evidence}
 \input{tables/posttrain_main.tex}
 
-Table~\ref{tab:posttrain-main} summarizes the curated post-training archive used by this paper. These counts come from a sequential search archive, not from a balanced i.i.d. trial design, so they should be read as a stability audit rather than a classical multi-seed benchmark. All real-task rows are teacher-forced token-accuracy probes rather than benchmark end metrics such as EM, F1, or pass@k. Two patterns matter.
+Table~\ref{tab:posttrain-main} summarizes the curated post-training archive used by this paper. These counts come from a sequential search archive, not from a balanced i.i.d. trial design, so they should be read as a stability audit rather than a classical multi-seed benchmark. All real-task rows are teacher-forced token-accuracy probes rather than benchmark end metrics such as EM, F1, or pass@k. The final column records whether a family actually survived the deliberate confirmation queues near the end of the search. Two patterns matter.
 
 First, the mechanism is \emph{not} a universal gain switch. The strongest repeatable family is \texttt{protein\_ss\_spot}, which shows both a strong best case and a positive median over a large number of medium-stage comparisons. \texttt{hotpot\_text\_restore} is weaker in absolute magnitude but still consistently positive enough to remain a credible supporting family. \texttt{punc\_restore} and \texttt{squad\_text\_restore} also show small positive pockets.
 

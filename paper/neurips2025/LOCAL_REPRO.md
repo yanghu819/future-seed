@@ -8,6 +8,7 @@ This note defines what a reader can and cannot reproduce from the current local 
 
 ```bash
 cd paper/neurips2025
+python3 verify_metrics_snapshot.py
 ./build.sh submission
 ./build.sh preprint
 ```
@@ -40,6 +41,7 @@ python3 scripts/run_round77_82_fastdiscover.py \
 
 - paper sources and bibliography
 - curated paper-side metrics in `data/metrics.json`
+- a paper-side verification script in `verify_metrics_snapshot.py`
 - queue files for the final exploit / confirm / breadth windows
 - local snapshot summaries and JSONL records for rounds `783-788` and `799-808`
 - active trainers and orchestrators used by the paper-facing post-training audit
@@ -80,6 +82,7 @@ That means:
 
 - the PDF build is deterministic inside the repo
 - the tables are auditable against the committed snapshot
+- the shipped closure-window highlights are directly checked against committed round records by `verify_metrics_snapshot.py`
 - the build is not a guarantee that the entire historical search can be rerun from scratch
 
 For row semantics and provenance, see:

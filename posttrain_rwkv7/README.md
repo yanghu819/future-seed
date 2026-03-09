@@ -14,12 +14,12 @@ Current state:
 
 | Task family | Best med gain | Med median | Positive med count | Current judgment |
 |---|---:|---:|---:|---|
-| `protein_ss_spot` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable real-task family |
-| `hotpot_text_restore` | `+4.20pp` | `+0.54pp` | `35/53` | small but repeatable positive line |
-| `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, but strict confirmation failed |
-| `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, high variance |
+| `protein_ss_spot` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable |
+| `hotpot_text_restore` | `+4.20pp` | `+0.54pp` | `35/53` | repeatable positive |
+| `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, unconfirmed |
+| `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, unstable |
 | `squad_text_restore` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
-| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small support signal only |
+| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small support |
 | `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task only |
 | `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix-only spike |
 
@@ -66,7 +66,7 @@ Low-ROI or negative families under the current recipe:
 ## What The Repo Can Defend
 
 1. Future-Seed clearly helps on toy and synthetic constraint-repair tasks.
-2. In post-training, `protein_ss_spot` is the strongest repeatable real-task family under the current recipe.
+2. In post-training, `protein_ss_spot` is the strongest repeatable family under the current recipe.
 3. `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
 4. `mbpp_longctx_probe`, `arc_mc_probe`, and `tsp_mask` remain mixed or exploratory rather than stable headline evidence.
 
