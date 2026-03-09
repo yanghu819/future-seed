@@ -37,6 +37,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - `references.bib`: bibliography
 - `render_tables.py`: generates LaTeX tables from `data/metrics.json`
 - `verify_metrics_snapshot.py`: verifies paper-side metrics against the shipped README table and shipped round artifacts
+- `verify_submission_layout.py`: verifies total pages, content-page budget, and bibliography/appendix/checklist boundaries from the built logs
 - `data/metrics.json`: curated metrics used by the paper draft
 - `tables/`: generated LaTeX tables
 - `REFERENCE_AUDIT.md`: official-source audit for all citations used in `main.tex`
@@ -52,6 +53,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - The draft intentionally keeps `mbpp_longctx_probe` and `arc_mc_probe` as mixed evidence, not stable confirmation.
 - The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
 - `python3 verify_metrics_snapshot.py` checks that the curated paper metrics remain consistent with the shipped snapshot boundary.
+- `python3 verify_submission_layout.py` checks that the submission/preprint builds remain within the NeurIPS content-page budget.
 - For the supplementary layout, see `ARTIFACT_GUIDE.md`.
 - For reproduction boundaries and local sanity commands, see `LOCAL_REPRO.md`.
 - `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).

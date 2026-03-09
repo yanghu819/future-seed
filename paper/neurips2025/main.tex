@@ -42,7 +42,7 @@ Autoregressive Transformers~\citep{vaswani2017attention} and bidirectional maske
 This paper studies a minimal intervention, \textbf{Future-Seed}, in which the terminal state of layer $\ell-1$ becomes the initial state of layer $\ell$. The mechanism is tiny, architecture-local, and decode-compatible, but it creates an additional path for future information to influence early masked positions. We ask two practical questions: (1) does this mechanism genuinely help future-aware repair, and (2) does any of that signal survive when we move from toy constraints to real post-training tasks?
 
 \paragraph{Contributions.}
-We make three contributions. First, we present a compact mechanism view of Future-Seed as cross-layer state feedback for in-place constraint repair. Second, we show strong synthetic evidence on future-aware sanity tasks, permutation repair, and Sudoku. Third, we report a large single-GPU post-training audit with both positive and negative findings: \texttt{protein\_ss\_spot} is the strongest repeatable real-task family, while \texttt{hotpot\_text\_restore}, \texttt{punc\_restore}, and \texttt{squad\_text\_restore} show smaller positive pockets and \texttt{mbpp\_longctx\_probe}/\texttt{arc\_mc\_probe} remain mixed.
+We make three contributions. First, we present a compact mechanism view of Future-Seed as cross-layer state feedback for in-place constraint repair. Second, we show strong synthetic evidence on future-aware sanity tasks, permutation repair, and Sudoku. Third, we report a large single-GPU post-training audit with both positive and negative findings: \texttt{protein\_ss\_spot} is the strongest repeatable family, while \texttt{hotpot\_text\_restore}, \texttt{punc\_restore}, and \texttt{squad\_text\_restore} show smaller positive pockets and \texttt{mbpp\_longctx\_probe}/\texttt{arc\_mc\_probe} remain mixed.
 
 \section{Method}
 Let $h_t^{(\ell)}$ denote the hidden state of layer $\ell$ after processing token position $t$. In a standard recurrent stack, each layer starts from its own default initial state. Future-Seed instead injects the previous layer's terminal state into deeper layers:
@@ -157,13 +157,16 @@ The third line is task design. HotpotQA~\citep{yang2018hotpotqa}, ARC~\citep{cla
 Future-Seed adds a small amount of cross-layer state feedback to a recurrent stack, but its effect is highly structured. The synthetic evidence is strong: future-aware repair, permutation repair, and Sudoku all improve materially. The real-task evidence is narrower but still useful: \texttt{protein\_ss\_spot} is a robust positive family, while \texttt{hotpot\_text\_restore}, \texttt{punc\_restore}, and \texttt{squad\_text\_restore} provide supporting gains and \texttt{mbpp\_longctx\_probe}/\texttt{arc\_mc\_probe} remain mixed. The most defensible conclusion is therefore targeted rather than universal: Future-Seed is a practical mechanism for in-place constraint repair, and a promising but still unstable ingredient for broader post-training.
 
 \bibliographystyle{plainnat}
+\typeout{BIBSTART_PAGE=\thepage}
 \bibliography{references}
 
 \clearpage
+\typeout{APPENDIX_PAGE=\thepage}
 \appendix
 \input{appendix}
 
 \clearpage
+\typeout{CHECKLIST_PAGE=\thepage}
 \input{checklist}
 
 \end{document}

@@ -11,6 +11,7 @@ RUN_SELF_TEST=1
 RUN_DRY_RUN=1
 RUN_PAPER=1
 RUN_METRICS=1
+RUN_LAYOUT=1
 
 usage() {
   cat <<'EOF'
@@ -21,6 +22,7 @@ options:
   --skip-self-test   skip fastdiscover self-test
   --skip-dry-run     skip fastdiscover dry-run
   --skip-metrics     skip paper metrics snapshot verification
+  --skip-layout      skip NeurIPS paper layout/page-budget verification
   --skip-paper       skip paper submission build
   --queue PATH       override dry-run queue path
   --python PATH      override python executable
@@ -48,6 +50,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-metrics)
       RUN_METRICS=0
+      shift
+      ;;
+    --skip-layout)
+      RUN_LAYOUT=0
       shift
       ;;
     --skip-paper)
@@ -152,6 +158,14 @@ if [[ "$RUN_PAPER" -eq 1 ]]; then
   echo "[health] paper build log saved to /tmp/future_seed_repo_health_paper.log"
 else
   echo "[health] paper build: skipped"
+fi
+
+if [[ "$RUN_LAYOUT" -eq 1 ]]; then
+  echo "[health] paper layout verification"
+  "$PY_BIN" paper/neurips2025/verify_submission_layout.py >/tmp/future_seed_repo_health_layout.log
+  echo "[health] layout verification log saved to /tmp/future_seed_repo_health_layout.log"
+else
+  echo "[health] paper layout verification: skipped"
 fi
 
 echo "[health] done"
