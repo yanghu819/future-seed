@@ -15,12 +15,11 @@ The real-task audit covers protein secondary-structure spot labeling, Hotpot- or
 All real-task numbers in the paper are teacher-forced answer/token-accuracy deltas on task-formatted probes. They are not benchmark end metrics such as EM, F1, or pass@k. A compact task matrix is provided in the supplementary repository snapshot at \texttt{paper/neurips2025/TASK\_MATRIX.md}.
 
 \section{Additional Synthetic Results}
-\input{tables/appendix_transformer.tex}
 \input{tables/appendix_sudoku_phase.tex}
 \input{tables/appendix_sudoku_consistency.tex}
 
 \paragraph{Takeaway.}
-The synthetic suite supports a narrow but strong claim: Future-Seed is especially helpful when a recurrent model must repair a masked region using information that arrives on the right and must also satisfy a global consistency constraint. The Transformer baselines in Table~\ref{tab:appendix-transformer} show that simply restoring bidirectional visibility or decoding with Hungarian matching is not enough on KVSORT; the useful signal comes from the specific cross-layer state feedback path.
+The synthetic suite supports a narrow but strong claim: Future-Seed is especially helpful when a recurrent model must repair a masked region using information that arrives on the right and must also satisfy a global consistency constraint. The main paper already shows that simple bidirectional visibility and decoder-side matching do not solve KVSORT; the additional appendix tables here focus on Sudoku phase behavior and regularization sensitivity.
 
 \section{Additional Post-Training Results}
 \input{tables/appendix_negative_tasks.tex}

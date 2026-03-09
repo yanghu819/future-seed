@@ -123,11 +123,15 @@ For synthetic tasks we report direct task metrics such as token accuracy, exact 
 
 Table~\ref{tab:synthetic-main} shows the clearest mechanism evidence. Future-Seed improves both future-aware sanity tasks and produces a sharp failure-to-success transition on KVSORT. The Sudoku result shows that the mechanism is not restricted to one-dimensional copy tasks: it also helps a small structured constraint problem where row, column, and block consistency must be maintained jointly.
 
+\input{tables/synthetic_transformer_main.tex}
+
+Table~\ref{tab:synthetic-transformer-main} rules out a simpler story. Under the tested KVSORT setup, adding bidirectional visibility or decoder-side matching constraints can restore validity, but it does not recover key order or exact match. This matters because Future-Seed's strongest synthetic win is not merely ``more valid outputs''; it is a failure-to-solution transition on the actual constrained task.
+
 \input{tables/permfill_main.tex}
 
 PERMFILL reveals a complementary point. Future-Seed alone is not the whole story for out-of-distribution extrapolation, but a tiny anchor inside the masked span dramatically improves stability. This suggests that the mechanism is especially useful when the problem supplies at least a minimal alignment foothold and the model must propagate global consistency through depth rather than reconstruct structure from a fully unconstrained masked segment.
 
-The synthetic suite also exposes a negative result: simply restoring bidirectional visibility with Transformer baselines does not solve KVSORT under the tested setup. Appendix~A shows that Hungarian decoding can restore validity, but not ordering, which strengthens the case that Future-Seed is doing more than acting as a trivial decoder-side constraint patch.
+The synthetic suite therefore supports a narrower but stronger claim than generic ``non-causal is better'': what matters here is a specific path that lets deeper recurrent layers reuse a compact future summary while preserving the causal scan.
 
 \section{Real-Task Post-Training Evidence}
 \input{tables/posttrain_main.tex}
