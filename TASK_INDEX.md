@@ -36,3 +36,21 @@ This index maps task family to backend trainer, representative queue, and curren
 | rightcopy + constr sanity | `run.sh` | repo root |
 | QA sanity | `run_qa.sh` | repo root |
 | Sudoku / KVSORT / PERMFILL | `run_sudoku.sh`, `run_kvsort_baselines.sh`, `run_permfill_anchor_sweep.sh` | `rwkv-diff-future-seed/` |
+
+## Recommended Next Noncausal Targets
+
+This section is not a result table. It is the recommended task stack for future compute budgets.
+
+| Priority | Task family | Concrete target | Why it matters | Current fit |
+|---|---|---|---|---|
+| P0 | repo-level code infill | `RepoBench-C` / `RepoBench-P` | strongest current mechanism story on a real task; explicit future dependence | already partially implemented in `repobench_char1_diagnostics/` |
+| P0 | cross-file code completion | `CrossCodeEval` | real repository completion with later-file evidence | new harness, same mechanism family |
+| P0 | executable repository completion | `RepoExec` | upgrades code infill to execution-backed metrics | new harness, high-value benchmark |
+| P0 | executable function FIM | `HumanEval-FIM`, `MBPP-FIM` | masked middle code must satisfy both prefix and suffix | builder and metric upgrade from current `mbpp_longctx` line |
+| P0 | protein sequence labeling | `protein_ss_spot` | strongest repeatable real-task family already in repo | already active |
+| P1 | reasoning with late options | `ARC-Challenge` q-first / options-first | prompt interpretation should use later options | existing `arc_mc_probe`, metric already meaningful |
+| P1 | long-context multihop QA | `HotpotQA`, `2Wiki`, `MuSiQue` | answer depends on later supporting evidence in the prompt | `Hotpot` partially explored; builders still needed |
+| P1 | support restoration tasks | `hotpot_text_restore`, `squad_text_restore`, `punc_restore` | useful support evidence for future-aware repair | already active |
+| P2 | product-style repair | OpenAPI, Docker, GitHub Actions, SQL repair | realistic future-constrained editing and cross-file repair | internal benchmark design, appendix or artifact value |
+
+See [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md) for the full benchmark roadmap, 8xH100 plan, and 1000-GPU plan.

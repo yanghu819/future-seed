@@ -22,6 +22,7 @@ The post-training campaign is closed through `round808`.
 Current judgment:
 - toy and synthetic constraint tasks clearly support Future-Seed
 - `rwkv-diff-future-seed` now includes a real-task mechanism diagnostic on `RepoBench char1`; see [`rwkv-diff-future-seed/repobench_char1_diagnostics/`](rwkv-diff-future-seed/repobench_char1_diagnostics)
+- the forward-looking benchmark plan now lives in [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md)
 - strongest repeatable family under the current recipe: `protein_ss_spot`
 - supporting positive real-task signals: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
 - promising but unconfirmed: `mbpp_longctx_probe`
@@ -34,12 +35,13 @@ Current judgment:
 2. global results: [`RESULTS.md`](RESULTS.md)
 3. quick onboarding: [`GETTING_STARTED.md`](GETTING_STARTED.md)
 4. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
-5. RepoBench char1 method diagnostic: [`rwkv-diff-future-seed/repobench_char1_diagnostics/README.md`](rwkv-diff-future-seed/repobench_char1_diagnostics/README.md)
-6. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
-7. post-training archive chronology: [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
-8. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
-9. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
-10. submission-ready upload note: [`paper/neurips2025/SUBMISSION_READY.md`](paper/neurips2025/SUBMISSION_READY.md)
+5. forward task roadmap: [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md)
+6. RepoBench char1 method diagnostic: [`rwkv-diff-future-seed/repobench_char1_diagnostics/README.md`](rwkv-diff-future-seed/repobench_char1_diagnostics/README.md)
+7. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
+8. post-training archive chronology: [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
+9. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+10. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
+11. submission-ready upload note: [`paper/neurips2025/SUBMISSION_READY.md`](paper/neurips2025/SUBMISSION_READY.md)
 
 ## Most Important Results
 
@@ -86,6 +88,7 @@ python3 scripts/run_round77_82_fastdiscover.py \
 ## Repository Map
 
 - [`PAPER.md`](PAPER.md): paper-first entry for the unified repo
+- [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md): explicit benchmark and task roadmap for future noncausal work
 - [`rwkv-diff-future-seed/`](rwkv-diff-future-seed): method code and toy experiments
 - [`rwkv-diff-future-seed/repobench_char1_diagnostics/`](rwkv-diff-future-seed/repobench_char1_diagnostics): real-task noncausal mechanism diagnostic for the method track
 - [`posttrain_rwkv7/`](posttrain_rwkv7): post-training experiments, logs, and queues

@@ -9,6 +9,7 @@ All real-task paper numbers are teacher-forced token-accuracy probe results, not
 - anonymous paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
 - submission source: [`paper/neurips2025/main.tex`](paper/neurips2025/main.tex)
 - preprint source: [`paper/neurips2025/main_preprint.tex`](paper/neurips2025/main_preprint.tex)
+- forward task roadmap: [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md)
 - appendix and checklist: [`paper/neurips2025/appendix.tex`](paper/neurips2025/appendix.tex), [`paper/neurips2025/checklist.tex`](paper/neurips2025/checklist.tex)
 - artifact layout: [`paper/neurips2025/ARTIFACT_GUIDE.md`](paper/neurips2025/ARTIFACT_GUIDE.md)
 - local reproduction boundary: [`paper/neurips2025/LOCAL_REPRO.md`](paper/neurips2025/LOCAL_REPRO.md)
@@ -32,6 +33,7 @@ All real-task paper numbers are teacher-forced token-accuracy probe results, not
 ## Where The Numbers Come From
 
 - unified result index: [`RESULTS.md`](RESULTS.md)
+- forward benchmark and task recommendations: [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md)
 - post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
 - rolling round log: [`posttrain_rwkv7/results/_rolling_round_log.md`](posttrain_rwkv7/results/_rolling_round_log.md)
 - full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
