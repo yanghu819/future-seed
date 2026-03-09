@@ -1,114 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="520" viewBox="0 0 1320 520">
   <defs>
-    <linearGradient id="bgTop" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f7f9fc"/>
-      <stop offset="100%" stop-color="#eef3fb"/>
-    </linearGradient>
-    <linearGradient id="bgBottom" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fff8ef"/>
-      <stop offset="100%" stop-color="#fff1e2"/>
-    </linearGradient>
-    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#335caa"/>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f1f1f"/>
     </marker>
-    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c4492d"/>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c96a3d"/>
     </marker>
     <style>
-      .title { font: 700 32px Helvetica, Arial, sans-serif; fill: #13233a; }
-      .subtitle { font: 700 24px Helvetica, Arial, sans-serif; fill: #13233a; }
-      .body { font: 400 21px Helvetica, Arial, sans-serif; fill: #24364d; }
-      .small { font: 400 18px Helvetica, Arial, sans-serif; fill: #4e6179; }
-      .token { font: 600 20px Helvetica, Arial, sans-serif; fill: #17304d; }
-      .panel { stroke: #c6d3e5; stroke-width: 2; rx: 28; }
-      .state { fill: #ffffff; stroke: #89a9d8; stroke-width: 2; rx: 14; }
-      .seed { fill: #fff0e6; stroke: #d57b62; stroke-width: 2; rx: 14; }
-      .flow { stroke: #335caa; stroke-width: 5; fill: none; marker-end: url(#arrowBlue); }
-      .seedflow { stroke: #c4492d; stroke-width: 6; fill: none; marker-end: url(#arrowRed); }
-      .divider { stroke: #d9e1ec; stroke-width: 2; stroke-dasharray: 8 8; }
+      .label { font: 700 26px Helvetica, Arial, sans-serif; fill: #141414; }
+      .row { font: 500 18px Helvetica, Arial, sans-serif; fill: #5b5b5b; }
+      .token { font: 600 19px Helvetica, Arial, sans-serif; fill: #1b1b1b; }
+      .note { font: 500 18px Helvetica, Arial, sans-serif; fill: #5f5f5f; }
+      .box { fill: #ffffff; stroke: #222222; stroke-width: 1.8; rx: 14; }
+      .muted { fill: #f4f4f4; stroke: #a9a9a9; stroke-width: 1.8; rx: 14; }
+      .accent { fill: #fff5ef; stroke: #c96a3d; stroke-width: 2.2; rx: 14; }
+      .flow { stroke: #222222; stroke-width: 2.6; fill: none; marker-end: url(#arrow); }
+      .seed { stroke: #c96a3d; stroke-width: 3; fill: none; marker-end: url(#arrowAccent); }
+      .divider { stroke: #dedede; stroke-width: 1.5; }
+      .dash { stroke: #cfcfcf; stroke-width: 1.5; stroke-dasharray: 7 7; }
+      .gate { fill: #fff5ef; stroke: #c96a3d; stroke-width: 2; }
     </style>
   </defs>
 
-  <text x="60" y="56" class="title">Future-Seed for prompt-time recurrent prefill</text>
-  <text x="60" y="92" class="body">The baseline keeps each layer's default start state. Future-Seed only changes the start state of deeper layers; the within-layer scan and final decode stay causal.</text>
+  <line x1="56" y1="260" x2="1264" y2="260" class="divider"/>
 
-  <rect x="50" y="128" width="1300" height="250" class="panel" fill="url(#bgTop)"/>
-  <text x="84" y="172" class="subtitle">Baseline recurrent stack</text>
-  <text x="86" y="206" class="small">Each layer starts from its own default state and scans the prompt left to right.</text>
-  <line x1="84" y1="255" x2="1320" y2="255" class="divider"/>
-  <text x="88" y="284" class="small">Layer l-1</text>
-  <text x="88" y="352" class="small">Layer l</text>
+  <text x="72" y="128" class="label">Baseline</text>
+  <text x="72" y="388" class="label">Future-Seed</text>
 
-  <g transform="translate(240,0)">
-    <rect x="0" y="268" width="140" height="48" class="state"/>
-    <rect x="180" y="268" width="140" height="48" class="state"/>
-    <rect x="360" y="268" width="140" height="48" class="state"/>
-    <rect x="540" y="268" width="140" height="48" class="state"/>
-    <text x="70" y="299" text-anchor="middle" class="token">h1^(l-1)</text>
-    <text x="250" y="299" text-anchor="middle" class="token">h2^(l-1)</text>
-    <text x="430" y="299" text-anchor="middle" class="token">h3^(l-1)</text>
-    <text x="610" y="299" text-anchor="middle" class="token">hT^(l-1)</text>
+  <text x="220" y="118" class="row">layer l-1</text>
+  <text x="232" y="198" class="row">layer l</text>
+  <text x="220" y="378" class="row">layer l-1</text>
+  <text x="182" y="458" class="row">layer l >= l_start</text>
 
-    <rect x="0" y="336" width="140" height="48" class="state"/>
-    <rect x="180" y="336" width="140" height="48" class="state"/>
-    <rect x="360" y="336" width="140" height="48" class="state"/>
-    <rect x="540" y="336" width="140" height="48" class="state"/>
-    <text x="70" y="367" text-anchor="middle" class="token">h1^(l)</text>
-    <text x="250" y="367" text-anchor="middle" class="token">h2^(l)</text>
-    <text x="430" y="367" text-anchor="middle" class="token">h3^(l)</text>
-    <text x="610" y="367" text-anchor="middle" class="token">hT^(l)</text>
+  <rect x="340" y="86" width="126" height="48" class="box"/>
+  <rect x="530" y="86" width="126" height="48" class="box"/>
+  <rect x="790" y="86" width="126" height="48" class="box"/>
+  <text x="403" y="116" text-anchor="middle" class="token">h1</text>
+  <text x="593" y="116" text-anchor="middle" class="token">h2</text>
+  <text x="853" y="116" text-anchor="middle" class="token">hT</text>
+  <text x="710" y="117" text-anchor="middle" class="note">...</text>
+  <path d="M 466 110 L 530 110" class="flow"/>
+  <path d="M 656 110 L 790 110" class="flow"/>
 
-    <path d="M 140 292 L 180 292" class="flow"/>
-    <path d="M 320 292 L 360 292" class="flow"/>
-    <path d="M 500 292 L 540 292" class="flow"/>
-    <path d="M 140 360 L 180 360" class="flow"/>
-    <path d="M 320 360 L 360 360" class="flow"/>
-    <path d="M 500 360 L 540 360" class="flow"/>
-  </g>
+  <rect x="340" y="166" width="126" height="48" class="muted"/>
+  <rect x="530" y="166" width="126" height="48" class="box"/>
+  <rect x="790" y="166" width="126" height="48" class="box"/>
+  <text x="403" y="196" text-anchor="middle" class="token">init</text>
+  <text x="593" y="196" text-anchor="middle" class="token">h1</text>
+  <text x="853" y="196" text-anchor="middle" class="token">hT</text>
+  <text x="710" y="197" text-anchor="middle" class="note">...</text>
+  <path d="M 466 190 L 530 190" class="flow"/>
+  <path d="M 656 190 L 790 190" class="flow"/>
+  <text x="974" y="196" class="note">default start state</text>
 
-  <text x="1000" y="315" class="body">No cross-layer feedback path.</text>
-  <text x="1000" y="346" class="body">Suffix evidence must survive only</text>
-  <text x="1000" y="377" class="body">through the recurrent state itself.</text>
+  <rect x="340" y="346" width="126" height="48" class="box"/>
+  <rect x="530" y="346" width="126" height="48" class="box"/>
+  <rect x="790" y="346" width="126" height="48" class="box"/>
+  <text x="403" y="376" text-anchor="middle" class="token">h1</text>
+  <text x="593" y="376" text-anchor="middle" class="token">h2</text>
+  <text x="853" y="376" text-anchor="middle" class="token">hT</text>
+  <text x="710" y="377" text-anchor="middle" class="note">...</text>
+  <path d="M 466 370 L 530 370" class="flow"/>
+  <path d="M 656 370 L 790 370" class="flow"/>
 
-  <rect x="50" y="420" width="1300" height="290" class="panel" fill="url(#bgBottom)"/>
-  <text x="84" y="464" class="subtitle">Future-Seed recurrent stack</text>
-  <text x="86" y="498" class="small">For layers l ≥ l_start, the previous layer's terminal state seeds the next layer's start state through a small gate.</text>
-  <line x1="84" y1="545" x2="1320" y2="545" class="divider"/>
-  <text x="88" y="574" class="small">Layer l-1</text>
-  <text x="88" y="650" class="small">Layer l ≥ l_start</text>
+  <rect x="326" y="426" width="154" height="48" class="accent"/>
+  <rect x="530" y="426" width="126" height="48" class="box"/>
+  <rect x="790" y="426" width="126" height="48" class="box"/>
+  <text x="403" y="456" text-anchor="middle" class="token">g * hT</text>
+  <text x="593" y="456" text-anchor="middle" class="token">h1</text>
+  <text x="853" y="456" text-anchor="middle" class="token">hT</text>
+  <text x="710" y="457" text-anchor="middle" class="note">...</text>
+  <path d="M 480 450 L 530 450" class="flow"/>
+  <path d="M 656 450 L 790 450" class="flow"/>
 
-  <g transform="translate(240,0)">
-    <rect x="0" y="558" width="140" height="48" class="state"/>
-    <rect x="180" y="558" width="140" height="48" class="state"/>
-    <rect x="360" y="558" width="140" height="48" class="state"/>
-    <rect x="540" y="558" width="140" height="48" class="state"/>
-    <text x="70" y="589" text-anchor="middle" class="token">h1^(l-1)</text>
-    <text x="250" y="589" text-anchor="middle" class="token">h2^(l-1)</text>
-    <text x="430" y="589" text-anchor="middle" class="token">h3^(l-1)</text>
-    <text x="610" y="589" text-anchor="middle" class="token">hT^(l-1)</text>
+  <path d="M 853 394 C 1005 394, 1015 450, 480 450" class="seed"/>
+  <circle cx="1008" cy="417" r="18" class="gate"/>
+  <text x="1008" y="423" text-anchor="middle" class="token">g</text>
 
-    <rect x="0" y="634" width="140" height="48" class="seed"/>
-    <rect x="180" y="634" width="140" height="48" class="state"/>
-    <rect x="360" y="634" width="140" height="48" class="state"/>
-    <rect x="540" y="634" width="140" height="48" class="state"/>
-    <text x="70" y="665" text-anchor="middle" class="token">h0^(l)</text>
-    <text x="250" y="665" text-anchor="middle" class="token">h1^(l)</text>
-    <text x="430" y="665" text-anchor="middle" class="token">h2^(l)</text>
-    <text x="610" y="665" text-anchor="middle" class="token">hT^(l)</text>
-
-    <path d="M 140 582 L 180 582" class="flow"/>
-    <path d="M 320 582 L 360 582" class="flow"/>
-    <path d="M 500 582 L 540 582" class="flow"/>
-    <path d="M 140 658 L 180 658" class="flow"/>
-    <path d="M 320 658 L 360 658" class="flow"/>
-    <path d="M 500 658 L 540 658" class="flow"/>
-    <path d="M 610 606 C 690 606, 720 640, 100 658" class="seedflow"/>
-  </g>
-
-  <rect x="942" y="588" width="334" height="80" rx="18" fill="#fff7f0" stroke="#e3b29f" stroke-width="2"/>
-  <text x="1109" y="622" text-anchor="middle" class="body">seed h0^(l) ← g^(l) ⊙ hT^(l-1)</text>
-  <text x="1109" y="652" text-anchor="middle" class="small">Only this cross-layer initialization is new.</text>
-
-  <text x="940" y="696" class="body">Decode path is unchanged:</text>
-  <text x="1140" y="696" class="body">same left-to-right recurrent scan.</text>
+  <text x="974" y="456" class="note">same scan, new start state</text>
+  <line x1="963" y1="440" x2="963" y2="462" class="dash"/>
 </svg>
