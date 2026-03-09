@@ -18,9 +18,11 @@ MODEL = os.getenv("MODEL", "rwkv")  # rwkv|transformer|transformer_causal
 DECODE = os.getenv("DECODE", "argmax")  # argmax|hungarian
 REFINE_STEPS = env_int("REFINE_STEPS", 0)
 REFINE_CONF = env_float("REFINE_CONF", 0.90)
-BIN_MASK_MODE = os.getenv("BIN_MASK_MODE", "random")  # random|prefix|span
+BIN_MASK_MODE = os.getenv("BIN_MASK_MODE", "random")  # random|prefix|span|tagspan
 BIN_PREFIX_RATIO = env_float("BIN_PREFIX_RATIO", 0.50)
 BIN_SPAN_LEN = env_int("BIN_SPAN_LEN", 128)
+BIN_TAG_START = env_int("BIN_TAG_START", 1)
+BIN_TAG_END = env_int("BIN_TAG_END", 2)
 TRANS_N_HEAD = env_int("TRANS_N_HEAD", 8)
 TRANS_DROPOUT = env_float("TRANS_DROPOUT", 0.0)
 TRANS_FF_MULT = env_int("TRANS_FF_MULT", 4)
@@ -56,6 +58,17 @@ FUTURE_SEED_SCALE = env_float("FUTURE_SEED_SCALE", 1.0)
 FUTURE_SEED_ALPHA_INIT = env_float("FUTURE_SEED_ALPHA_INIT", 0.0)
 FUTURE_SEED_LAYER_START = env_int("FUTURE_SEED_LAYER_START", 0)
 FUTURE_SEED_S0_GATE = env_int("FUTURE_SEED_S0_GATE", 0) == 1
+FUTURE_SEED_INIT_ONLY = env_int("FUTURE_SEED_INIT_ONLY", 0) == 1
+FUTURE_SEED_COLLECT_MODE = os.getenv("FUTURE_SEED_COLLECT_MODE", "full")  # full|suffix|anchors|anchor_window
+FUTURE_SEED_ANCHOR_LEFT = env_int("FUTURE_SEED_ANCHOR_LEFT", 32)
+FUTURE_SEED_ANCHOR_RIGHT = env_int("FUTURE_SEED_ANCHOR_RIGHT", 64)
+FUTURE_SEED_GATE_MODE = os.getenv("FUTURE_SEED_GATE_MODE", "scalar")  # scalar|lowrank
+FUTURE_SEED_GATE_RANK = env_int("FUTURE_SEED_GATE_RANK", 4)
+FUTURE_SEED_GATE_EXAMPLE = env_int("FUTURE_SEED_GATE_EXAMPLE", 0) == 1
+if FUTURE_SEED_GATE_MODE not in {"scalar", "lowrank"}:
+    raise ValueError(f"Unsupported FUTURE_SEED_GATE_MODE={FUTURE_SEED_GATE_MODE}")
+if FUTURE_SEED_COLLECT_MODE not in {"full", "suffix", "anchors", "anchor_window"}:
+    raise ValueError(f"Unsupported FUTURE_SEED_COLLECT_MODE={FUTURE_SEED_COLLECT_MODE}")
 RWKV7_KERNEL = os.getenv("RWKV7_KERNEL", "python")
 RWKV7_CUDA_SRC = os.getenv("RWKV7_CUDA_SRC", "")
 TRAIN = env_int("TRAIN", 0) == 1
@@ -67,6 +80,10 @@ LOG_JSONL = os.getenv("LOG_JSONL", "")
 MASKACC_EVAL = env_int("MASKACC_EVAL", 0) == 1
 MASKACC_SPLIT = os.getenv("MASKACC_SPLIT", "val")
 MASKACC_ITERS = env_int("MASKACC_ITERS", 200)
+MASKACC_IGNORE_TOKEN = env_int("MASKACC_IGNORE_TOKEN", -1)
+SPANEM_EVAL = env_int("SPANEM_EVAL", 0) == 1
+SPANEM_SPLIT = os.getenv("SPANEM_SPLIT", "val")
+SPANEM_ITERS = env_int("SPANEM_ITERS", 200)
 REVERSE_TASK = env_int("REVERSE_TASK", 0) == 1
 REVERSE_DIGIT_MAX = env_int("REVERSE_DIGIT_MAX", 60)
 REVERSE_EVAL = env_int("REVERSE_EVAL", 0) == 1
@@ -174,6 +191,7 @@ FS_ENCDEC_LAMBDA = env_float("FS_ENCDEC_LAMBDA", 0.3)
 FS_ENCDEC_RATIO = env_float("FS_ENCDEC_RATIO", 0.5)
 FS_ENCDEC_STATE_DROPOUT = env_float("FS_ENCDEC_STATE_DROPOUT", 0.1)
 WEIGHTS_PATH = os.getenv("WEIGHTS_PATH", "weights/diffusion.pt")
+SAVE_WEIGHTS = env_int("SAVE_WEIGHTS", 1) == 1
 DATA_PATH = os.getenv("DATA_PATH", "../tiny-diffusion/data.txt")
 DATA_BIN = os.getenv("DATA_BIN", "")
 DATA_VAL_BIN = os.getenv("DATA_VAL_BIN", "")
@@ -1247,6 +1265,26 @@ elif use_bin:
             start = max(0, (SEQ_LEN - span_len) // 2)
             mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
             mask[:, start : start + span_len] = True
+        elif BIN_MASK_MODE == "tagspan":
+            mask = torch.zeros(DEVICE_BSZ, SEQ_LEN, dtype=torch.bool)
+            for b in range(DEVICE_BSZ):
+                row = y[b]
+                s_idx = (row == BIN_TAG_START).nonzero(as_tuple=False).flatten()
+                e_idx = (row == BIN_TAG_END).nonzero(as_tuple=False).flatten()
+                if s_idx.numel() == 0 or e_idx.numel() == 0:
+                    continue
+                s = int(s_idx[0].item())
+                e_after = e_idx[e_idx > s]
+                if e_after.numel() == 0:
+                    continue
+                e = int(e_after[0].item())
+                if e > s + 1:
+                    mask[b, s + 1 : e] = True
+            missing = ~mask.any(dim=1)
+            if missing.any():
+                span_len = max(1, min(SEQ_LEN, int(BIN_SPAN_LEN)))
+                start = max(0, (SEQ_LEN - span_len) // 2)
+                mask[missing, start : start + span_len] = True
         else:
             mask_probs = torch.rand(DEVICE_BSZ, 1)
             mask = torch.rand(DEVICE_BSZ, SEQ_LEN) < mask_probs
@@ -1300,7 +1338,7 @@ else:
         return x.to(device), y.to(device), mask.to(device)
 
 
-def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
+def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_gate):
     B, T, C = r.size()
     H = C // HEAD_SIZE
     N = HEAD_SIZE
@@ -1316,7 +1354,7 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
         else:
             s0f = state.float() * FUTURE_SEED_SCALE
             if FUTURE_SEED_S0_GATE:
-                s0f = s0f * future_seed_alpha.float()
+                s0f = s0f * future_seed_gate.float()
             s0 = s0f.to(torch.bfloat16)
         y, sT = RUN_CUDA_RWKV7_STATE(w4, q4, k4, v4, a4, b4, s0)
         return y.view(B, T, C).float(), sT.float()
@@ -1336,7 +1374,12 @@ def rwkv7_recurrence(r, w, k, v, a, b, state, future_seed_alpha):
     else:
         base = state
         state = state * FUTURE_SEED_SCALE
-        inject = base * future_seed_alpha
+        if FUTURE_SEED_S0_GATE:
+            state = state * future_seed_gate
+        if FUTURE_SEED_INIT_ONLY:
+            inject = 0.0
+        else:
+            inject = base * future_seed_gate
 
     y = torch.empty(B, T, H, N, device=r.device, dtype=torch.float32)
     s = state
@@ -1446,6 +1489,25 @@ class RWKV7(nn.Module):
             self.value.weight.data.uniform_(-0.5 / (self.n_embd**0.5), 0.5 / (self.n_embd**0.5))
             self.output.weight.data.zero_()
             self.future_seed_alpha = nn.Parameter(torch.full((1, self.n_head, 1, 1), FUTURE_SEED_ALPHA_INIT))
+            if FUTURE_SEED_GATE_MODE == "lowrank":
+                rank = max(1, FUTURE_SEED_GATE_RANK)
+                self.future_seed_gate_u = nn.Parameter(torch.zeros(1, self.n_head, HEAD_SIZE, rank))
+                self.future_seed_gate_v = nn.Parameter(torch.zeros(1, self.n_head, rank, HEAD_SIZE))
+            if FUTURE_SEED_GATE_EXAMPLE:
+                self.future_seed_example_gate = nn.Linear(args.n_embd, self.n_head, bias=True)
+                self.future_seed_example_gate.weight.data.zero_()
+                self.future_seed_example_gate.bias.data.fill_(4.0)
+
+    def _build_future_seed_gate(self, gate_source):
+        gate = torch.sigmoid(self.future_seed_alpha)
+        if FUTURE_SEED_GATE_MODE == "lowrank":
+            gate_logits = self.future_seed_alpha + torch.matmul(self.future_seed_gate_u, self.future_seed_gate_v)
+            gate = torch.sigmoid(gate_logits)
+        if FUTURE_SEED_GATE_EXAMPLE:
+            pooled = gate_source.mean(dim=1)
+            example_gate = torch.sigmoid(self.future_seed_example_gate(pooled)).view(gate_source.size(0), self.n_head, 1, 1)
+            gate = gate * example_gate
+        return gate
 
     def forward(self, x, v1, state):
         B, T, C = x.size()
@@ -1483,8 +1545,8 @@ class RWKV7(nn.Module):
         mk = torch.sigmoid(self.time_misc_k + (xk @ self.mk_w1) @ self.mk_w2)
         k = k * torch.clamp(w * mk, max=0).exp()
 
-        future_seed_alpha = torch.sigmoid(self.future_seed_alpha)
-        x, state = rwkv7_recurrence(r, w, k, v, -kk, kk * a, state, future_seed_alpha)
+        future_seed_gate = self._build_future_seed_gate(xv)
+        x, state = rwkv7_recurrence(r, w, k, v, -kk, kk * a, state, future_seed_gate)
         x = self.ln_x(x.view(B * T, C)).view(B, T, C)
 
         x = x + (
@@ -1550,25 +1612,108 @@ class GPT(nn.Module):
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         self.lm_head.weight.data.zero_()
 
-    def forward(self, idx, targets=None, mask=None, return_states=False, seed_states=None, seed_dropout=0.0):
+    def _embed(self, idx):
         x = self.transformer.wte(idx)
         x = x + (idx == mask_token_id).unsqueeze(-1).to(x.dtype) * self.mask_emb
         x = F.rms_norm(x, (x.size(-1),))
+        return x
+
+    def _build_external_seed_idx(self, idx):
+        if FUTURE_SEED_COLLECT_MODE == "full":
+            return None
+        if BIN_MASK_MODE != "tagspan":
+            return None
+
+        keep = torch.zeros_like(idx, dtype=torch.bool)
+        found = False
+        for b in range(idx.shape[0]):
+            row = idx[b]
+            if FUTURE_SEED_COLLECT_MODE == "suffix":
+                e_idx = (row == BIN_TAG_END).nonzero(as_tuple=False).flatten()
+                if e_idx.numel() == 0:
+                    continue
+                found = True
+                e = int(e_idx[0].item())
+                keep[b, e:] = True
+            elif FUTURE_SEED_COLLECT_MODE == "anchors":
+                s_idx = (row == BIN_TAG_START).nonzero(as_tuple=False).flatten()
+                e_idx = (row == BIN_TAG_END).nonzero(as_tuple=False).flatten()
+                if s_idx.numel() < 2 or e_idx.numel() < 2:
+                    continue
+                first_s = int(s_idx[0].item())
+                first_e_after = e_idx[e_idx > first_s]
+                if first_e_after.numel() == 0:
+                    continue
+                first_e = int(first_e_after[0].item())
+                any_anchor = False
+                for s_t in s_idx[1:]:
+                    s = int(s_t.item())
+                    if s <= first_e:
+                        continue
+                    e_after = e_idx[e_idx > s]
+                    if e_after.numel() == 0:
+                        continue
+                    e = int(e_after[0].item())
+                    keep[b, s : e + 1] = True
+                    any_anchor = True
+                if any_anchor:
+                    found = True
+            elif FUTURE_SEED_COLLECT_MODE == "anchor_window":
+                s_idx = (row == BIN_TAG_START).nonzero(as_tuple=False).flatten()
+                e_idx = (row == BIN_TAG_END).nonzero(as_tuple=False).flatten()
+                if s_idx.numel() < 2 or e_idx.numel() < 2:
+                    continue
+                s = int(s_idx[1].item())
+                e_after = e_idx[e_idx > s]
+                if e_after.numel() == 0:
+                    continue
+                e = int(e_after[0].item())
+                left = max(0, s - FUTURE_SEED_ANCHOR_LEFT)
+                right = min(row.shape[0], e + 1 + FUTURE_SEED_ANCHOR_RIGHT)
+                keep[b, left:right] = True
+                found = True
+
+        if not found:
+            return None
+
+        out = idx.clone()
+        out[~keep] = mask_token_id
+        return out
+
+    def _collect_seed_states(self, idx):
+        x = self._embed(idx)
+        x0 = x
+        v1 = None
+        states = []
+        for block in self.transformer.h:
+            x, v1, state1 = block(x, v1, x0, None)
+            states.append(state1)
+        return states
+
+    def forward(self, idx, targets=None, mask=None, return_states=False, seed_states=None, seed_dropout=0.0):
+        x = self._embed(idx)
         x0 = x
         v1 = None
         state0 = None
         states = [] if return_states else None
+
+        external_seed_states = seed_states
+        if self.future_seed and external_seed_states is None and not return_states:
+            seed_idx = self._build_external_seed_idx(idx)
+            if seed_idx is not None:
+                external_seed_states = self._collect_seed_states(seed_idx)
+
         for block in self.transformer.h:
             use_state = None
             if self.future_seed and block.layer_id >= FUTURE_SEED_LAYER_START:
-                if seed_states is not None:
-                    use_state = seed_states[block.layer_id]
+                if external_seed_states is not None:
+                    use_state = external_seed_states[block.layer_id]
                     if seed_dropout > 0:
                         use_state = F.dropout(use_state, p=seed_dropout, training=self.training)
                 else:
                     use_state = state0
             x, v1, state1 = block(x, v1, x0, use_state)
-            if self.future_seed and seed_states is None:
+            if self.future_seed and external_seed_states is None:
                 state0 = state1
             if return_states:
                 states.append(state1)
@@ -1845,6 +1990,9 @@ class Muon(torch.optim.Optimizer):
             curr_idx = 0
             for p in group["params"]:
                 g = p.grad
+                if g is None:
+                    curr_idx += p.numel()
+                    continue
                 state = self.state[p]
                 if "momentum_buffer" not in state:
                     state["momentum_buffer"] = torch.zeros_like(g)
@@ -1952,10 +2100,36 @@ def maskacc_eval(model, split="val", iters=200):
         xb, yb, mb = get_batch(split)
         logits, _ = model(xb, yb, mb)
         pred = logits.argmax(dim=-1)
-        correct += (pred[mb] == yb[mb]).sum().item()
-        total += mb.sum().item()
+        eval_mask = mb
+        if MASKACC_IGNORE_TOKEN >= 0:
+            eval_mask = eval_mask & (yb != MASKACC_IGNORE_TOKEN)
+        if eval_mask.any():
+            correct += (pred[eval_mask] == yb[eval_mask]).sum().item()
+            total += eval_mask.sum().item()
     model.train()
     return correct / total if total > 0 else 0.0
+
+
+@torch.no_grad()
+def spanem_eval(model, split="val", iters=200):
+    model.eval()
+    exact = 0
+    total = 0
+    for _ in range(iters):
+        xb, yb, mb = get_batch(split)
+        logits, _ = model(xb, yb, mb)
+        pred = logits.argmax(dim=-1)
+        eval_mask = mb
+        if MASKACC_IGNORE_TOKEN >= 0:
+            eval_mask = eval_mask & (yb != MASKACC_IGNORE_TOKEN)
+        for b in range(eval_mask.shape[0]):
+            bm = eval_mask[b]
+            if bm.any():
+                total += 1
+                if torch.equal(pred[b][bm], yb[b][bm]):
+                    exact += 1
+    model.train()
+    return exact / total if total > 0 else 0.0
 
 
 def _hungarian_min_cost(cost):
@@ -3198,6 +3372,128 @@ def mem_check(model, prompt_len=16):
     model.train()
 
 
+def _copy_into_shape(src, target):
+    out = target.clone()
+    src = src.to(dtype=out.dtype)
+    if src.ndim == out.ndim:
+        slices = tuple(slice(0, min(s, t)) for s, t in zip(src.shape, out.shape))
+        out[slices] = src[slices]
+        return out
+    src_flat = src.reshape(-1)
+    out_flat = out.view(-1)
+    n = min(src_flat.numel(), out_flat.numel())
+    out_flat[:n] = src_flat[:n]
+    return out
+
+
+def _adapt_blinkdl_rwkv7_state_dict(raw_sd, model_sd):
+    """
+    Map BlinkDL RWKV7 checkpoint keys (emb / blocks / head) to this repo's keys
+    (transformer.wte / transformer.h / lm_head).
+    """
+    if not raw_sd:
+        return raw_sd
+    if not any(k.startswith("blocks.") for k in raw_sd.keys()):
+        return raw_sd
+
+    mapped = {}
+    missed = 0
+
+    attn_src = {
+        "receptance.weight": "receptance.weight",
+        "key.weight": "key.weight",
+        "value.weight": "value.weight",
+        "output.weight": "output.weight",
+        "ln_x.weight": "ln_x.weight",
+        "ln_x.bias": "ln_x.bias",
+        "time_maa_x": "x_r",
+        "time_maa_rg": "x_g",
+        "time_maa_wa": "x_w",
+        "time_maa_k": "x_k",
+        "time_maa_v": "x_v",
+        "time_decay": "w0",
+        "time_aaaaa": "a0",
+        "time_misc_a": "a0",
+        "time_misc_k": "k_k",
+        "time_maa_w1": "w1",
+        "time_maa_w2": "w2",
+        "time_decay_w1": "v1",
+        "time_decay_w2": "v2",
+        "time_aaa_w1": "a1",
+        "time_aaa_w2": "a2",
+        "time_kkk_w1": "w1",
+        "time_kkk_w2": "w2",
+        "gate_w1": "g1",
+        "gate_w2": "g2",
+        "ma_w1": "v1",
+        "ma_w2": "v2",
+        "mk_w1": "v1",
+        "mk_w2": "v2",
+        "mv_w1": "v1",
+        "mv_w2": "v2",
+        "time_misc_v": "v0",
+        "time_faaaa": "r_k",
+    }
+
+    for mk, target in model_sd.items():
+        src_key = None
+
+        if mk == "transformer.wte.weight":
+            src_key = "emb.weight"
+        elif mk == "lm_head.weight":
+            src_key = "head.weight"
+        elif mk == "mask_emb":
+            src_key = None
+        elif mk.startswith("transformer.h."):
+            parts = mk.split(".")
+            layer_id = parts[2]
+            rest = ".".join(parts[3:])
+
+            if rest.startswith("ln1.") or rest.startswith("ln2."):
+                src_key = f"blocks.{layer_id}.{rest}"
+            elif rest == "lambdas":
+                src_key = None
+            elif rest == "mlp.c_fc.weight":
+                src_key = f"blocks.{layer_id}.ffn.key.weight"
+            elif rest == "mlp.c_proj.weight":
+                src_key = f"blocks.{layer_id}.ffn.value.weight"
+            elif rest.startswith("attn."):
+                suffix = rest[len("attn.") :]
+                if suffix in attn_src:
+                    src_key = f"blocks.{layer_id}.att.{attn_src[suffix]}"
+                elif suffix.startswith("future_seed_"):
+                    src_key = None
+                else:
+                    src_key = None
+
+        if src_key and src_key in raw_sd:
+            mapped[mk] = _copy_into_shape(raw_sd[src_key], target)
+        else:
+            missed += 1
+
+    print(f"[load] BlinkDL mapping applied: mapped={len(mapped)} missed={missed}")
+    return mapped
+
+
+def _load_state_dict_with_adapters(model, path, device):
+    raw = torch.load(path, map_location=device)
+    if isinstance(raw, dict) and "state_dict" in raw and isinstance(raw["state_dict"], dict):
+        raw = raw["state_dict"]
+    if not isinstance(raw, dict):
+        raise RuntimeError(f"Unsupported checkpoint format at {path}: {type(raw)}")
+
+    sd = _adapt_blinkdl_rwkv7_state_dict(raw, model.state_dict())
+    incompat = model.load_state_dict(sd, strict=False)
+    print(
+        f"[load] loaded {path} | missing={len(incompat.missing_keys)} "
+        f"unexpected={len(incompat.unexpected_keys)}"
+    )
+    if incompat.missing_keys:
+        print(f"[load] missing sample: {incompat.missing_keys[:8]}")
+    if incompat.unexpected_keys:
+        print(f"[load] unexpected sample: {incompat.unexpected_keys[:8]}")
+
+
 if __name__ == "__main__":
     os.makedirs(os.path.dirname(WEIGHTS_PATH), exist_ok=True)
     if MODEL == "transformer":
@@ -3231,18 +3527,24 @@ if __name__ == "__main__":
         for p in m.parameters():
             p.requires_grad = False
         for n, p in m.named_parameters():
-            if "future_seed_alpha" in n or n == "mask_emb":
+            if "future_seed_" in n or n == "mask_emb":
                 p.requires_grad = True
 
     print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")
     print(sum(p.numel() for p in m.parameters() if p.requires_grad) / 1e6, "M trainable")
 
     if os.path.exists(WEIGHTS_PATH):
-        m.load_state_dict(torch.load(WEIGHTS_PATH, map_location=device))
+        _load_state_dict_with_adapters(m, WEIGHTS_PATH, device)
 
     run_meta = dict(
         model=MODEL,
         future_seed=int(bool(FUTURE_SEED)),
+        future_seed_init_only=int(bool(FUTURE_SEED_INIT_ONLY)),
+        future_seed_s0_gate=int(bool(FUTURE_SEED_S0_GATE)),
+        future_seed_collect_mode=str(FUTURE_SEED_COLLECT_MODE),
+        future_seed_gate_mode=str(FUTURE_SEED_GATE_MODE),
+        future_seed_gate_rank=int(FUTURE_SEED_GATE_RANK),
+        future_seed_gate_example=int(bool(FUTURE_SEED_GATE_EXAMPLE)),
         attn_fs=int(bool(ATTN_FS)),
         attn_fs_collector=str(ATTN_FS_COLLECTOR),
         attn_fs_gating=int(bool(ATTN_FS_GATING)),
@@ -3399,6 +3701,10 @@ if __name__ == "__main__":
                     acc = maskacc_eval(m, split=MASKACC_SPLIT, iters=MASKACC_ITERS)
                     print(f"maskacc_{MASKACC_SPLIT} {acc:.4f}")
                     rec[f"maskacc_{MASKACC_SPLIT}"] = float(acc)
+                if SPANEM_EVAL:
+                    em = spanem_eval(m, split=SPANEM_SPLIT, iters=SPANEM_ITERS)
+                    print(f"spanem_{SPANEM_SPLIT} {em:.4f}")
+                    rec[f"spanem_{SPANEM_SPLIT}"] = float(em)
                 if QA_EVAL:
                     acc_qa = qa_eval(m, mode="qa")
                     acc_aq = qa_eval(m, mode="aq")
@@ -3457,7 +3763,10 @@ if __name__ == "__main__":
 
         print(f"Total training time: {time.time() - start:.2f} seconds")
         _jsonl_append(LOG_JSONL, {"event": "end", **run_meta, "time_sec": float(time.time() - start)})
-        torch.save(m.state_dict(), WEIGHTS_PATH)
+        if SAVE_WEIGHTS:
+            torch.save(m.state_dict(), WEIGHTS_PATH)
+        else:
+            print(f"[save] skipped SAVE_WEIGHTS=0 (would write: {WEIGHTS_PATH})")
     elif not os.path.exists(WEIGHTS_PATH):
         raise FileNotFoundError(f"WEIGHTS_PATH not found and TRAIN=0: {WEIGHTS_PATH}")
 
@@ -3479,6 +3788,9 @@ if __name__ == "__main__":
     if (not TRAIN) and MASKACC_EVAL:
         acc = maskacc_eval(m, split=MASKACC_SPLIT, iters=MASKACC_ITERS)
         print(f"maskacc_{MASKACC_SPLIT} {acc:.4f}")
+    if (not TRAIN) and SPANEM_EVAL:
+        em = spanem_eval(m, split=SPANEM_SPLIT, iters=SPANEM_ITERS)
+        print(f"spanem_{SPANEM_SPLIT} {em:.4f}")
 
     if MEM_CHECK:
         mem_check(m, prompt_len=PROMPT_LEN)
