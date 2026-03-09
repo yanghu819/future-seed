@@ -15,6 +15,8 @@
 \usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 
 \title{Future-Seed: Cross-Layer State Feedback for In-Place Constraint Repair}
 
@@ -27,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-Recurrent and state-space language models are attractive for long-context processing, but they are structurally weak at \emph{in-place constraint repair}: early masked positions must often depend on information located to their right, while one-shot parallel infill easily violates global consistency. We study \textbf{Future-Seed}, a lightweight cross-layer state feedback mechanism that initializes each layer with the previous layer's terminal state, effectively creating a ``re-read across depth'' pathway without changing the causal scan at decode time. On hard synthetic tasks, Future-Seed consistently improves future-aware repair, turns KVSORT from exact failure to exact recovery, and materially improves PERMFILL length extrapolation when paired with a tiny anchor. We then audit the mechanism in a single-GPU post-training campaign across protein secondary-structure spot labeling, Hotpot- and SQuAD-derived text-restoration probes, MBPP long-context code probes, ARC multiple-choice token probes, and punctuation restoration. All real-task numbers are teacher-forced token-accuracy deltas rather than benchmark end metrics. The strongest repeatable real-task family is protein secondary-structure spot labeling, with smaller positive pockets on Hotpot-derived text restoration, punctuation restoration, and SQuAD-derived text restoration. By contrast, MBPP-longctx and ARC token probes show promising but unstable gains and fail strict held-out confirmation. The combined evidence supports Future-Seed as a targeted mechanism for constraint repair rather than a universal post-training booster.
+Recurrent and state-space language models are attractive for long-context processing, but they are structurally weak at \emph{in-place constraint repair}: early masked positions may depend on suffix evidence, while one-shot parallel infill often violates global consistency. We study \textbf{Future-Seed}, a lightweight cross-layer state feedback mechanism that initializes layer $\ell$ with the terminal state of layer $\ell-1$, creating a cheap ``re-read across depth'' path without changing the causal decode order. On synthetic tasks, Future-Seed consistently improves future-aware repair, turns KVSORT from exact failure to exact recovery, and materially improves PERMFILL extrapolation when paired with a tiny anchor. We then audit the same mechanism in a single-GPU post-training campaign across protein secondary-structure spot labeling, Hotpot- and SQuAD-derived text restoration, MBPP long-context code probes, ARC multiple-choice token probes, and punctuation restoration. All real-task numbers are teacher-forced token-accuracy deltas rather than benchmark end metrics. The strongest repeatable family is protein secondary-structure spot labeling, with smaller supporting gains on Hotpot-derived text restoration, punctuation restoration, and SQuAD-derived text restoration. By contrast, MBPP-longctx and ARC token probes show upside but fail strict confirmation. The resulting evidence supports Future-Seed as a targeted repair mechanism, not a universal post-training booster.
 \end{abstract}
 
 \section{Introduction}
@@ -54,13 +56,44 @@ The post-training search only varies small prompt-time gates. In the scalar vari
 
 \begin{figure}[t]
     \centering
-    \fbox{\begin{minipage}{0.93\linewidth}
-    \small
-    \textbf{Baseline:} each layer starts from its own empty initial state and scans left-to-right once.\\[2mm]
-    \textbf{Future-Seed:} layer $\ell$ receives the terminal summary from layer $\ell-1$, so early positions in deeper layers can condition on information already aggregated from the whole prompt.\\[2mm]
-    In practice, this acts like a cheap ``re-read across depth'' path for future-aware masked repair.
-    \end{minipage}}
-    \caption{Mechanism sketch. Future-Seed preserves the causal scan but adds cross-layer state feedback.}
+    \begin{tikzpicture}[
+        >=Latex,
+        x=1.0cm,
+        y=0.9cm,
+        state/.style={draw, rounded corners=2pt, minimum width=0.72cm, minimum height=0.42cm, fill=blue!6},
+        seedstate/.style={draw, rounded corners=2pt, minimum width=0.72cm, minimum height=0.42cm, fill=red!10},
+        note/.style={font=\scriptsize},
+        label/.style={font=\small\bfseries}
+    ]
+        \node[label, anchor=west] at (-0.6, 2.2) {Baseline stack};
+        \node[note, anchor=east] at (-0.2, 1.6) {$\ell - 1$};
+        \node[note, anchor=east] at (-0.2, 0.9) {$\ell$};
+        \foreach \x/\txt in {0/1,1/2,2/3,3/T} {
+            \node[state] (bup\x) at (\x,1.6) {$h_{\txt}^{(\ell-1)}$};
+            \node[state] (blo\x) at (\x,0.9) {$h_{\txt}^{(\ell)}$};
+        }
+        \foreach \a/\b in {0/1,1/2,2/3} {
+            \draw[->, thick] (bup\a) -- (bup\b);
+            \draw[->, thick] (blo\a) -- (blo\b);
+        }
+        \node[note, anchor=west] at (3.55, 1.25) {each layer starts from its own default state};
+
+        \node[label, anchor=west] at (-0.6, -0.1) {Future-Seed stack};
+        \node[note, anchor=east] at (-0.2, -0.7) {$\ell - 1$};
+        \node[note, anchor=east] at (-0.2, -1.4) {$\ell \ge \ell_{\mathrm{start}}$};
+        \foreach \x/\txt in {0/1,1/2,2/3,3/T} {
+            \node[state] (fup\x) at (\x,-0.7) {$h_{\txt}^{(\ell-1)}$};
+            \node[state] (flo\x) at (\x,-1.4) {$h_{\txt}^{(\ell)}$};
+        }
+        \node[seedstate] (seed0) at (0,-1.4) {$h_{0}^{(\ell)}$};
+        \foreach \a/\b in {0/1,1/2,2/3} {
+            \draw[->, thick] (fup\a) -- (fup\b);
+            \draw[->, thick] (flo\a) -- (flo\b);
+        }
+        \draw[->, very thick, red!70!black] (fup3.south) to[out=-80,in=20] node[note, right, pos=0.55] {$g^{(\ell)} \odot h_T^{(\ell-1)}$} (seed0.east);
+        \node[note, anchor=west] at (3.55, -1.05) {terminal summary seeds the next layer's initial state};
+    \end{tikzpicture}
+    \caption{Future-Seed preserves the left-to-right causal scan inside each layer, but for $\ell \ge \ell_{\mathrm{start}}$ it replaces the deeper layer's default start state with gated feedback from the previous layer's terminal state. This creates a compact future-aware path without changing decode order.}
     \label{fig:mechanism}
 \end{figure}
 
@@ -116,7 +149,9 @@ There are still two useful lessons in these negatives. One is scientific: Future
 The positive side of this work is better controllable structured editing: code completion, constrained infill, and sequence repair all benefit from mechanisms that preserve global consistency. The risk is that stronger infill and repair mechanisms could also help misuse cases such as stealthier document editing, constraint-satisfying synthetic content, or automated puzzle/benchmark overfitting. We therefore recommend releasing the mechanism together with explicit limitations, exact reproduction commands, and a clear separation between strong synthetic evidence and mixed real-task evidence.
 
 \section{Related Work}
-Future-Seed sits between three lines of work. The first is recurrent or state-space sequence modeling, including RWKV~\citep{peng2023rwkv} and Mamba~\citep{gu2024mamba}. The second is masked, span-corruption, and edit-based generation, including BERT~\citep{devlin2019bert}, T5~\citep{raffel2020t5}, iterative refinement~\citep{lee2018iterative}, Mask-Predict~\citep{ghazvininejad2019maskpredict}, Levenshtein Transformer~\citep{gu2019levenshtein}, and MaskGIT~\citep{chang2022maskgit}. The third is benchmark families that stress multi-hop reasoning, code completion, and protein sequence modeling, including HotpotQA~\citep{yang2018hotpotqa}, ARC~\citep{clark2018arc}, SQuAD~\citep{rajpurkar2016squad}, MBPP~\citep{austin2021program}, TAPE~\citep{rao2019tape}, and large-scale protein language modeling~\citep{rives2021biological}. Our contribution is not a new benchmark or a new backbone, but a controlled study of one lightweight cross-layer mechanism across both synthetic repair tasks and a realistic post-training search archive.
+Future-Seed sits at the intersection of three lines of work. The first is recurrent or state-space sequence modeling, where compact hidden-state summaries must carry long-range information across a causal scan, as in RWKV~\citep{peng2023rwkv} and Mamba~\citep{gu2024mamba}. The second is bidirectional corruption and iterative editing, including BERT~\citep{devlin2019bert}, T5 span corruption~\citep{raffel2020t5}, iterative refinement~\citep{lee2018iterative}, Mask-Predict~\citep{ghazvininejad2019maskpredict}, Levenshtein Transformer~\citep{gu2019levenshtein}, and MaskGIT~\citep{chang2022maskgit}. Those methods largely change the objective, the decoding procedure, or both. By contrast, Future-Seed keeps the recurrent causal scan and changes only how deeper layers are initialized.
+
+The third line is task design. HotpotQA~\citep{yang2018hotpotqa}, ARC~\citep{clark2018arc}, and SQuAD~\citep{rajpurkar2016squad} motivate restoration-style probes with distributed evidence. MBPP~\citep{austin2021program} provides a code setting where long-context token repair is measurable but high variance. TAPE~\citep{rao2019tape} and large protein language models~\citep{rives2021biological} motivate protein sequence probes, where bidirectional sequence context is often valuable even when the reported metric here remains a small teacher-forced spot labeler. Our contribution is therefore not a new benchmark or a new backbone, but a controlled study of one lightweight cross-layer feedback mechanism across both synthetic repair tasks and a realistic post-training search archive.
 
 \section{Conclusion}
 Future-Seed adds a small amount of cross-layer state feedback to a recurrent stack, but its effect is highly structured. The synthetic evidence is strong: future-aware repair, permutation repair, and Sudoku all improve materially. The real-task evidence is narrower but still useful: \texttt{protein\_ss\_spot} is a robust positive family, while \texttt{hotpot\_text\_restore}, \texttt{punc\_restore}, and \texttt{squad\_text\_restore} provide supporting gains and \texttt{mbpp\_longctx\_probe}/\texttt{arc\_mc\_probe} remain mixed. The most defensible conclusion is therefore targeted rather than universal: Future-Seed is a practical mechanism for in-place constraint repair, and a promising but still unstable ingredient for broader post-training.
