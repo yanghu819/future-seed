@@ -1,11 +1,11 @@
 # Submission Ready
 
-- Generated at (UTC): `2026-03-09 08:05:25Z`
+- Generated at (UTC): `2026-03-09 11:27:32Z`
 - Submission PDF: `paper/neurips2025/build/neurips2025-submission.pdf`
 - Preprint PDF: `paper/neurips2025/build/neurips2025-preprint.pdf`
 - Supplementary ZIP: `paper/neurips2025/dist/future-seed-neurips2025-supplementary.zip`
 - SHA256 sums: `paper/neurips2025/dist/SHA256SUMS.txt`
-- Supplementary ZIP size: `369.3KB`
+- Supplementary ZIP size: `374.5KB`
 
 ## Official Submission References
 

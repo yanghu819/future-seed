@@ -15,14 +15,14 @@
 \usepackage{xcolor}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
+\usepackage{array}
+\graphicspath{{figures/}}
 
 \title{Future-Seed: Cross-Layer State Feedback for In-Place Constraint Repair}
 
 \author{
-  Future-Seed Project Team \\
-  Author information omitted in repository snapshot
+  Anonymous Authors \\
+  Paper under double-blind review
 }
 
 \begin{document}
@@ -54,50 +54,42 @@ where $g^{(\ell)}$ is a scalar or head-wise gate and $T$ is the sequence length.
 \paragraph{Gate variants.}
 The post-training search only varies small prompt-time gates. In the scalar variant, each eligible layer has one learned logit whose sigmoid controls the amount of terminal-state feedback for that layer. In the head-wise variant, each eligible layer has one learned logit per head, again passed through a sigmoid. The late-stage queues mainly search layer starts in $\{6, 8, 10\}$, optional cosine or linear schedule modulation, and a small set of normalization / detach / clipping choices. Decode itself is never modified.
 
-\begin{figure}[t]
+\begin{figure*}[t]
     \centering
-    \begin{tikzpicture}[
-        >=Latex,
-        x=1.0cm,
-        y=0.9cm,
-        state/.style={draw, rounded corners=2pt, minimum width=0.72cm, minimum height=0.42cm, fill=blue!6},
-        seedstate/.style={draw, rounded corners=2pt, minimum width=0.72cm, minimum height=0.42cm, fill=red!10},
-        note/.style={font=\scriptsize},
-        label/.style={font=\small\bfseries}
-    ]
-        \node[label, anchor=west] at (-0.6, 2.2) {Baseline stack};
-        \node[note, anchor=east] at (-0.2, 1.6) {$\ell - 1$};
-        \node[note, anchor=east] at (-0.2, 0.9) {$\ell$};
-        \foreach \x/\txt in {0/1,1/2,2/3,3/T} {
-            \node[state] (bup\x) at (\x,1.6) {$h_{\txt}^{(\ell-1)}$};
-            \node[state] (blo\x) at (\x,0.9) {$h_{\txt}^{(\ell)}$};
-        }
-        \foreach \a/\b in {0/1,1/2,2/3} {
-            \draw[->, thick] (bup\a) -- (bup\b);
-            \draw[->, thick] (blo\a) -- (blo\b);
-        }
-        \node[note, anchor=west] at (3.55, 1.25) {each layer starts from its own default state};
-
-        \node[label, anchor=west] at (-0.6, -0.1) {Future-Seed stack};
-        \node[note, anchor=east] at (-0.2, -0.7) {$\ell - 1$};
-        \node[note, anchor=east] at (-0.2, -1.4) {$\ell \ge \ell_{\mathrm{start}}$};
-        \foreach \x/\txt in {0/1,1/2,2/3,3/T} {
-            \node[state] (fup\x) at (\x,-0.7) {$h_{\txt}^{(\ell-1)}$};
-            \node[state] (flo\x) at (\x,-1.4) {$h_{\txt}^{(\ell)}$};
-        }
-        \node[seedstate] (seed0) at (0,-1.4) {$h_{0}^{(\ell)}$};
-        \foreach \a/\b in {0/1,1/2,2/3} {
-            \draw[->, thick] (fup\a) -- (fup\b);
-            \draw[->, thick] (flo\a) -- (flo\b);
-        }
-        \draw[->, very thick, red!70!black] (fup3.south) to[out=-80,in=20] node[note, right, pos=0.55] {$g^{(\ell)} \odot h_T^{(\ell-1)}$} (seed0.east);
-        \node[note, anchor=west] at (3.55, -1.05) {terminal summary seeds the next layer's initial state};
-    \end{tikzpicture}
-    \caption{Future-Seed preserves the left-to-right causal scan inside each layer, but for $\ell \ge \ell_{\mathrm{start}}$ it replaces the deeper layer's default start state with gated feedback from the previous layer's terminal state. This creates a compact future-aware path without changing decode order.}
+    \includegraphics[width=\textwidth]{future_seed_mechanism.pdf}
+    \caption{SVG mechanism diagram for Future-Seed. The baseline stack resets each layer to its own default start state. Future-Seed keeps the same within-layer left-to-right scan and the same decode rule, but for $\ell \ge \ell_{\mathrm{start}}$ it seeds the deeper layer with gated feedback from the previous layer's terminal state.}
     \label{fig:mechanism}
-\end{figure}
+\end{figure*}
 
 This design targets a specific failure mode: masked regions whose correct values depend on suffix information and whose outputs must satisfy a global constraint, such as permutation validity or Sudoku consistency. It is not intended as a universal replacement for attention or iterative refinement.
+
+
+\begin{table}[t]
+\centering
+\small
+\caption{Prompt-time Future-Seed prefill in the causal-decode setting. Only line 3 differs from the baseline recurrent stack.}
+\label{tab:future-seed-algorithm}
+\begin{tabular}{r p{0.82\columnwidth}}
+\toprule
+\multicolumn{2}{l}{\textbf{Input}: prompt tokens $x_{1:T}$, recurrent layers $f^{(1:L)}$, start layer $\ell_{\mathrm{start}}$, gates $g^{(\ell)}$} \\
+\multicolumn{2}{l}{\textbf{Output}: top-layer prompt state used by the unchanged causal decoder} \\
+\midrule
+1 & Initialize $s_0^{(\ell)} \leftarrow 0$ for every layer $\ell$. \\
+2 & \textbf{for} $\ell = 1, \ldots, L$ \textbf{do} \\
+3 & \quad \textbf{if} $\ell \ge \ell_{\mathrm{start}}$ \textbf{then} seed $s_0^{(\ell)} \leftarrow g^{(\ell)} \odot s_T^{(\ell-1)}$. \\
+4 & \quad \textbf{for} $t = 1, \ldots, T$ \textbf{do} \\
+5 & \qquad $(h_t^{(\ell)}, s_t^{(\ell)}) \leftarrow f^{(\ell)}(x_t, s_{t-1}^{(\ell)})$. \\
+6 & \quad \textbf{end for} \\
+7 & \textbf{end for} \\
+8 & Decode exactly as in the baseline model from the resulting top-layer state. \\
+\midrule
+\multicolumn{2}{p{0.95\columnwidth}}{\textbf{Difference from baseline:} Future-Seed only changes the start state at deeper layers. Token order, within-layer recurrence, and final decode remain causal.} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Why this is not just bidirectional visibility.}
+Future-Seed does not give every position unrestricted right-context attention. Instead, it asks whether a compact terminal summary can be replayed through depth while preserving the recurrent scan. This matters because our strongest synthetic win is not merely improved validity. In KVSORT, several alternative baselines can force valid key sets, but they still fail to recover the correct order. The mechanism is therefore best understood as a way to recycle future evidence through the backbone, not as a generic replacement for non-causal decoding.
 
 \section{Experimental Setup}
 \paragraph{Backbone and compute.}
@@ -114,6 +106,28 @@ In \texttt{hotpot\_text\_restore}, the prompt gives background notes plus a nois
 
 \paragraph{Queue policy.}
 The final fastdiscover queues use a fixed two-stage policy. Quick stage budgets are task-dependent but typically 140--160 steps; medium stage budgets are typically 260--280 steps. We prune candidates below $-0.5$pp at quick stage, promote only the top candidate above $+0.8$pp, and then report medium-stage deltas against the same-task baseline.
+
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Late-stage post-training audit protocol used by the paper-facing snapshot. These windows are not independent benchmark reruns; they are the exploit, confirmation, and breadth queues that decide which claims survive into the main table.}
+\label{tab:audit-protocol}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccc}
+\toprule
+Queue window & Role in the audit & Representative task focus & Quick-stage gate & Medium-stage interpretation \\
+\midrule
+Rounds 783--790 & exploit promising families & \texttt{mbpp\_longctx\_probe}, \texttt{arc\_mc\_probe} & prune below $-0.5$pp, promote top-1 above $+0.8$pp & keep only medium-stage improvements that survive repeated queue pressure \\
+Rounds 799--802 & strict confirmation & held-out checks for exploit winners & same thresholds & treat a failed confirmation queue as evidence against a stable headline \\
+Rounds 803--804 & alternate-recipe check & \texttt{mbpp\_longctx\_probe} with non-\texttt{q\_first} recipes & same thresholds & stop if the alternate recipe cannot reach the promotion gate \\
+Rounds 805--808 & breadth pivot & \texttt{protein\_ss\_spot}, \texttt{hotpot\_text\_restore}, \texttt{squad\_text\_restore}, \texttt{wiki} & same thresholds & prioritize families that convert to medium-stage positives after the pivot \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+\paragraph{Archive semantics.}
+The paper-side post-training table is intentionally not reported as a classical benchmark leaderboard. The queue policy is part of the experiment: each family must survive exploit pressure, confirmation pressure, and finally a breadth pivot that checks whether the same recipe is simply overfitting search attention. This is why the paper reports both best-case gains and family-level medians, and why the confirmation column in Table~\ref{tab:posttrain-main} matters as much as the best spike.
 
 \paragraph{Evaluation summary.}
 For synthetic tasks we report direct task metrics such as token accuracy, exact match, and solve-rate. For the post-training audit we report teacher-forced answer/token-accuracy deltas in percentage points (pp) by probe family, together with positive-count summaries and qualitative judgments.
@@ -143,6 +157,58 @@ First, the mechanism is \emph{not} a universal gain switch. The strongest repeat
 Second, the most exciting spikes are not the most trustworthy claims. \texttt{mbpp\_longctx\_probe} and \texttt{arc\_mc\_probe} both produce large wins in parts of the search, but neither survives a strict held-out confirmation pass. In other words, Future-Seed can create real-task upside on token-level probes, but the strongest real-task claims are still the ones that survive repeated queue pressure rather than the largest one-off gains.
 
 We therefore frame the real-task evidence conservatively. The paper can defend \texttt{protein\_ss\_spot} as the strongest repeatable family under the current recipe, and \texttt{hotpot\_text\_restore}/\texttt{punc\_restore}/\texttt{squad\_text\_restore} as modest supporting signals. It cannot honestly claim stable held-out confirmation on \texttt{mbpp\_longctx\_probe} or \texttt{arc\_mc\_probe} yet.
+
+
+A useful pattern across these families is target density. The more stable positives tend to be dense repair tasks, where the model receives many supervised target tokens that all benefit from better prompt-time context shaping. Protein spot labeling still predicts a short answer, but the sequence context is long, regular, and repeatedly structured. By contrast, ARC and MBPP often reduce evaluation to a sparse answer token or a narrow completion span, so any gain is easier to erase under held-out confirmation pressure. This does not prove that Future-Seed only helps dense targets, but it does explain why restoration-style probes are currently more trustworthy evidence than sparse-answer probes.
+
+The same interpretation also clarifies why we keep the reporting unit at the family level rather than the single best run. In a sequential search archive, the strongest one-off spike is often the least informative number. The more useful statistic is whether a family keeps producing positive medium-stage deltas when the queue policy changes from exploitation to confirmation. Table~\ref{tab:posttrain-main} is therefore intentionally designed as a stability table rather than a headline benchmark table.
+
+
+\section{What The Archive Suggests About Task Structure}
+\begin{table}[t]
+\centering
+\small
+\caption{Practical reading of the current task families. The table is interpretive: it summarizes which structures appear most compatible with Future-Seed under the audited recipe.}
+\label{tab:task-structure}
+\begin{tabular}{p{0.23\columnwidth}p{0.28\columnwidth}p{0.36\columnwidth}}
+\toprule
+Structure & Representative families & Reading \\
+\midrule
+Dense restoration & \texttt{protein\_ss\_spot}, \texttt{hotpot\_text\_restore}, \texttt{squad\_text\_restore}, \texttt{punc\_restore} & Most reliable positives. Many supervised target tokens can benefit from better prompt-side context shaping. \\
+Sparse answer probes & \texttt{arc\_mc\_probe}, \texttt{mbpp\_longctx\_probe} & Can spike high, but gains are less robust under held-out confirmation pressure. \\
+Constraint diagnostics & \texttt{graph\_color}, \texttt{tsp\_mask}, \texttt{countdown}, \texttt{nqueens}, \texttt{sat3} & Useful for mechanism stress tests, but not yet strong real-task headline evidence. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The post-training archive suggests a concrete working hypothesis. Future-Seed appears strongest when the task contains many opportunities to reuse a compact future summary across multiple supervised target positions. Dense restoration and local structured labeling both fit this pattern: once the prompt has been reread through depth, many downstream target tokens can benefit from the same improved contextualization. This is consistent with the strongest repeatable families in Table~\ref{tab:posttrain-main}.
+
+The same archive also suggests where the mechanism is currently fragile. Sparse-answer probes compress success or failure into a very small target region. In those settings, a candidate can look impressive during exploitation but collapse once confirmation queues change the seed or recipe emphasis. That is why we treat \texttt{arc\_mc\_probe} and \texttt{mbpp\_longctx\_probe} as mixed evidence even though their best individual runs are much larger than the supporting gains on \texttt{punc\_restore} or \texttt{squad\_text\_restore}.
+
+A final lesson is methodological. Diagnostic constraint tasks remain valuable because they separate architectural mechanism from benchmark noise. The current paper uses them to show that Future-Seed is not merely recovering validity through a decoding trick. But the archive also shows that success on a sharp diagnostic task is not enough to claim a broad post-training win. The right reading is layered: synthetic and diagnostic tasks establish that the mechanism is real, while dense restoration tasks tell us where it currently transfers best.
+
+\section{Failure Modes and Applicability Conditions}
+\begin{table}[t]
+\centering
+\small
+\caption{Failure modes exposed by the current archive. The rightmost column is prescriptive: it states how the paper believes Future-Seed should be used under the current evidence boundary.}
+\label{tab:failure-modes}
+\begin{tabular}{p{0.24\columnwidth}p{0.32\columnwidth}p{0.31\columnwidth}}
+\toprule
+Observed regime & Archive symptom & Practical reading \\
+\midrule
+Dense restoration or local labeling & Positive medium-stage deltas recur across queue pivots; best and median both stay positive. & Highest-priority operating regime under the current recipe. Use Future-Seed when many target tokens can share the same improved prompt-side context. \\
+Sparse answer or narrow-span probes & Best spikes can be large, but held-out confirmation often collapses. & Treat gains as exploratory unless a separate confirmation queue survives. Do not headline single-run peaks. \\
+Pure diagnostic constraints & Mechanism effects are sharp and interpretable, but benchmark transfer is indirect. & Use these tasks to test whether the mechanism is real, not to claim broad post-training utility by themselves. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The archive implies a concrete operating rule. Future-Seed is most plausible when the prompt contains useful right-context evidence and the supervised target exposes that evidence at many positions. In those settings the mechanism can amortize one better prompt-side reread across a whole set of predictions. This is the common structure behind protein spot labeling, punctuation restoration, and the stronger text-restoration families.
+
+The same archive warns against a different reading that would be easy but wrong. A large spike on a sparse probe is not evidence that Future-Seed has solved that domain. It only says that, for one queue state and one recipe slice, the mechanism helped the model place probability mass on a narrow target region. Unless that advantage survives confirmation pressure, the correct scientific reading is \emph{potential} rather than \emph{stable transfer}.
+
+There is also a design lesson for future experiments. If one wants to maximize the chance of seeing a durable gain, the first candidates should not be arbitrary benchmarks; they should be tasks with long prompt context, repeated or distributed supervision, and a genuine need to repair internal consistency. That recommendation is grounded in the current archive rather than in a general theory, but it is a better guide than simply searching where the single best spike happened to appear.
 
 \section{Limitations and Negative Results}
 This work has four important limitations. First, the post-training campaign is compute-constrained: all decisions are made under a single-GPU search budget, so the resulting archive reflects a pragmatic search policy rather than a clean, balanced hyperparameter study. Second, the aggregated family statistics in Table~\ref{tab:posttrain-main} are not independent repeated trials; they summarize a sequential exploration process. Third, the positive real-task evidence is uneven across families, and the strict confirmation queues fail for the most ambitious real-task headlines. Fourth, the synthetic tasks are intentionally sharp and mechanistic, which helps isolate the effect of Future-Seed but also narrows the external validity of the claim. The anonymous repository snapshot also does not include the referenced RWKV7 checkpoint blob or a pinned training environment, so it is an auditable artifact snapshot rather than a fully turnkey rerun package.
