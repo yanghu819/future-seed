@@ -9,7 +9,7 @@ The paper-facing post-training rows are teacher-forced token-accuracy probes, no
 
 If you are new here, choose one track first and follow that path end-to-end.
 
-One-shot repo sanity:
+One-shot repo sanity and anonymous supplementary packaging:
 
 ```bash
 bash check_repo_health.sh
@@ -37,6 +37,7 @@ Current judgment:
 6. post-training archive chronology: [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
 7. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
 8. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
+9. submission-ready upload note: [`paper/neurips2025/SUBMISSION_READY.md`](paper/neurips2025/SUBMISSION_READY.md)
 
 ## Most Important Results
 

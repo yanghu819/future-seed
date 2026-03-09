@@ -14,7 +14,7 @@ python3 verify_submission_layout.py
 ./build.sh preprint
 ```
 
-2. Repository health check
+2. Full submission health check
 
 ```bash
 bash check_repo_health.sh
@@ -27,7 +27,16 @@ bash check_repo_health.sh --skip-paper
 bash check_repo_health.sh --skip-dry-run
 ```
 
-3. Fastdiscover orchestration sanity
+3. Anonymous supplementary package assembly
+
+```bash
+cd paper/neurips2025
+python3 verify_anonymity_snapshot.py
+python3 package_submission_bundle.py
+python3 verify_anonymity_snapshot.py --zip dist/future-seed-neurips2025-supplementary.zip
+```
+
+4. Fastdiscover orchestration sanity
 
 ```bash
 cd posttrain_rwkv7
@@ -42,11 +51,11 @@ python3 scripts/run_round77_82_fastdiscover.py \
 
 - paper sources and bibliography
 - curated paper-side metrics in `data/metrics.json`
-- a paper-side verification script in `verify_metrics_snapshot.py`
-- a paper-side layout/page-budget checker in `verify_submission_layout.py`
+- paper-side verification scripts for metrics, layout, and anonymity
+- a supplementary packaging script and manifest
 - queue files for the final exploit / confirm / breadth windows
 - local snapshot summaries and JSONL records for rounds `783-788` and `799-808`
-- active trainers and orchestrators used by the paper-facing post-training audit
+- a curated subset of active trainers and orchestrators used by the paper-facing post-training audit
 
 ## What The Snapshot Does Not Contain
 
@@ -54,6 +63,22 @@ python3 scripts/run_round77_82_fastdiscover.py \
 - a pinned full training environment lockfile
 - a turnkey end-to-end rerun of the whole post-training search campaign
 - every historical dataset cache used during the original search
+- a full legal bundle for every upstream dataset and dependency used during the broader project
+
+## Checkpoint Boundary
+
+The packaging script supports three checkpoint modes:
+
+- `omit` (default in the current snapshot)
+- `bundle` via `--checkpoint-path`
+- `link` via `--checkpoint-url`
+
+The current local snapshot does not include the default checkpoint blob and does not ship an anonymous checkpoint URL. For that reason:
+
+- the supplementary ZIP is still valid as an anonymous artifact snapshot
+- the paper rebuild is still deterministic
+- the real-task post-training results remain auditable against the shipped queue and run files
+- end-to-end retraining remains outside the fully reproducible boundary
 
 ## How To Interpret Dry-Run Failures
 
@@ -63,7 +88,7 @@ If a task shows `quick baseline failed` during `--dry_run`, the usual cause is m
 
 ## Cache And Environment Defaults
 
-Active local scripts now support a shared cache root:
+Active local scripts support a shared cache root:
 
 ```bash
 export FUTURE_SEED_CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/future-seed"
@@ -86,6 +111,7 @@ That means:
 - the tables are auditable against the committed snapshot
 - the shipped closure-window highlights are directly checked against committed round records by `verify_metrics_snapshot.py`
 - the built PDFs are checked against the NeurIPS content-page budget by `verify_submission_layout.py`
+- the curated source/ZIP snapshot is checked by `verify_anonymity_snapshot.py`
 - the build is not a guarantee that the entire historical search can be rerun from scratch
 
 For row semantics and provenance, see:
@@ -94,3 +120,4 @@ For row semantics and provenance, see:
 - [`METRICS_PROVENANCE.md`](METRICS_PROVENANCE.md)
 - [`ARTIFACT_GUIDE.md`](ARTIFACT_GUIDE.md)
 - [`SUPPLEMENTARY_MANIFEST.md`](SUPPLEMENTARY_MANIFEST.md)
+- [`REPRO_MATRIX.md`](REPRO_MATRIX.md)

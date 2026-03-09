@@ -28,23 +28,70 @@ Outputs:
 
 The current submission build keeps the main content safely below the NeurIPS nine-page content limit; references, appendix, and checklist follow after the main text.
 
+## Full Submission Check
+
+```bash
+bash check_repo_health.sh
+```
+
+That command runs:
+- markdown link validation
+- fastdiscover orchestrator self-test
+- non-mutating fastdiscover dry-run on the shipped breadth queue
+- paper metrics verification
+- submission PDF build
+- NeurIPS page-budget verification
+- source anonymity verification
+- anonymous supplementary ZIP packaging and ZIP-level anonymity verification
+
+## Supplementary Packaging
+
+```bash
+cd paper/neurips2025
+python3 package_submission_bundle.py
+```
+
+Outputs:
+- `dist/future-seed-neurips2025-supplementary.zip`
+- `dist/SHA256SUMS.txt`
+- `SUBMISSION_READY.md`
+
+Default checkpoint policy in the current snapshot:
+- `omit`
+- no checkpoint blob is bundled unless you explicitly provide one with `--checkpoint-path` or point to an anonymous external URL with `--checkpoint-url`
+- because no anonymous checkpoint is currently shipped, reproducibility and open-access checklist items remain conservative
+
+The package script enforces the NeurIPS 2025 supplementary ZIP policy boundary documented at:
+- `https://neurips.cc/Conferences/2025/PaperInformation/CodeSubmissionPolicy`
+
 ## Files
 
+Core paper files:
 - `main.tex`: submission-ready anonymous paper source
 - `main_preprint.tex`: preprint-ready paper source
 - `appendix.tex`: appendices and reproducibility notes
 - `checklist.tex`: filled NeurIPS 2025 checklist
 - `references.bib`: bibliography
+
+Paper-side utilities:
 - `render_tables.py`: generates LaTeX tables from `data/metrics.json`
 - `verify_metrics_snapshot.py`: verifies paper-side metrics against the shipped README table and shipped round artifacts
 - `verify_submission_layout.py`: verifies total pages, content-page budget, and bibliography/appendix/checklist boundaries from the built logs
-- `data/metrics.json`: curated metrics used by the paper draft
-- `tables/`: generated LaTeX tables
-- `REFERENCE_AUDIT.md`: official-source audit for all citations used in `main.tex`
+- `verify_anonymity_snapshot.py`: scans the curated source snapshot and supplementary ZIP for anonymity leaks
+- `package_submission_bundle.py`: assembles the anonymous supplementary ZIP
+- `artifact_manifest.py`: single source of truth for the supplementary file list
+
+Paper-side documentation:
 - `TASK_MATRIX.md`: mapping from paper rows to trainer scripts, datasets, and probe metrics
 - `METRICS_PROVENANCE.md`: provenance notes for the curated paper-side metrics snapshot
 - `LOCAL_REPRO.md`: exact boundary of what this local snapshot can and cannot reproduce
-- `SUPPLEMENTARY_MANIFEST.md`: submission-style manifest for the anonymous supplementary snapshot
+- `ARTIFACT_GUIDE.md`: high-level description of the anonymous artifact boundary
+- `SUPPLEMENTARY_MANIFEST.md`: human-readable manifest for the anonymous supplementary snapshot
+- `COMPUTE_ACCOUNTING.md`: compute and storage boundary for the paper-facing snapshot
+- `ASSET_LICENSE_MATRIX.md`: paper-relevant asset and license audit matrix
+- `REPRO_MATRIX.md`: per-claim reproducibility status matrix
+- `REFERENCE_AUDIT.md`: official-source audit for all citations used in `main.tex`
+- `SUBMISSION_READY.md`: generated upload checklist once the package script runs
 
 ## Notes
 
@@ -55,9 +102,6 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
 - `python3 verify_metrics_snapshot.py` checks that the curated paper metrics remain consistent with the shipped snapshot boundary.
 - `python3 verify_submission_layout.py` checks that the submission/preprint builds remain within the NeurIPS content-page budget.
-- For the supplementary layout, see `ARTIFACT_GUIDE.md`.
-- For the actual supplementary package boundary, see `SUPPLEMENTARY_MANIFEST.md`.
-- For reproduction boundaries and local sanity commands, see `LOCAL_REPRO.md`.
-- `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).
+- `python3 verify_anonymity_snapshot.py` checks that the curated anonymous snapshot does not leak local paths, legacy remote commands, or owner identifiers.
 - The shipped post-training round artifacts in this snapshot are `783-788` and `799-808`.
 - The default post-training checkpoint path is referenced in the scripts but the checkpoint blob is not included in this anonymous snapshot.

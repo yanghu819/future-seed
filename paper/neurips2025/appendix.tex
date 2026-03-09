@@ -34,16 +34,14 @@ Rounds 805--808 were used to stop over-spending on the same \texttt{mbpp\_longct
 The repository snapshot and anonymous supplementary archive include:
 \begin{itemize}
     \item the code for the synthetic task suite under \texttt{rwkv-diff-future-seed/};
-    \item the post-training launchers under \texttt{posttrain\_rwkv7/scripts/};
-    \item the final queue file \path{_search_queue_round783_790_realtask_exploit_v3.json};
-    \item the final queue file \path{_search_queue_round799_802_final_confirm.json};
-    \item the final queue file \path{_search_queue_round803_804_mbpp_altconfirm.json};
-    \item the final queue file \path{_search_queue_round805_808_breadth_roi.json};
+    \item a curated subset of post-training scripts under \texttt{posttrain\_rwkv7/scripts/}, centered on \texttt{run\_round77\_82\_fastdiscover.py}, \texttt{cache\_defaults.py}, and the trainer scripts referenced by \texttt{TASK\_MATRIX.md};
+    \item the final queue files \path{_search_queue_round783_790_realtask_exploit_v3.json}, \path{_search_queue_round799_802_final_confirm.json}, \path{_search_queue_round803_804_mbpp_altconfirm.json}, and \path{_search_queue_round805_808_breadth_roi.json};
     \item the synced summary files for rounds 783--788 and 799--808 under \texttt{posttrain\_rwkv7/runs/};
     \item the synced JSONL records for rounds 783--788 and 799--808 under \texttt{posttrain\_rwkv7/runs/};
-    \item this paper package under \texttt{paper/neurips2025/}.
+    \item this paper package under \texttt{paper/neurips2025/}, including \texttt{COMPUTE\_ACCOUNTING.md}, \texttt{ASSET\_LICENSE\_MATRIX.md}, and \texttt{REPRO\_MATRIX.md};
+    \item an anonymous supplementary ZIP assembled by \texttt{package\_submission\_bundle.py}.
 \end{itemize}
-A compact build path is provided in the paper package via \texttt{build.sh}. The paper tables are regenerated deterministically from committed metrics in \texttt{data/metrics.json} using \texttt{render\_tables.py}. Those paper-side metrics are curated for this submission; they are not regenerated from the raw run archive by the current snapshot.
+A compact build path is provided in the paper package via \texttt{build.sh}. The paper tables are regenerated deterministically from committed metrics in \texttt{data/metrics.json} using \texttt{render\_tables.py}. Those paper-side metrics are curated for this submission; they are not regenerated from the raw run archive by the current snapshot. Source and ZIP anonymity are checked by \texttt{verify\_anonymity\_snapshot.py}. The supplementary ZIP is packaged against the NeurIPS 2025 code/data policy boundary, including the official 100MB limit for the anonymous archive unless large files move to an anonymous external URL.
 
 \section{Assets, Licenses, and Scope}
-The real-task audit uses publicly available datasets and benchmark snapshots, including ARC, HotpotQA, SQuAD, MBPP, and a public protein secondary-structure dataset snapshot. We cite the original benchmark creators in the main paper. We do not claim to have completed a full legal audit of every upstream redistribution license inside this submission; this is one reason the checklist answer on explicit license coverage is conservative.
+The real-task audit uses publicly available datasets and benchmark snapshots, including ARC, HotpotQA, SQuAD, MBPP, and a public protein secondary-structure dataset snapshot. We cite the original benchmark creators in the main paper. \texttt{ASSET\_LICENSE\_MATRIX.md} records the paper-relevant asset boundary and makes explicit where the current anonymous snapshot cannot support a precise per-asset license statement. This is why the checklist answer on explicit license coverage remains conservative even though the upstream creators are credited.

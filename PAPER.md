@@ -13,6 +13,10 @@ All real-task paper numbers are teacher-forced token-accuracy probe results, not
 - artifact layout: [`paper/neurips2025/ARTIFACT_GUIDE.md`](paper/neurips2025/ARTIFACT_GUIDE.md)
 - local reproduction boundary: [`paper/neurips2025/LOCAL_REPRO.md`](paper/neurips2025/LOCAL_REPRO.md)
 - supplementary manifest: [`paper/neurips2025/SUPPLEMENTARY_MANIFEST.md`](paper/neurips2025/SUPPLEMENTARY_MANIFEST.md)
+- submission-ready upload note: [`paper/neurips2025/SUBMISSION_READY.md`](paper/neurips2025/SUBMISSION_READY.md)
+- reproducibility matrix: [`paper/neurips2025/REPRO_MATRIX.md`](paper/neurips2025/REPRO_MATRIX.md)
+- compute accounting: [`paper/neurips2025/COMPUTE_ACCOUNTING.md`](paper/neurips2025/COMPUTE_ACCOUNTING.md)
+- asset/license matrix: [`paper/neurips2025/ASSET_LICENSE_MATRIX.md`](paper/neurips2025/ASSET_LICENSE_MATRIX.md)
 - reference audit: [`paper/neurips2025/REFERENCE_AUDIT.md`](paper/neurips2025/REFERENCE_AUDIT.md)
 - task matrix: [`paper/neurips2025/TASK_MATRIX.md`](paper/neurips2025/TASK_MATRIX.md)
 - metrics provenance: [`paper/neurips2025/METRICS_PROVENANCE.md`](paper/neurips2025/METRICS_PROVENANCE.md)
@@ -39,6 +43,7 @@ All real-task paper numbers are teacher-forced token-accuracy probe results, not
 cd paper/neurips2025
 ./build.sh submission
 ./build.sh preprint
+python3 package_submission_bundle.py
 ```
 
 ## Whole-Repo Health Check
