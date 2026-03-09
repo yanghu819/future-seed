@@ -21,6 +21,7 @@ The post-training campaign is closed through `round808`.
 
 Current judgment:
 - toy and synthetic constraint tasks clearly support Future-Seed
+- `rwkv-diff-future-seed` now includes a real-task mechanism diagnostic on `RepoBench char1`; see [`rwkv-diff-future-seed/repobench_char1_diagnostics/`](rwkv-diff-future-seed/repobench_char1_diagnostics)
 - strongest repeatable family under the current recipe: `protein_ss_spot`
 - supporting positive real-task signals: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
 - promising but unconfirmed: `mbpp_longctx_probe`
@@ -33,11 +34,12 @@ Current judgment:
 2. global results: [`RESULTS.md`](RESULTS.md)
 3. quick onboarding: [`GETTING_STARTED.md`](GETTING_STARTED.md)
 4. task-to-script map: [`TASK_INDEX.md`](TASK_INDEX.md)
-5. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
-6. post-training archive chronology: [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
-7. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
-8. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
-9. submission-ready upload note: [`paper/neurips2025/SUBMISSION_READY.md`](paper/neurips2025/SUBMISSION_READY.md)
+5. RepoBench char1 method diagnostic: [`rwkv-diff-future-seed/repobench_char1_diagnostics/README.md`](rwkv-diff-future-seed/repobench_char1_diagnostics/README.md)
+6. post-training final status: [`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md)
+7. post-training archive chronology: [`posttrain_rwkv7/ARCHIVE_ROUNDS.md`](posttrain_rwkv7/ARCHIVE_ROUNDS.md)
+8. full experiment ledger: [`posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md`](posttrain_rwkv7/paper/DETAILED_EXPERIMENT_LOG.md)
+9. NeurIPS paper package: [`paper/neurips2025/README.md`](paper/neurips2025/README.md)
+10. submission-ready upload note: [`paper/neurips2025/SUBMISSION_READY.md`](paper/neurips2025/SUBMISSION_READY.md)
 
 ## Most Important Results
 
@@ -47,6 +49,7 @@ Current judgment:
 | real-task, repeatable positive | `hotpot_text_restore` | `+4.20pp` |
 | real-task, promising and unconfirmed | `mbpp_longctx_probe` | `+10.00pp` |
 | real-task, high upside but unstable | `arc_mc_probe` | `+20.83pp` |
+| method-track diagnostic | `RepoBench char1` | `+6.67pp` |
 | diagnostic constraint task | `graph_color` | `+8.33pp` |
 | appendix-only spike | `tsp_mask` | `+25.00pp` |
 
@@ -84,6 +87,7 @@ python3 scripts/run_round77_82_fastdiscover.py \
 
 - [`PAPER.md`](PAPER.md): paper-first entry for the unified repo
 - [`rwkv-diff-future-seed/`](rwkv-diff-future-seed): method code and toy experiments
+- [`rwkv-diff-future-seed/repobench_char1_diagnostics/`](rwkv-diff-future-seed/repobench_char1_diagnostics): real-task noncausal mechanism diagnostic for the method track
 - [`posttrain_rwkv7/`](posttrain_rwkv7): post-training experiments, logs, and queues
 - [`RESULTS.md`](RESULTS.md): unified results page
 - [`paper/neurips2025/README.md`](paper/neurips2025/README.md): anonymous NeurIPS 2025 submission package

@@ -1,0 +1,64 @@
+{
+  "task": "RepoBench-C python_cff char1",
+  "metric": "spanem_val_final",
+  "runs": {
+    "main_confirm5_v2": {
+      "run_id": "rwkv15b_scan20260307_auth_repobench_import_cff_char1_confirm5_v2_v1",
+      "baseline": 0.0,
+      "ours": 0.0667,
+      "uplift": 0.0667,
+      "n": 5
+    },
+    "main_shuffled_confirm5_v2": {
+      "run_id": "rwkv15b_scan20260307_auth_repobench_import_cff_char1_shuffled_future_confirm5_v2_v1",
+      "baseline": 0.0546,
+      "ours": 0.0227,
+      "uplift": -0.0319,
+      "n": 5
+    },
+    "gap20_v2": {
+      "run_id": "rwkv15b_scan20260309_auth_repobench_import_cff_char1_gap20_v2_v1",
+      "near_baseline": 0.0,
+      "near_ours": 0.0652,
+      "near_uplift": 0.0652,
+      "far_baseline": 0.05,
+      "far_ours": 0.025,
+      "far_uplift": -0.025,
+      "n": 3
+    },
+    "gap20_far_anchor_exact": {
+      "run_id": "rwkv15b_scan20260309_auth_repobench_char1_gap20_far_anchor_exact_v1",
+      "baseline_mean": 0.05,
+      "v2_mean": 0.025,
+      "anchor_mean": 0.075,
+      "anchor_mean_uplift": 0.025,
+      "anchor_mean_over_v2": 0.05,
+      "n": 3
+    },
+    "gap20_near_anchor_exact_smoke": {
+      "run_id": "rwkv15b_scan20260309_auth_repobench_char1_gap20_near_anchor_exact_smoke_v1",
+      "baseline": 0.0,
+      "v2": 0.0652,
+      "anchor": 0.0435,
+      "anchor_over_v2": -0.0217
+    },
+    "subset_regex": {
+      "run_id": "rwkv15b_scan20260309_auth_repobench_char1_datasubset_confirm3_v2_regex_v1",
+      "baseline_mean": 0.0233,
+      "ours_mean": 0.0,
+      "mean_uplift": -0.0233,
+      "n": 3
+    }
+  },
+  "current_claim_boundary": {
+    "supported": [
+      "Future-Seed v2 helps on RepoBench char1",
+      "the gain depends on true future information",
+      "the gain is distance-sensitive",
+      "a more selective collector can rescue the far bucket"
+    ],
+    "not_supported_yet": [
+      "full-distribution robustness across regex-cleaned subsets"
+    ]
+  }
+}

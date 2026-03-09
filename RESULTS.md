@@ -15,6 +15,7 @@ Primary sources:
 
 What the current evidence supports:
 - Future-Seed clearly helps on toy and synthetic tasks that stress future-aware constraint repair.
+- The method track now has a real-task mechanism diagnostic on `RepoBench char1` showing noncausal, distance-sensitive gains.
 - In post-training, the strongest repeatable family under the current recipe is `protein_ss_spot`.
 - `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
 - `mbpp_longctx_probe` remains promising but mixed rather than confirmed.
@@ -31,6 +32,31 @@ What the current evidence supports:
 | `permfill` exact at `n_test=36` | `0.00%` | `93.50%` | `+93.50pp` |
 | `sudoku` solve at `holes=12` | `0.00%` | `55.10%` | `+55.10pp` |
 | `sudoku` constraint regularizer at `holes=12` | `47.95%` | `58.55%` | `+10.60pp` |
+
+## RepoBench Char1 Mechanism Diagnostic
+
+Primary source:
+- [`rwkv-diff-future-seed/repobench_char1_diagnostics/README.md`](rwkv-diff-future-seed/repobench_char1_diagnostics/README.md)
+
+Current evidence:
+- main result: baseline `0.00%`, `v2_init_gate` `6.67%`
+- shuffled-future control: baseline `5.46%`, ours `2.27%`
+- distance split:
+  - `near`: baseline `0.00%`, ours `6.52%`
+  - `far`: baseline `5.00%`, ours `2.50%`
+- exact-anchor rescue on `far`:
+  - baseline `5.00%`
+  - `v2`: `2.50%`
+  - exact-anchor collector: `7.50%`
+
+Interpretation:
+- the gain depends on real future information
+- the useful future signal is distance-sensitive
+- collector choice changes which future regime is helped
+
+Current boundary:
+- this is a method-track diagnostic, not yet a broad full-distribution robustness claim
+- regex-cleaned subset confirm is currently negative
 
 ## Post-Training Scoreboard
 

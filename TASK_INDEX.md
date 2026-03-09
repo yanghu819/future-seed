@@ -32,6 +32,7 @@ This index maps task family to backend trainer, representative queue, and curren
 |---|---|---|
 | WikiText prefix infill | `run_wikitext_prefix.sh` | `rwkv-diff-future-seed/` |
 | MBPP prefix infill | `run_mbpp_prefix.sh` | `rwkv-diff-future-seed/` |
+| RepoBench char1 mechanism diagnostic | evidence + code path in `repobench_char1_diagnostics/README.md` and `rwkv_diff_future_seed.py` | `rwkv-diff-future-seed/repobench_char1_diagnostics/` |
 | rightcopy + constr sanity | `run.sh` | repo root |
 | QA sanity | `run_qa.sh` | repo root |
 | Sudoku / KVSORT / PERMFILL | `run_sudoku.sh`, `run_kvsort_baselines.sh`, `run_permfill_anchor_sweep.sh` | `rwkv-diff-future-seed/` |
