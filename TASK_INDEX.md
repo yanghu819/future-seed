@@ -54,3 +54,9 @@ This section is not a result table. It is the recommended task stack for future 
 | P2 | product-style repair | OpenAPI, Docker, GitHub Actions, SQL repair | realistic future-constrained editing and cross-file repair | internal benchmark design, appendix or artifact value |
 
 See [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md) for the full benchmark roadmap, 8xH100 plan, and 1000-GPU plan.
+
+## Multi-GPU Runner
+
+| Goal | Entry | Location |
+|---|---|---|
+| single-GPU smoke and 8-GPU short-run RWKV7 Goose experiments | `setup.sh`, `down.sh`, `run1.sh`, `run8.sh` | `future-seed-8gpu/` |

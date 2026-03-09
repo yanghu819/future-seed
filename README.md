@@ -90,6 +90,7 @@ python3 scripts/run_round77_82_fastdiscover.py \
 - [`PAPER.md`](PAPER.md): paper-first entry for the unified repo
 - [`NONCAUSAL_TASK_ROADMAP.md`](NONCAUSAL_TASK_ROADMAP.md): explicit benchmark and task roadmap for future noncausal work
 - [`rwkv-diff-future-seed/`](rwkv-diff-future-seed): method code and toy experiments
+- [`future-seed-8gpu/`](future-seed-8gpu): Hugging Face / ModelScope runner for single-GPU smoke and 8-GPU short Future-Seed experiments
 - [`rwkv-diff-future-seed/repobench_char1_diagnostics/`](rwkv-diff-future-seed/repobench_char1_diagnostics): real-task noncausal mechanism diagnostic for the method track
 - [`posttrain_rwkv7/`](posttrain_rwkv7): post-training experiments, logs, and queues
 - [`RESULTS.md`](RESULTS.md): unified results page
