@@ -44,6 +44,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - `TASK_MATRIX.md`: mapping from paper rows to trainer scripts, datasets, and probe metrics
 - `METRICS_PROVENANCE.md`: provenance notes for the curated paper-side metrics snapshot
 - `LOCAL_REPRO.md`: exact boundary of what this local snapshot can and cannot reproduce
+- `SUPPLEMENTARY_MANIFEST.md`: submission-style manifest for the anonymous supplementary snapshot
 
 ## Notes
 
@@ -55,6 +56,7 @@ The current submission build keeps the main content safely below the NeurIPS nin
 - `python3 verify_metrics_snapshot.py` checks that the curated paper metrics remain consistent with the shipped snapshot boundary.
 - `python3 verify_submission_layout.py` checks that the submission/preprint builds remain within the NeurIPS content-page budget.
 - For the supplementary layout, see `ARTIFACT_GUIDE.md`.
+- For the actual supplementary package boundary, see `SUPPLEMENTARY_MANIFEST.md`.
 - For reproduction boundaries and local sanity commands, see `LOCAL_REPRO.md`.
 - `references.bib` is manually audited against official venue or archive pages (`proceedings.neurips.cc`, `aclanthology.org`, `jmlr.org`, `pnas.org`, and `arxiv.org`).
 - The shipped post-training round artifacts in this snapshot are `783-788` and `799-808`.
