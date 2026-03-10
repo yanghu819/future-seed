@@ -11,6 +11,7 @@ RUN_SELF_TEST=1
 RUN_DRY_RUN=1
 RUN_PAPER=1
 RUN_METRICS=1
+RUN_REF_AUDIT=1
 RUN_LAYOUT=1
 RUN_ANON=1
 RUN_PACKAGE=1
@@ -29,6 +30,7 @@ options:
   --skip-self-test      skip fastdiscover self-test
   --skip-dry-run        skip fastdiscover dry-run
   --skip-metrics        skip paper metrics snapshot verification
+  --skip-reference-audit skip paper citation/reference audit verification
   --skip-layout         skip NeurIPS paper layout/page-budget verification
   --skip-paper          skip paper submission/preprint builds
   --skip-anonymity      skip curated source anonymity verification
@@ -67,6 +69,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-metrics)
       RUN_METRICS=0
+      shift
+      ;;
+    --skip-reference-audit)
+      RUN_REF_AUDIT=0
       shift
       ;;
     --skip-layout)
@@ -201,6 +207,14 @@ if [[ "$RUN_METRICS" -eq 1 ]]; then
   echo "[health] metrics verification log saved to /tmp/future_seed_repo_health_metrics.log"
 else
   echo "[health] paper metrics snapshot verification: skipped"
+fi
+
+if [[ "$RUN_REF_AUDIT" -eq 1 ]]; then
+  echo "[health] paper reference audit verification"
+  "$PY_BIN" paper/neurips2025/verify_reference_audit.py >/tmp/future_seed_repo_health_reference_audit.log 2>&1
+  echo "[health] reference audit log saved to /tmp/future_seed_repo_health_reference_audit.log"
+else
+  echo "[health] paper reference audit verification: skipped"
 fi
 
 if [[ "$RUN_PAPER" -eq 1 ]]; then
