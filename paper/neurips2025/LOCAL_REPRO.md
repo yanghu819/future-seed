@@ -111,7 +111,7 @@ That means:
 - the PDF build is deterministic inside the repo
 - the tables are auditable against the committed snapshot
 - the shipped closure-window highlights are directly checked against committed round records by `verify_metrics_snapshot.py`
-- every citation used in `main.tex` is checked against the paper-side audit ledger by `verify_reference_audit.py`
+- every citation used in `main.tex` is checked against the paper-side audit ledger and the committed `references.bib` URL fields by `verify_reference_audit.py`
 - the built PDFs are checked against the NeurIPS content-page budget by `verify_submission_layout.py`
 - the curated source/ZIP snapshot is checked by `verify_anonymity_snapshot.py`
 - the build is not a guarantee that the entire historical search can be rerun from scratch

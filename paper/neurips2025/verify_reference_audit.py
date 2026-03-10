@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parent
 MAIN_TEX = ROOT / "main.tex"
 AUDIT_MD = ROOT / "REFERENCE_AUDIT.md"
+BIB_FILE = ROOT / "references.bib"
 
 ALLOWED_DOMAINS = {
     "proceedings.neurips.cc",
@@ -39,6 +40,25 @@ def extract_detailed_heads(md: str) -> list[str]:
     return re.findall(r"^### `([^`]+)`$", md, re.MULTILINE)
 
 
+def parse_bib_entries(text: str) -> dict[str, dict[str, str]]:
+    entries: dict[str, dict[str, str]] = {}
+    for match in re.finditer(r"@(\w+)\{([^,]+),(.*?)\n\}", text, re.DOTALL):
+        _entry_type, key, body = match.groups()
+        fields: dict[str, str] = {}
+        for line in body.splitlines():
+            line = line.strip()
+            if not line or "=" not in line:
+                continue
+            field, value = line.split("=", 1)
+            field = field.strip().lower()
+            value = value.strip().rstrip(",").strip()
+            if value.startswith("{") and value.endswith("}"):
+                value = value[1:-1]
+            fields[field] = value
+        entries[key.strip()] = fields
+    return entries
+
+
 def validate_domain(url: str) -> bool:
     host = urlparse(url).netloc.lower()
     return host in ALLOWED_DOMAINS
@@ -47,10 +67,12 @@ def validate_domain(url: str) -> bool:
 def main() -> None:
     tex = MAIN_TEX.read_text(encoding="utf-8")
     md = AUDIT_MD.read_text(encoding="utf-8")
+    bib_text = BIB_FILE.read_text(encoding="utf-8")
 
     cite_keys = extract_cite_keys(tex)
     summary_urls = extract_summary_urls(md)
     detail_heads = extract_detailed_heads(md)
+    bib_entries = parse_bib_entries(bib_text)
 
     errors: list[str] = []
 
@@ -68,9 +90,21 @@ def main() -> None:
     if extra_detail:
         errors.append(f"extra detail sections not cited in main.tex: {', '.join(extra_detail)}")
 
+    missing_bib = [key for key in cite_keys if key not in bib_entries]
+    if missing_bib:
+        errors.append(f"missing BibTeX entries: {', '.join(missing_bib)}")
+
     for key, url in sorted(summary_urls.items()):
         if not validate_domain(url):
             errors.append(f"{key}: unapproved source domain for {url}")
+
+        bib_fields = bib_entries.get(key, {})
+        for required_field in ("title", "author", "year", "url"):
+            if required_field not in bib_fields:
+                errors.append(f"{key}: missing BibTeX field '{required_field}'")
+        bib_url = bib_fields.get("url")
+        if bib_url and bib_url != url:
+            errors.append(f"{key}: BibTeX url does not match audit summary url ({bib_url} != {url})")
 
         section_pat = re.compile(
             rf"### `{re.escape(key)}`\n(?P<body>.*?)(?=\n### `|\Z)",
@@ -99,6 +133,7 @@ def main() -> None:
     print("reference_audit_ok")
     print(f"- cited keys: {len(cite_keys)}")
     print(f"- audited keys: {len(detail_heads)}")
+    print(f"- bib entries checked: {len(bib_entries)}")
     print(f"- allowed domains: {', '.join(sorted(ALLOWED_DOMAINS))}")
 
 
