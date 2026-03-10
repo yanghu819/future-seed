@@ -57,7 +57,7 @@ The post-training search only varies small prompt-time gates. In the scalar vari
 \begin{figure*}[t]
     \centering
     \includegraphics[width=\textwidth]{future_seed_mechanism.pdf}
-    \caption{SVG mechanism diagram for Future-Seed. The baseline stack resets each layer to its own default start state. Future-Seed keeps the same within-layer left-to-right scan and the same decode rule, but for $\ell \ge \ell_{\mathrm{start}}$ it seeds the deeper layer with gated feedback from the previous layer's terminal state.}
+    \caption{Mechanism diagram for Future-Seed. The baseline stack resets each layer to its own default start state. Future-Seed keeps the same within-layer left-to-right scan and the same decode rule, but for $\ell \ge \ell_{\mathrm{start}}$ it seeds the deeper layer with gated feedback from the previous layer's terminal state.}
     \label{fig:mechanism}
 \end{figure*}
 
@@ -230,12 +230,12 @@ Future-Seed adds a small amount of cross-layer state feedback to a recurrent sta
 \typeout{BIBSTART_PAGE=\thepage}
 \bibliography{references}
 
-\clearpage
+\newpage
 \typeout{APPENDIX_PAGE=\thepage}
 \appendix
 \input{appendix}
 
-\clearpage
+\newpage
 \typeout{CHECKLIST_PAGE=\thepage}
 \input{checklist}
 

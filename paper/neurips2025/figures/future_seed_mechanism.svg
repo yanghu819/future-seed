@@ -1,82 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="520" viewBox="0 0 1320 520">
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="460" viewBox="0 0 1160 460">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1f1f1f"/>
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#222222"/>
     </marker>
     <marker id="arrowAccent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c96a3d"/>
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ca6d45"/>
     </marker>
     <style>
-      .label { font: 700 26px Helvetica, Arial, sans-serif; fill: #141414; }
-      .row { font: 500 18px Helvetica, Arial, sans-serif; fill: #5b5b5b; }
-      .token { font: 600 19px Helvetica, Arial, sans-serif; fill: #1b1b1b; }
-      .note { font: 500 18px Helvetica, Arial, sans-serif; fill: #5f5f5f; }
-      .box { fill: #ffffff; stroke: #222222; stroke-width: 1.8; rx: 14; }
-      .muted { fill: #f4f4f4; stroke: #a9a9a9; stroke-width: 1.8; rx: 14; }
-      .accent { fill: #fff5ef; stroke: #c96a3d; stroke-width: 2.2; rx: 14; }
-      .flow { stroke: #222222; stroke-width: 2.6; fill: none; marker-end: url(#arrow); }
-      .seed { stroke: #c96a3d; stroke-width: 3; fill: none; marker-end: url(#arrowAccent); }
-      .divider { stroke: #dedede; stroke-width: 1.5; }
-      .dash { stroke: #cfcfcf; stroke-width: 1.5; stroke-dasharray: 7 7; }
-      .gate { fill: #fff5ef; stroke: #c96a3d; stroke-width: 2; }
+      .title { font: 700 26px Helvetica, Arial, sans-serif; fill: #121212; }
+      .row { font: 500 17px Helvetica, Arial, sans-serif; fill: #666666; }
+      .token { font: 600 18px Helvetica, Arial, sans-serif; fill: #1a1a1a; }
+      .hint { font: 500 16px Helvetica, Arial, sans-serif; fill: #666666; }
+      .box { fill: #ffffff; stroke: #202020; stroke-width: 1.7; rx: 13; }
+      .ghost { fill: #f2f2f2; stroke: #a8a8a8; stroke-width: 1.7; rx: 13; }
+      .accent { fill: #fff4ee; stroke: #ca6d45; stroke-width: 2.1; rx: 13; }
+      .flow { stroke: #232323; stroke-width: 2.4; fill: none; marker-end: url(#arrow); }
+      .seed { stroke: #ca6d45; stroke-width: 2.8; fill: none; marker-end: url(#arrowAccent); }
+      .divider { stroke: #dfdfdf; stroke-width: 1.4; }
+      .guide { stroke: #d2d2d2; stroke-width: 1.2; stroke-dasharray: 6 6; }
+      .gate { fill: #fff4ee; stroke: #ca6d45; stroke-width: 1.9; }
     </style>
   </defs>
 
-  <line x1="56" y1="260" x2="1264" y2="260" class="divider"/>
+  <line x1="48" y1="230" x2="1112" y2="230" class="divider"/>
 
-  <text x="72" y="128" class="label">Baseline</text>
-  <text x="72" y="388" class="label">Future-Seed</text>
+  <text x="56" y="92" class="title">Baseline</text>
+  <text x="56" y="312" class="title">Future-Seed</text>
 
-  <text x="220" y="118" class="row">layer l-1</text>
-  <text x="232" y="198" class="row">layer l</text>
-  <text x="220" y="378" class="row">layer l-1</text>
-  <text x="182" y="458" class="row">layer l >= l_start</text>
+  <text x="162" y="84" class="row">layer l-1</text>
+  <text x="178" y="158" class="row">layer l</text>
+  <text x="162" y="304" class="row">layer l-1</text>
+  <text x="138" y="378" class="row">layer l, l >= l_start</text>
 
-  <rect x="340" y="86" width="126" height="48" class="box"/>
-  <rect x="530" y="86" width="126" height="48" class="box"/>
-  <rect x="790" y="86" width="126" height="48" class="box"/>
-  <text x="403" y="116" text-anchor="middle" class="token">h1</text>
-  <text x="593" y="116" text-anchor="middle" class="token">h2</text>
-  <text x="853" y="116" text-anchor="middle" class="token">hT</text>
-  <text x="710" y="117" text-anchor="middle" class="note">...</text>
-  <path d="M 466 110 L 530 110" class="flow"/>
-  <path d="M 656 110 L 790 110" class="flow"/>
+  <rect x="264" y="54" width="116" height="42" class="box"/>
+  <rect x="432" y="54" width="116" height="42" class="box"/>
+  <rect x="658" y="54" width="116" height="42" class="box"/>
+  <text x="322" y="81" text-anchor="middle" class="token">h1</text>
+  <text x="490" y="81" text-anchor="middle" class="token">h2</text>
+  <text x="716" y="81" text-anchor="middle" class="token">hT</text>
+  <text x="603" y="82" text-anchor="middle" class="hint">...</text>
+  <path d="M 380 75 L 432 75" class="flow"/>
+  <path d="M 548 75 L 658 75" class="flow"/>
 
-  <rect x="340" y="166" width="126" height="48" class="muted"/>
-  <rect x="530" y="166" width="126" height="48" class="box"/>
-  <rect x="790" y="166" width="126" height="48" class="box"/>
-  <text x="403" y="196" text-anchor="middle" class="token">init</text>
-  <text x="593" y="196" text-anchor="middle" class="token">h1</text>
-  <text x="853" y="196" text-anchor="middle" class="token">hT</text>
-  <text x="710" y="197" text-anchor="middle" class="note">...</text>
-  <path d="M 466 190 L 530 190" class="flow"/>
-  <path d="M 656 190 L 790 190" class="flow"/>
-  <text x="974" y="196" class="note">default start state</text>
+  <rect x="264" y="128" width="116" height="42" class="ghost"/>
+  <rect x="432" y="128" width="116" height="42" class="box"/>
+  <rect x="658" y="128" width="116" height="42" class="box"/>
+  <text x="322" y="155" text-anchor="middle" class="token">init</text>
+  <text x="490" y="155" text-anchor="middle" class="token">h1</text>
+  <text x="716" y="155" text-anchor="middle" class="token">hT</text>
+  <text x="603" y="156" text-anchor="middle" class="hint">...</text>
+  <path d="M 380 149 L 432 149" class="flow"/>
+  <path d="M 548 149 L 658 149" class="flow"/>
 
-  <rect x="340" y="346" width="126" height="48" class="box"/>
-  <rect x="530" y="346" width="126" height="48" class="box"/>
-  <rect x="790" y="346" width="126" height="48" class="box"/>
-  <text x="403" y="376" text-anchor="middle" class="token">h1</text>
-  <text x="593" y="376" text-anchor="middle" class="token">h2</text>
-  <text x="853" y="376" text-anchor="middle" class="token">hT</text>
-  <text x="710" y="377" text-anchor="middle" class="note">...</text>
-  <path d="M 466 370 L 530 370" class="flow"/>
-  <path d="M 656 370 L 790 370" class="flow"/>
+  <rect x="264" y="274" width="116" height="42" class="box"/>
+  <rect x="432" y="274" width="116" height="42" class="box"/>
+  <rect x="658" y="274" width="116" height="42" class="box"/>
+  <text x="322" y="301" text-anchor="middle" class="token">h1</text>
+  <text x="490" y="301" text-anchor="middle" class="token">h2</text>
+  <text x="716" y="301" text-anchor="middle" class="token">hT</text>
+  <text x="603" y="302" text-anchor="middle" class="hint">...</text>
+  <path d="M 380 295 L 432 295" class="flow"/>
+  <path d="M 548 295 L 658 295" class="flow"/>
 
-  <rect x="326" y="426" width="154" height="48" class="accent"/>
-  <rect x="530" y="426" width="126" height="48" class="box"/>
-  <rect x="790" y="426" width="126" height="48" class="box"/>
-  <text x="403" y="456" text-anchor="middle" class="token">g * hT</text>
-  <text x="593" y="456" text-anchor="middle" class="token">h1</text>
-  <text x="853" y="456" text-anchor="middle" class="token">hT</text>
-  <text x="710" y="457" text-anchor="middle" class="note">...</text>
-  <path d="M 480 450 L 530 450" class="flow"/>
-  <path d="M 656 450 L 790 450" class="flow"/>
+  <rect x="264" y="348" width="146" height="42" class="accent"/>
+  <rect x="432" y="348" width="116" height="42" class="box"/>
+  <rect x="658" y="348" width="116" height="42" class="box"/>
+  <text x="337" y="375" text-anchor="middle" class="token">g ⊙ hT</text>
+  <text x="490" y="375" text-anchor="middle" class="token">h1</text>
+  <text x="716" y="375" text-anchor="middle" class="token">hT</text>
+  <text x="603" y="376" text-anchor="middle" class="hint">...</text>
+  <path d="M 410 369 L 432 369" class="flow"/>
+  <path d="M 548 369 L 658 369" class="flow"/>
 
-  <path d="M 853 394 C 1005 394, 1015 450, 480 450" class="seed"/>
-  <circle cx="1008" cy="417" r="18" class="gate"/>
-  <text x="1008" y="423" text-anchor="middle" class="token">g</text>
+  <path d="M 716 316 C 840 316, 898 332, 898 360 C 898 388, 822 392, 410 369" class="seed"/>
+  <circle cx="898" cy="360" r="16" class="gate"/>
+  <text x="898" y="366" text-anchor="middle" class="token">g</text>
 
-  <text x="974" y="456" class="note">same scan, new start state</text>
-  <line x1="963" y1="440" x2="963" y2="462" class="dash"/>
+  <line x1="936" y1="337" x2="936" y2="383" class="guide"/>
+  <text x="954" y="353" class="hint">only new path</text>
+  <text x="954" y="378" class="hint">same causal scan</text>
 </svg>
