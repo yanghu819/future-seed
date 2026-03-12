@@ -25,12 +25,14 @@ This index maps task family to backend trainer, representative queue, and curren
 | `nqueens` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round735_742_constraint_bfs.json` | hard negative at med |
 | `sat3` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round735_742_constraint_bfs.json` | current recipe near zero |
 | `zebra` | `posttrain_rwkv7/scripts/train_np_sat_tsp_probe_sft.py` | `posttrain_rwkv7/results/_search_queue_round743_750_constraint_bfs_v2.json` | no useful conversion so far |
+| `sudoku_rwkv_cot_bridge` | `posttrain_rwkv7/scripts/run_sudoku_rwkv_eval.py` | ad-hoc smoke / compare queue on `assets/sudoku9_unique/*.jsonl` | active pivot: use the official Sudoku-RWKV CoT baseline, then test Future-Seed as RWKV-v6 cross-layer state feedback |
 
 ## Method / Toy Track
 
 | Goal | Script | Location |
 |---|---|---|
 | 9x9 unique-solution Sudoku mainline | `run_sudoku9_unique_maintrack.py`, `train_sudoku9_unique_sft.py`, `build_sudoku9_unique_manifests.py` | `posttrain_rwkv7/scripts/` |
+| Sudoku-RWKV official snapshot + FS bridge | `sudoku_rwkv_official.py`, `sudoku_rwkv_future_seed.py`, `run_sudoku_rwkv_eval.py` | `posttrain_rwkv7/scripts/` |
 | WikiText prefix infill | `run_wikitext_prefix.sh` | `rwkv-diff-future-seed/` |
 | MBPP prefix infill | `run_mbpp_prefix.sh` | `rwkv-diff-future-seed/` |
 | rightcopy + constr sanity | `run.sh` | repo root |
@@ -39,4 +41,5 @@ This index maps task family to backend trainer, representative queue, and curren
 
 Notes:
 - the canonical Sudoku benchmark is now the 9x9 unique-solution in-place task under `posttrain_rwkv7/scripts/`
+- the active pivot for long-CoT Sudoku is `Sudoku-RWKV` as baseline plus `run_sudoku_rwkv_eval.py` for Future-Seed probes
 - the older `posttrain_rwkv7/scripts/train_sudoku_sft.py` is an archive teacher-forced probe and should not be treated as the main Sudoku result

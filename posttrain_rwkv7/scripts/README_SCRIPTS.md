@@ -38,7 +38,48 @@ The active Sudoku benchmark is the 9x9 unique-solution in-place task:
 
 The older `train_sudoku_sft.py` remains in the tree as an archive probe. It is not the canonical 9x9 benchmark.
 
-## 3) Recommended execution order
+## 3) Sudoku-RWKV Baseline + Future-Seed Bridge
+
+For the CoT-style `Sudoku-RWKV` baseline from the external repo, use:
+
+- `sudoku_rwkv_official.py`
+  - fetches the pinned upstream snapshot and checkpoint into the local cache root
+- `sudoku_rwkv_future_seed.py`
+  - dynamic wrapper around the upstream `RWKV-v6` inference model with optional Future-Seed attention-state injection
+- `run_sudoku_rwkv_eval.py`
+  - evaluates either the untouched official baseline or the Future-Seed-augmented variant on our `sudoku9_unique` manifests
+
+Smoke:
+
+```bash
+cd posttrain_rwkv7
+python3 scripts/sudoku_rwkv_official.py --skip-checkpoint --self_test
+python3 scripts/run_sudoku_rwkv_eval.py --self_test
+```
+
+Example baseline / FS probe:
+
+```bash
+cd posttrain_rwkv7
+./.venv/bin/python scripts/run_sudoku_rwkv_eval.py \
+  --manifest assets/sudoku9_unique/val_smoke.jsonl \
+  --limit 1 \
+  --max_tokens 50000 \
+  --strategy "cuda fp16"
+
+./.venv/bin/python scripts/run_sudoku_rwkv_eval.py \
+  --manifest assets/sudoku9_unique/val_smoke.jsonl \
+  --limit 1 \
+  --max_tokens 50000 \
+  --strategy "cuda fp16" \
+  --future_seed \
+  --fs_layer_start 2 \
+  --seed_scale 0.5 \
+  --fs_norm \
+  --fs_clip 0.5
+```
+
+## 4) Recommended execution order
 
 ```bash
 # preflight
@@ -67,7 +108,7 @@ python3 scripts/train_sudoku9_unique_sft.py --self_test
 python3 scripts/run_sudoku9_unique_maintrack.py --self_test --dry_run
 ```
 
-## 4) Orchestrator quick reference
+## 5) Orchestrator quick reference
 
 - self-test (no training):
 
@@ -86,22 +127,23 @@ python3 scripts/run_sudoku9_unique_maintrack.py --self_test --dry_run
   --dry_run
 ```
 
-## 5) Supporting scripts
+## 6) Supporting scripts
 
 - `supervise_gapless_457_640.sh`
   - watchdog style auto-restart launcher for long unattended runs
 - `summarize_*.py`
   - task-specific summary scripts from older workflows
 
-## 6) Legacy scripts
+## 7) Legacy scripts
 
 Files like `run_round2X_*`, `run_round3X_*`, ... `run_round7X_*` are historical launchers kept for traceability.
 They are useful for forensics, but not required for new reproduction.
 
-## 7) Notes for contributors
+## 8) Notes for contributors
 
 1. Read root `README.md` and `results/README_RESULTS.md` first.
 2. Use finite packets before editing strategy files.
 3. For Sudoku, prefer `sudoku9_unique` over the older `train_sudoku_sft.py` probe.
-4. Sync `runs/` to `results/` before updating README or logs.
-5. Only then modify queue strategy or policy files.
+4. For CoT Sudoku baselines, prefer `run_sudoku_rwkv_eval.py` over ad-hoc copies of the external repo.
+5. Sync `runs/` to `results/` before updating README or logs.
+6. Only then modify queue strategy or policy files.
