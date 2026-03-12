@@ -112,9 +112,11 @@ python3 scripts/run_round77_82_fastdiscover.py \
 The paper tables are curated paper-side summaries generated from `paper/neurips2025/data/metrics.json`.
 
 Those summaries are constrained by three automated checks:
-- `verify_metrics_snapshot.py` checks them against the shipped README scoreboard and selected shipped round records
+- `verify_metrics_snapshot.py` checks the historical archive summary against the committed README scoreboard and recomputes the shipped closure/breadth subset from selected round records
 - `verify_submission_layout.py` checks that the built PDFs stay within the NeurIPS content-page budget and that bibliography / appendix / checklist boundaries remain well-formed
 - `verify_anonymity_snapshot.py` checks that the curated source/ZIP snapshot does not leak local identity or legacy remote infrastructure details
+
+The shipped `posttrain_rwkv7/runs/` subset is therefore a boundary-audit release for rounds `783-788` and `799-808`, not a raw public replay of the full historical family counts used in the paper-side summary.
 
 The real-task rows in the paper remain teacher-forced token-accuracy probes, not benchmark end metrics such as EM, F1, or pass@k.
 

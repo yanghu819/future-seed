@@ -69,7 +69,7 @@ The repository contains older historical runners and archive notes that are valu
 The supplementary ZIP therefore ships only the files that support:
 
 - paper rebuild
-- paper-number audit against the shipped snapshot boundary
+- paper-side historical-summary consistency checks plus boundary audit of the shipped closure/breadth subset
 - local sanity checks of the active fastdiscover orchestrator
 
 It is not intended to be a turnkey rerun bundle for the entire project history.

@@ -47,7 +47,7 @@
     \item {\bf Experimental result reproducibility}
     \item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results of the paper to the extent that it affects the main claims and/or conclusions of the paper (regardless of whether the code and data are provided or not)?
     \item[] Answer: \answerNo{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: The paper discloses the mechanism, probe families, queue policy, task matrix, and artifact layout, and the supplementary snapshot includes auditable queue files and shipped round records. However, the anonymous snapshot does not include the default checkpoint blob or a turnkey end-to-end rerun path for the reported post-training results; see Section~5, the appendix, and \texttt{REPRO\_MATRIX.md}.
+    \item[] Justification: The paper discloses the mechanism, probe families, queue policy, task matrix, and artifact layout, and the supplementary snapshot includes auditable queue files and shipped closure/breadth round records. However, the anonymous snapshot does not include the default checkpoint blob, nor does it raw-recompute every historical family count in the paper's post-training table from shipped runs alone; see Section~5, the appendix, and \texttt{REPRO\_MATRIX.md}.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that the paper does not include experiments.
@@ -67,7 +67,7 @@
 \item {\bf Open access to data and code}
     \item[] Question: Does the paper provide open access to the data and code, with sufficient instructions to faithfully reproduce the main experimental results, as described in supplemental material?
     \item[] Answer: \answerNo{} % Replace by \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item[] Justification: The repository snapshot includes code, queues, curated metrics, selected run artifacts, source/ZIP anonymity checks, and a supplementary packaging script, but it does not include the default checkpoint or a full end-to-end rerun path for every reported result. See \texttt{ARTIFACT\_GUIDE.md}, \texttt{LOCAL\_REPRO.md}, and \texttt{SUPPLEMENTARY\_MANIFEST.md}.
+    \item[] Justification: The repository snapshot includes code, queues, curated metrics, selected run artifacts, source/ZIP anonymity checks, and a supplementary packaging script, but it does not include the default checkpoint or a full end-to-end rerun path for every reported result, and the shipped raw runs only cover the release-backed closure/breadth subset. See \texttt{ARTIFACT\_GUIDE.md}, \texttt{LOCAL\_REPRO.md}, and \texttt{SUPPLEMENTARY\_MANIFEST.md}.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer NA means that paper does not include experiments requiring code.

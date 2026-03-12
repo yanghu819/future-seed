@@ -1,6 +1,6 @@
 \section{Additional Experimental Details}
 \paragraph{Base setting.}
-All experiments use an RWKV7 backbone with prompt-time Future-Seed only: generation remains left-to-right and causal at decode time. The post-training scripts default to the checkpoint \texttt{assets/weights/rwkv7-g1d-0.1b-20260129-ctx8192.pth}. That checkpoint path is referenced by the scripts but the blob itself is not included in this anonymous repository snapshot. The real-task campaign uses a single NVIDIA RTX 4090 and serial quick-to-medium screening to conserve wall-clock budget.
+All post-training experiments use an RWKV7 backbone with prompt-time Future-Seed only: generation remains left-to-right and causal at decode time. The post-training scripts default to the checkpoint \texttt{assets/weights/rwkv7-g1d-0.1b-20260129-ctx8192.pth}. That checkpoint path is referenced by the scripts but the blob itself is not included in this anonymous repository snapshot. The real-task campaign uses a single NVIDIA RTX 4090 and serial quick-to-medium screening to conserve wall-clock budget.
 
 \paragraph{Post-training search policy.}
 The late-stage queues use a two-stage policy: a quick stage for baseline and candidate screening, and a medium stage only for candidates that clear a positive gate. In the final fastdiscover queues, we prune candidates below $-0.5$pp at quick stage and only promote a top candidate above $+0.8$pp to medium budget. The dominant late-stage quick/medium budgets are 140/280 for ARC-like queues, 150/260 for SQuAD-like queues, and 160/260 for MBPP-longctx queues.

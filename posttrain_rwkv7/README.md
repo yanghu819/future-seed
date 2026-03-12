@@ -10,7 +10,10 @@ Current state:
 - current work is documentation, table cleanup, and repo hygiene, not more BFS under the same recipe
 - legacy AutoDL-era scripts and chronology remain for provenance only; see [`LEGACY_AUTODL.md`](LEGACY_AUTODL.md)
 
-## Current Best Evidence
+## Historical Archive Summary Used By The Paper
+
+This table is the curated paper-side family summary from the broader internal post-training archive.
+It is not raw-recomputed from the shipped `runs/` subset in this repository snapshot.
 
 | Task family | Best med gain | Med median | Positive med count | Current judgment |
 |---|---:|---:|---:|---|
@@ -19,9 +22,23 @@ Current state:
 | `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, unconfirmed |
 | `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, unstable |
 | `squad_text_restore` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
-| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small support |
+| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | historical positive pocket |
 | `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task only |
 | `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix-only spike |
+
+## Shipped Snapshot-Backed Closure/Breadth Evidence
+
+This table is the part that the released `runs/` snapshot can directly recompute from raw JSONL records
+for rounds `783-788` and `799-808`.
+
+| Task family | Shipped best med gain | Shipped med median | Shipped positive med count | Released reading |
+|---|---:|---:|---:|---|
+| protein_ss_spot | n/a | n/a | 0/0 | near-gate quick positives only in the shipped breadth window |
+| hotpot_text_restore | +1.00pp | +0.55pp | 2/2 | released positive breadth signal |
+| mbpp_longctx_probe | +5.01pp | +0.54pp | 3/5 | mixed released closure evidence |
+| arc_mc_probe | +9.38pp | +3.12pp | 3/5 | mixed released closure evidence |
+| squad_text_restore | n/a | n/a | 0/0 | quick-only near-gate signal in the shipped breadth window |
+| punc_restore | n/a | n/a | 0/0 | historical only; not present in the shipped closure/breadth subset |
 
 Low-ROI or negative families under the current recipe:
 - `protein_contact`
@@ -34,15 +51,15 @@ Low-ROI or negative families under the current recipe:
 
 ## Final Closure And Breadth Pivot
 
-### Closure window (`round783-802`)
+### Shipped closure subset (`round783-788` and `round799-802`)
 
 - `mbpp_longctx_probe` stayed promising but did not pass strict final confirmation:
-  - exploit positives: `round785 +5.01pp`, `round786 +0.54pp`, `round788 +0.97pp`, `round789 +1.87pp`
+  - shipped exploit positives: `round785 +5.01pp`, `round786 +0.54pp`, `round788 +0.97pp`
   - strict confirms failed to promote:
     - `round799`: quick `+0.38pp`
     - `round800`: quick `+0.60pp`
 - `arc_mc_probe` produced large positives but stayed unstable:
-  - positives: `round785 +3.12pp`, `round787 +9.38pp`, `round788 +3.12pp`, `round790 +6.25pp`
+  - shipped positives: `round785 +3.12pp`, `round787 +9.38pp`, `round788 +3.12pp`
   - held-out confirm failed:
     - `round801`: med `-1.56pp`
 - `tsp_mask` did not confirm:
@@ -66,8 +83,8 @@ Low-ROI or negative families under the current recipe:
 ## What The Repo Can Defend
 
 1. Future-Seed clearly helps on toy and synthetic constraint-repair tasks.
-2. In post-training, `protein_ss_spot` is the strongest repeatable family under the current recipe.
-3. `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
+2. In post-training, `protein_ss_spot` is the strongest repeatable family in the paper-side archive summary under the current recipe.
+3. `hotpot_text_restore` has direct medium-stage positives in the released breadth window; `squad_text_restore` and `punc_restore` should be read as smaller historical positive pockets rather than current snapshot-backed lines.
 4. `mbpp_longctx_probe`, `arc_mc_probe`, and `tsp_mask` remain mixed or exploratory rather than stable headline evidence.
 
 ## What The Repo Should Not Claim
@@ -76,6 +93,7 @@ Low-ROI or negative families under the current recipe:
 2. `mbpp_longctx_probe` was strictly confirmed by the final confirmation queue
 3. `arc_mc_probe` is already robust enough for a clean stability claim
 4. constraint-task wins alone prove the real-task story
+5. the paper-side family counts can be raw-recomputed from the shipped `runs/` subset alone
 
 ## Quick Reproduction Entrypoints
 

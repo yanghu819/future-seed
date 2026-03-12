@@ -78,7 +78,7 @@ The current local snapshot does not include the default checkpoint blob and does
 
 - the supplementary ZIP is still valid as an anonymous artifact snapshot
 - the paper rebuild is still deterministic
-- the real-task post-training results remain auditable against the shipped queue and run files
+- representative closure/breadth highlights remain auditable against the shipped queue and run files
 - end-to-end retraining remains outside the fully reproducible boundary
 
 ## How To Interpret Dry-Run Failures
@@ -109,8 +109,9 @@ The paper tables are regenerated from committed `data/metrics.json`, not from a 
 That means:
 
 - the PDF build is deterministic inside the repo
-- the tables are auditable against the committed snapshot
-- the shipped closure-window highlights are directly checked against committed round records by `verify_metrics_snapshot.py`
+- the historical archive summary used by the paper is auditable as a committed paper-side snapshot
+- the shipped closure/breadth highlights are directly checked against committed round records by `verify_metrics_snapshot.py`
+- the shipped `runs/` subset does not raw-recompute every family count in the paper's post-training main table
 - every citation used in `main.tex` is checked against the paper-side audit ledger and the committed `references.bib` URL fields by `verify_reference_audit.py`
 - the built PDFs are checked against the NeurIPS content-page budget by `verify_submission_layout.py`
 - the curated source/ZIP snapshot is checked by `verify_anonymity_snapshot.py`

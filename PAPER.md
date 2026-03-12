@@ -25,7 +25,8 @@ All real-task paper numbers are teacher-forced token-accuracy probe results, not
 
 - strong synthetic evidence for in-place constraint repair
 - strongest repeatable real-task family under the current recipe: `protein_ss_spot`
-- supporting but smaller real-task positives: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
+- clearest released secondary positive: `hotpot_text_restore`
+- smaller historical positive pockets in the broader archive: `squad_text_restore`, `punc_restore`
 - mixed evidence only: `mbpp_longctx_probe`, `arc_mc_probe`
 - no stable held-out real-task confirmation claim
 

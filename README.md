@@ -22,7 +22,8 @@ The post-training campaign is closed through `round808`.
 Current judgment:
 - toy and synthetic constraint tasks clearly support Future-Seed
 - strongest repeatable family under the current recipe: `protein_ss_spot`
-- supporting positive real-task signals: `hotpot_text_restore`, `squad_text_restore`, `punc_restore`
+- clearest released secondary positive: `hotpot_text_restore`
+- smaller historical positive pockets in the broader archive: `squad_text_restore`, `punc_restore`
 - promising but unconfirmed: `mbpp_longctx_probe`
 - high-upside but unstable: `arc_mc_probe`
 - low-ROI or negative under the current recipe: `protein_contact`, `wiki`, `hotpot_longctx`, `countdown`, `nqueens`, `zebra`, `sat3`

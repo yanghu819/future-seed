@@ -1,0 +1,348 @@
+{
+  "synthetic": {
+    "main_summary": [
+      {
+        "task": "RIGHTCOPY acc",
+        "baseline": 10.46,
+        "future_seed": 15.5,
+        "delta": 5.04
+      },
+      {
+        "task": "CONSTR acc",
+        "baseline": 9.77,
+        "future_seed": 21.14,
+        "delta": 11.37
+      },
+      {
+        "task": "KVSORT id exact",
+        "baseline": 0.0,
+        "future_seed": 100.0,
+        "delta": 100.0
+      },
+      {
+        "task": "KVSORT ood exact",
+        "baseline": 0.0,
+        "future_seed": 100.0,
+        "delta": 100.0
+      },
+      {
+        "task": "Sudoku solve @ holes=12",
+        "baseline": 0.0,
+        "future_seed": 55.1,
+        "delta": 55.1
+      }
+    ],
+    "permfill": [
+      {
+        "weights": "FS=1, train n=24",
+        "anchor": "off",
+        "n24": 100.0,
+        "n28": 0.0,
+        "n32": 0.0,
+        "n36": 0.0
+      },
+      {
+        "weights": "FS=1, train n=24",
+        "anchor": "k=2",
+        "n24": 99.0,
+        "n28": 83.0,
+        "n32": 12.0,
+        "n36": 0.0
+      },
+      {
+        "weights": "FS=1, train n=32",
+        "anchor": "k=2",
+        "n24": 100.0,
+        "n28": 100.0,
+        "n32": 100.0,
+        "n36": 93.5
+      }
+    ],
+    "sudoku_phase": [
+      {
+        "holes": 4,
+        "fs0": 35.3,
+        "fs1": 100.0
+      },
+      {
+        "holes": 6,
+        "fs0": 16.65,
+        "fs1": 100.0
+      },
+      {
+        "holes": 8,
+        "fs0": 5.2,
+        "fs1": 100.0
+      },
+      {
+        "holes": 10,
+        "fs0": 0.95,
+        "fs1": 95.1
+      },
+      {
+        "holes": 12,
+        "fs0": 0.0,
+        "fs1": 55.1
+      },
+      {
+        "holes": 14,
+        "fs0": 0.0,
+        "fs1": 0.0
+      }
+    ],
+    "sudoku_consistency": [
+      {
+        "setting": "lambda=0.0",
+        "holes10": 93.85,
+        "holes12": 47.95,
+        "holes14": 0.0
+      },
+      {
+        "setting": "lambda=0.1",
+        "holes10": 95.15,
+        "holes12": 58.55,
+        "holes14": 0.0
+      }
+    ],
+    "transformer_baselines": [
+      {
+        "model": "Transformer-MLM",
+        "decode": "argmax",
+        "exact": 0.0,
+        "key_valid": 0.0,
+        "key_order": 0.0
+      },
+      {
+        "model": "Transformer-MLM",
+        "decode": "hungarian",
+        "exact": 0.0,
+        "key_valid": 100.0,
+        "key_order": 0.0
+      },
+      {
+        "model": "Transformer-Causal",
+        "decode": "hungarian",
+        "exact": 0.0,
+        "key_valid": 100.0,
+        "key_order": 0.0
+      },
+      {
+        "model": "Transformer-Causal + ATTN_FS",
+        "decode": "hungarian",
+        "exact": 0.0,
+        "key_valid": 100.0,
+        "key_order": 0.0
+      },
+      {
+        "model": "Transformer-MLM + Sinkhorn",
+        "decode": "hungarian",
+        "exact": 0.0,
+        "key_valid": 100.0,
+        "key_order": 0.0
+      }
+    ]
+  },
+  "posttrain": {
+    "main_summary": [
+      {
+        "task": "protein_ss_spot",
+        "best": 8.14,
+        "median": 2.18,
+        "pos": 103,
+        "total": 126,
+        "judgment": "strongest repeatable",
+        "confirm": "repeatable"
+      },
+      {
+        "task": "hotpot_text_restore",
+        "best": 4.2,
+        "median": 0.54,
+        "pos": 35,
+        "total": 53,
+        "judgment": "repeatable positive",
+        "confirm": "repeatable"
+      },
+      {
+        "task": "mbpp_longctx_probe",
+        "best": 10.0,
+        "median": 0.91,
+        "pos": 53,
+        "total": 87,
+        "judgment": "promising, unconfirmed",
+        "confirm": "strict confirm failed"
+      },
+      {
+        "task": "arc_mc_probe",
+        "best": 20.83,
+        "median": 4.17,
+        "pos": 70,
+        "total": 116,
+        "judgment": "high upside, unstable",
+        "confirm": "held-out confirm failed"
+      },
+      {
+        "task": "squad_text_restore",
+        "best": 7.31,
+        "median": 0.55,
+        "pos": 24,
+        "total": 35,
+        "judgment": "mixed, not locked",
+        "confirm": "not strictly confirmed"
+      },
+      {
+        "task": "punc_restore",
+        "best": 2.16,
+        "median": 0.36,
+        "pos": 16,
+        "total": 24,
+        "judgment": "historical positive pocket",
+        "confirm": "historical support"
+      }
+    ],
+    "snapshot_boundary_summary": [
+      {
+        "task": "protein_ss_spot",
+        "best": null,
+        "median": null,
+        "pos": 0,
+        "total": 0,
+        "judgment": "no medium-stage rows in shipped closure/breadth subset"
+      },
+      {
+        "task": "hotpot_text_restore",
+        "best": 1.0,
+        "median": 0.55,
+        "pos": 2,
+        "total": 2,
+        "judgment": "released positive breadth signal"
+      },
+      {
+        "task": "mbpp_longctx_probe",
+        "best": 5.01,
+        "median": 0.54,
+        "pos": 3,
+        "total": 5,
+        "judgment": "mixed released closure evidence"
+      },
+      {
+        "task": "arc_mc_probe",
+        "best": 9.38,
+        "median": 3.12,
+        "pos": 3,
+        "total": 5,
+        "judgment": "mixed released closure evidence"
+      },
+      {
+        "task": "squad_text_restore",
+        "best": null,
+        "median": null,
+        "pos": 0,
+        "total": 0,
+        "judgment": "quick-only near-gate signal in shipped breadth subset"
+      },
+      {
+        "task": "punc_restore",
+        "best": null,
+        "median": null,
+        "pos": 0,
+        "total": 0,
+        "judgment": "historical only; not shipped in closure/breadth subset"
+      }
+    ],
+    "appendix_summary": [
+      {
+        "task": "graph_color",
+        "best": 8.33,
+        "median": 0.0,
+        "pos": 4,
+        "total": 10,
+        "judgment": "diagnostic only"
+      },
+      {
+        "task": "tsp_mask",
+        "best": 25.0,
+        "median": 2.08,
+        "pos": 2,
+        "total": 4,
+        "judgment": "appendix only"
+      },
+      {
+        "task": "countdown",
+        "best": -4.17,
+        "median": -4.17,
+        "pos": 0,
+        "total": 2,
+        "judgment": "negative"
+      },
+      {
+        "task": "nqueens",
+        "best": -4.17,
+        "median": -10.42,
+        "pos": 0,
+        "total": 2,
+        "judgment": "negative"
+      },
+      {
+        "task": "sat3",
+        "best": 0.0,
+        "median": 0.0,
+        "pos": 0,
+        "total": 4,
+        "judgment": "near-zero"
+      }
+    ],
+    "closure_highlights": [
+      {
+        "round": 785,
+        "task": "mbpp_longctx_seed38_depthmix_anchor",
+        "config": "scalar_l6_train1e4",
+        "stage": "med",
+        "baseline_stage": "med",
+        "name": "mbpp_longctx_seed38_depthmix_anchor",
+        "delta": 5.01,
+        "note": "best closure-window MBPP probe result"
+      },
+      {
+        "round": 787,
+        "task": "arc_mc_seed260_depthmix_qfirst",
+        "config": "scalar_l6_train1e4",
+        "stage": "med",
+        "baseline_stage": "med",
+        "name": "arc_mc_seed260_depthmix_qfirst",
+        "delta": 9.38,
+        "note": "best closure-window ARC token-probe result"
+      },
+      {
+        "round": 807,
+        "task": "hotpot_seed96_breadth",
+        "config": "head_l8",
+        "stage": "med",
+        "baseline_stage": "med",
+        "name": "hotpot_seed96_breadth",
+        "delta": 1.0,
+        "note": "best breadth-pivot Hotpot text-restore positive"
+      },
+      {
+        "round": 806,
+        "task": "squad_seed104_breadth",
+        "config": "scalar_l8_train1e4",
+        "stage": "quick",
+        "baseline_stage": "quick",
+        "name": "squad_seed104_breadth",
+        "delta": 0.76,
+        "note": "quick positive, below promote gate"
+      },
+      {
+        "round": 805,
+        "task": "protein_ss_seed283_breadth",
+        "config": "scalar_l8_sched_cos",
+        "stage": "quick",
+        "baseline_stage": "quick",
+        "name": "protein_ss_seed283_breadth",
+        "delta": 0.58,
+        "note": "near-gate quick positive"
+      }
+    ]
+  },
+  "source_note": "Synthetic metrics are taken from the existing technical report in this repository. Post-training summary metrics were aggregated from the full local post-training run archive before packaging the paper draft; latest closure details are additionally backed by the synced round783-808 records committed under posttrain_rwkv7/runs/."
+}

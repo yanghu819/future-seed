@@ -10,3 +10,5 @@ tiny-diffusion/
 paper/build/
 _autodl_logs/
 data/
+!paper/neurips2025/data/
+!paper/neurips2025/data/metrics.json

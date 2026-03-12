@@ -76,7 +76,7 @@ Core paper files:
 
 Paper-side utilities:
 - `render_tables.py`: generates LaTeX tables from `data/metrics.json`
-- `verify_metrics_snapshot.py`: verifies paper-side metrics against the shipped README table and shipped round artifacts
+- `verify_metrics_snapshot.py`: verifies that the historical archive summary in `data/metrics.json` matches the committed README scoreboard and that the shipped closure/breadth subset recomputes from raw round artifacts
 - `verify_reference_audit.py`: verifies that every citation used in `main.tex` has a detailed audit entry, an approved official-source URL, and a matching `url` field in `references.bib`
 - `verify_submission_layout.py`: verifies total pages, content-page budget, and bibliography/appendix/checklist boundaries from the built logs
 - `verify_anonymity_snapshot.py`: scans the curated source snapshot and supplementary ZIP for anonymity leaks
@@ -99,12 +99,13 @@ Paper-side documentation:
 
 - The paper is written as an anonymous submission draft.
 - The strongest headline claim is synthetic mechanism evidence plus repeatable `protein_ss_spot` gains.
-- The supporting real-task signals are `hotpot_text_restore`, `squad_text_restore`, and `punc_restore`.
+- The clearest released secondary positive is `hotpot_text_restore`.
+- `squad_text_restore` and `punc_restore` should be read as smaller historical positive pockets in the broader archive.
 - The draft intentionally keeps `mbpp_longctx_probe` and `arc_mc_probe` as mixed evidence, not stable confirmation.
 - The paper tables are regenerated from committed `data/metrics.json` and do not depend on live experiment logs at build time.
-- `python3 verify_metrics_snapshot.py` checks that the curated paper metrics remain consistent with the shipped snapshot boundary.
+- `python3 verify_metrics_snapshot.py` checks internal consistency for the committed historical archive summary and also recomputes the shipped closure/breadth subset from raw round records.
 - `python3 verify_reference_audit.py` checks that every cited paper has an explicit paper-side usage note, an official-source URL in the audit file, and a matching official URL in `references.bib`.
 - `python3 verify_submission_layout.py` checks that the submission/preprint builds remain within the NeurIPS content-page budget.
 - `python3 verify_anonymity_snapshot.py` checks that the curated anonymous snapshot does not leak local paths, legacy remote commands, or owner identifiers.
-- The shipped post-training round artifacts in this snapshot are `783-788` and `799-808`.
+- The shipped post-training round artifacts in this snapshot are `783-788` and `799-808`; the paper-side family counts remain a curated internal archive summary rather than a raw recomputation from that subset.
 - The default post-training checkpoint path is referenced in the scripts but the checkpoint blob is not included in this anonymous snapshot.

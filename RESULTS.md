@@ -16,7 +16,8 @@ Primary sources:
 What the current evidence supports:
 - Future-Seed clearly helps on toy and synthetic tasks that stress future-aware constraint repair.
 - In post-training, the strongest repeatable family under the current recipe is `protein_ss_spot`.
-- `hotpot_text_restore`, `squad_text_restore`, and `punc_restore` are supporting positive signals.
+- `hotpot_text_restore` is the clearest released secondary positive.
+- `squad_text_restore` and `punc_restore` are smaller historical positive pockets in the broader archive, not the strongest snapshot-backed lines.
 - `mbpp_longctx_probe` remains promising but mixed rather than confirmed.
 - `arc_mc_probe` has strong upside but is still too high-variance for a stability claim.
 - Under the current recipe, the repo should not claim stable held-out real-task confirmation yet.
@@ -34,6 +35,10 @@ What the current evidence supports:
 
 ## Post-Training Scoreboard
 
+This scoreboard is the curated historical archive summary rendered into the paper.
+The shipped `posttrain_rwkv7/runs/` subset directly backs the closure/breadth evidence in
+[`posttrain_rwkv7/README.md`](posttrain_rwkv7/README.md), but it does not raw-recompute every family count below.
+
 | Task family | Best med gain | Med median | Positive med count | Current judgment |
 |---|---:|---:|---:|---|
 | `protein_ss_spot` | `+8.14pp` | `+2.18pp` | `103/126` | strongest repeatable |
@@ -41,7 +46,7 @@ What the current evidence supports:
 | `mbpp_longctx_probe` | `+10.00pp` | `+0.91pp` | `53/87` | promising, unconfirmed |
 | `arc_mc_probe` | `+20.83pp` | `+4.17pp` | `70/116` | high upside, unstable |
 | `squad_text_restore` | `+7.31pp` | `+0.55pp` | `24/35` | mixed, not locked |
-| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | small support |
+| `punc_restore` | `+2.16pp` | `+0.36pp` | `16/24` | historical positive pocket |
 | `graph_color` | `+8.33pp` | `+0.00pp` | `4/10` | useful diagnostic task, not real-task evidence |
 | `tsp_mask` | `+25.00pp` | `+2.08pp` | `2/4` | appendix only; spike did not confirm |
 | `countdown` | `-4.17pp` | `-4.17pp` | `0/2` | negative under current recipe |
