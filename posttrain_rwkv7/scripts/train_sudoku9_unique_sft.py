@@ -75,6 +75,13 @@ def round_up(x: int, multiple: int) -> int:
     return ((x + multiple - 1) // multiple) * multiple
 
 
+def record_rank_key(row: dict[str, object]) -> tuple[float, float]:
+    return (
+        float(row.get("val_focus_exact_mean", 0.0)),
+        float(row.get("val_focus_blank_acc_mean", 0.0)),
+    )
+
+
 class TrainPool:
     def __init__(self, *, clues: Sequence[int], cache_per_clue: int, seed: int):
         self.clues = [int(c) for c in clues]
@@ -458,7 +465,7 @@ def main() -> None:
                 rec[f"val_{key}"] = float(value)
             with metrics_path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(rec) + "\n")
-            if float(val_metrics["focus_exact_mean"]) > best_focus:
+            if best_record is None or record_rank_key(rec) > record_rank_key(best_record):
                 best_focus = float(val_metrics["focus_exact_mean"])
                 best_record = dict(rec)
 

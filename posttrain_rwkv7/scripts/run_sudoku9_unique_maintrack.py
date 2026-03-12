@@ -51,6 +51,33 @@ def read_summary(run_dir: Path) -> dict:
     return json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
 
 
+def best_metrics_record(run_dir: Path) -> dict:
+    metrics_path = run_dir / "metrics.jsonl"
+    best: dict | None = None
+    if not metrics_path.exists():
+        return {}
+    with metrics_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            row = json.loads(line)
+            key = (
+                float(row.get("val_focus_exact_mean", 0.0)),
+                float(row.get("val_focus_blank_acc_mean", 0.0)),
+            )
+            if best is None:
+                best = row
+                continue
+            best_key = (
+                float(best.get("val_focus_exact_mean", 0.0)),
+                float(best.get("val_focus_blank_acc_mean", 0.0)),
+            )
+            if key > best_key:
+                best = row
+    return best or {}
+
+
 def latest_run_dirs(root: Path, tags: list[str]) -> dict[str, Path]:
     out: dict[str, Path] = {}
     for path in root.glob("**/sudoku9_unique_sft/*/summary.json"):
@@ -67,24 +94,44 @@ def latest_run_dirs(root: Path, tags: list[str]) -> dict[str, Path]:
 
 def pick_top2_fs(root: Path) -> list[str]:
     runs = latest_run_dirs(root, PHASE_A_CONFIGS)
-    baseline = read_summary(runs["baseline"]).get("best_record") or {}
+    baseline = best_metrics_record(runs["baseline"])
     base32 = float(baseline.get("val_exact_32", 0.0))
     base28 = float(baseline.get("val_exact_28", 0.0))
+    base_blank = float(baseline.get("val_focus_blank_acc_mean", 0.0))
+    nonzero_exact = False
     scored = []
     for tag in PHASE_A_CONFIGS:
         if tag == "baseline":
             continue
-        summary = read_summary(runs[tag])
-        best = summary.get("best_record") or {}
+        best = best_metrics_record(runs[tag])
         d32 = float(best.get("val_exact_32", 0.0)) - base32
         d28 = float(best.get("val_exact_28", 0.0)) - base28
-        if d32 < -0.01 and d28 < -0.01:
-            continue
-        scored.append((float(best.get("val_focus_exact_mean", -1.0)), tag))
-    scored.sort(reverse=True)
-    if not scored:
+        if float(best.get("val_focus_exact_mean", 0.0)) > 0.0:
+            nonzero_exact = True
+        scored.append(
+            {
+                "tag": tag,
+                "focus_exact": float(best.get("val_focus_exact_mean", 0.0)),
+                "focus_blank": float(best.get("val_focus_blank_acc_mean", 0.0)),
+                "d32": d32,
+                "d28": d28,
+                "dblank": float(best.get("val_focus_blank_acc_mean", 0.0)) - base_blank,
+            }
+        )
+    ranked: list[tuple[float, str]] = []
+    for row in scored:
+        if nonzero_exact:
+            if row["d32"] < -0.01 and row["d28"] < -0.01:
+                continue
+            ranked.append((float(row["focus_exact"]), str(row["tag"])))
+        else:
+            if float(row["dblank"]) < -0.005:
+                continue
+            ranked.append((float(row["focus_blank"]), str(row["tag"])))
+    ranked.sort(reverse=True)
+    if not ranked:
         raise RuntimeError("no FS config survived phase A")
-    return [tag for _, tag in scored[:2]]
+    return [tag for _, tag in ranked[:2]]
 
 
 def launch_phase(

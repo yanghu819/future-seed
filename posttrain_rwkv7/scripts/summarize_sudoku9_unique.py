@@ -23,7 +23,15 @@ def best_record(run_dir: Path) -> dict[str, Any]:
                 if not line:
                     continue
                 row = json.loads(line)
-                if best is None or float(row.get("val_focus_exact_mean", 0.0)) > float(best.get("val_focus_exact_mean", 0.0)):
+                row_key = (
+                    float(row.get("val_focus_exact_mean", 0.0)),
+                    float(row.get("val_focus_blank_acc_mean", 0.0)),
+                )
+                best_key = (
+                    float(best.get("val_focus_exact_mean", 0.0)),
+                    float(best.get("val_focus_blank_acc_mean", 0.0)),
+                ) if best is not None else None
+                if best is None or row_key > best_key:
                     best = row
     summary_path = run_dir / "summary.json"
     summary = load_json(summary_path) if summary_path.exists() else {}
@@ -53,9 +61,15 @@ def main() -> None:
         print("No sudoku9_unique runs found.")
         return
 
-    rows.sort(key=lambda row: float((row["best"] or {}).get("val_focus_exact_mean", -1.0)), reverse=True)
-    print("config | mode | best focus exact | step | val32 | val28 | val24 | final test focus exact")
-    print("---|---|---:|---:|---:|---:|---:|---:")
+    rows.sort(
+        key=lambda row: (
+            float((row["best"] or {}).get("val_focus_exact_mean", -1.0)),
+            float((row["best"] or {}).get("val_focus_blank_acc_mean", -1.0)),
+        ),
+        reverse=True,
+    )
+    print("config | mode | best focus exact | best focus blank | step | val32 | val28 | val24 | final test focus exact")
+    print("---|---|---:|---:|---:|---:|---:|---:|---:")
     for row in rows:
         best = row["best"] or {}
         summary = row["summary"] or {}
@@ -63,7 +77,8 @@ def main() -> None:
         focus_test = final_test.get("focus_exact_mean")
         focus_test_text = f"{float(focus_test)*100:.2f}%" if focus_test is not None else "-"
         print(
-            f"{row['config']} | {row.get('mode','-')} | {float(best.get('val_focus_exact_mean', 0.0))*100:.2f}% | {int(best.get('step', 0))} | "
+            f"{row['config']} | {row.get('mode','-')} | {float(best.get('val_focus_exact_mean', 0.0))*100:.2f}% | "
+            f"{float(best.get('val_focus_blank_acc_mean', 0.0))*100:.2f}% | {int(best.get('step', 0))} | "
             f"{float(best.get('val_exact_32', 0.0))*100:.2f}% | {float(best.get('val_exact_28', 0.0))*100:.2f}% | "
             f"{float(best.get('val_exact_24', 0.0))*100:.2f}% | {focus_test_text}"
         )
