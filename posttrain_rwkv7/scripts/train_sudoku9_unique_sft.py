@@ -14,11 +14,20 @@ import argparse
 import json
 import random
 import statistics
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+for _path in (SCRIPT_DIR, REPO_ROOT):
+    _text = str(_path)
+    if _text not in sys.path:
+        sys.path.insert(0, _text)
+
+from cache_defaults import apply_cache_env, ensure_cache_dirs
 from sudoku9_unique import (
     SudokuExample,
     blank_token_accuracy,
@@ -60,6 +69,10 @@ def parse_int_list(text: str) -> list[int]:
     if not vals:
         raise ValueError("expected at least one integer")
     return vals
+
+
+def round_up(x: int, multiple: int) -> int:
+    return ((x + multiple - 1) // multiple) * multiple
 
 
 class TrainPool:
@@ -188,6 +201,9 @@ def main() -> None:
     eval_clues = parse_int_list(args.eval_clues)
     focus_clues = parse_int_list(args.focus_clues)
 
+    apply_cache_env()
+    ensure_cache_dirs()
+
     if not args.val_manifest:
         raise ValueError("--val_manifest is required")
 
@@ -199,6 +215,8 @@ def main() -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     tok = RWKVWorldTokenizer(args.vocab)
     codec = SudokuCharCodec.from_tokenizer(tok)
+    pad_id = int(tok.eot_id)
+    digit_ids = torch.tensor([codec.char_to_id[str(i)] for i in range(1, 10)], dtype=torch.long, device=device)
 
     val_examples = load_manifest(Path(args.val_manifest))
     val_by_clue = grouped_by_clue(val_examples)
@@ -245,6 +263,24 @@ def main() -> None:
     )
     train_pool = TrainPool(clues=train_clues, cache_per_clue=int(args.train_cache_per_clue), seed=int(args.seed))
 
+    def pad_left_list(seqs: Sequence[list[int]], *, multiple: int = 16) -> tuple[torch.Tensor, int]:
+        max_len = max(len(s) for s in seqs)
+        max_len_pad = round_up(max_len, multiple)
+        out = []
+        for s in seqs:
+            out.append([pad_id] * (max_len_pad - len(s)) + s)
+        return torch.tensor(out, dtype=torch.long, device=device), max_len
+
+    def pad_right_tensor(t: torch.Tensor, *, multiple: int = 16) -> tuple[torch.Tensor, int]:
+        seq_len = int(t.size(1))
+        if seq_len == 0:
+            return t, 0
+        seq_len_pad = round_up(seq_len, multiple)
+        if seq_len_pad == seq_len:
+            return t, seq_len
+        pad = torch.full((int(t.size(0)), seq_len_pad - seq_len), pad_id, dtype=t.dtype, device=t.device)
+        return torch.cat([t, pad], dim=1), seq_len
+
     def encode_examples(examples: Sequence[SudokuExample]):
         prompt_rows = []
         answer_rows = []
@@ -262,11 +298,11 @@ def main() -> None:
             puzzles.append(ex.puzzle)
             solutions.append(ex.solution)
             clue_counts.append(int(ex.clue_count))
-        prompt_ids = torch.tensor(prompt_rows, dtype=torch.long, device=device)
+        prompt_ids, prompt_len = pad_left_list(prompt_rows, multiple=16)
         answer_ids = torch.tensor(answer_rows, dtype=torch.long, device=device)
         blank_mask_t = torch.tensor(blank_masks, dtype=torch.bool, device=device)
         clue_mask_t = torch.tensor(clue_masks, dtype=torch.bool, device=device)
-        return prompt_ids, answer_ids, blank_mask_t, clue_mask_t, puzzles, solutions, clue_counts
+        return prompt_ids, prompt_len, answer_ids, blank_mask_t, clue_mask_t, puzzles, solutions, clue_counts
 
     def prompt_forward(prompt_ids: torch.Tensor):
         return model(
@@ -285,6 +321,10 @@ def main() -> None:
             return_states=True,
         )
 
+    def argmax_digit_ids(logits: torch.Tensor) -> torch.Tensor:
+        digit_logits = logits.index_select(dim=-1, index=digit_ids)
+        return digit_ids[digit_logits.argmax(dim=-1)]
+
     def evaluate_examples(examples: Sequence[SudokuExample]) -> dict[str, float]:
         if not examples:
             return {"exact": 0.0, "valid": 0.0, "clue": 0.0, "blank_acc": 0.0}
@@ -296,27 +336,26 @@ def main() -> None:
         with torch.no_grad():
             for start in range(0, len(examples), int(args.bsz)):
                 batch = examples[start : start + int(args.bsz)]
-                prompt_ids, answer_ids, _blank_mask, clue_mask, puzzles, solutions, _ = encode_examples(batch)
+                prompt_ids, prompt_len, answer_ids, _blank_mask, clue_mask, puzzles, solutions, _ = encode_examples(batch)
                 prompt_hidden, states = prompt_forward(prompt_ids)
                 assert states is not None
                 generated = torch.empty_like(answer_ids)
-                logits = model.project(prompt_hidden[:, -1, :])
-                next_tok = logits.argmax(dim=-1)
+                logits = model.project(prompt_hidden[:, prompt_len - 1, :])
+                next_tok = argmax_digit_ids(logits)
                 generated[:, 0] = torch.where(clue_mask[:, 0], answer_ids[:, 0], next_tok)
-                current_states = states
                 for pos in range(1, ANSWER_LEN):
-                    hidden, current_states = model(
-                        generated[:, pos - 1 : pos],
-                        seed_states=current_states,
+                    prefix_pad, prefix_len = pad_right_tensor(generated[:, :pos], multiple=16)
+                    hidden, _ = model(
+                        prefix_pad,
+                        seed_states=states,
                         future_seed=False,
                         fs_alpha=None,
                         fs_alpha_head=None,
                         seed_scale=1.0,
-                        return_states=True,
+                        return_states=False,
                     )
-                    assert current_states is not None
-                    logits = model.project(hidden[:, -1, :])
-                    next_tok = logits.argmax(dim=-1)
+                    logits = model.project(hidden[:, prefix_len - 1, :])
+                    next_tok = argmax_digit_ids(logits)
                     generated[:, pos] = torch.where(clue_mask[:, pos], answer_ids[:, pos], next_tok)
 
                 for row_idx in range(generated.size(0)):
@@ -372,23 +411,25 @@ def main() -> None:
             break
 
         batch = train_pool.sample(int(args.bsz))
-        prompt_ids, answer_ids, blank_mask, _clue_mask, _puzzles, _solutions, clue_counts = encode_examples(batch)
+        prompt_ids, prompt_len, answer_ids, blank_mask, _clue_mask, _puzzles, _solutions, clue_counts = encode_examples(batch)
         opt.zero_grad(set_to_none=True)
 
         prompt_hidden, prompt_states = prompt_forward(prompt_ids)
         assert prompt_states is not None
 
-        vocab_size = model.project(prompt_hidden[:, -1, :]).size(-1)
+        prompt_last_hidden = prompt_hidden[:, prompt_len - 1, :]
+        vocab_size = model.project(prompt_last_hidden).size(-1)
         loss0 = torch.tensor(0.0, device=device)
         if bool(blank_mask[:, 0].any()):
-            logits0 = model.project(prompt_hidden[:, -1, :])
+            logits0 = model.project(prompt_last_hidden)
             loss0 = F.cross_entropy(logits0[blank_mask[:, 0]], answer_ids[:, 0][blank_mask[:, 0]])
 
         ans_in = answer_ids[:, :-1].contiguous()
+        ans_in_pad, ans_in_len = pad_right_tensor(ans_in, multiple=16)
         ans_tgt = answer_ids[:, 1:].clone()
         ans_tgt[~blank_mask[:, 1:]] = -100
         ans_hidden, _ = model(
-            ans_in,
+            ans_in_pad,
             seed_states=prompt_states,
             future_seed=False,
             fs_alpha=None,
@@ -396,9 +437,9 @@ def main() -> None:
             seed_scale=1.0,
             return_states=False,
         )
-        ans_hidden = ans_hidden[:, : ANSWER_LEN - 1, :].contiguous()
+        ans_hidden = ans_hidden[:, :ans_in_len, :].contiguous()
         logits = model.project(ans_hidden)
-        loss_rest = F.cross_entropy(logits.view(-1, vocab_size), ans_tgt.view(-1), ignore_index=-100)
+        loss_rest = F.cross_entropy(logits.view(-1, vocab_size), ans_tgt[:, :ans_in_len].contiguous().view(-1), ignore_index=-100)
         loss = loss0 + loss_rest
         loss.backward()
         opt.step()
