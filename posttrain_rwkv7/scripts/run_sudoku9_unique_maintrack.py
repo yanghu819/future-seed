@@ -15,6 +15,9 @@ TRAIN = SCRIPTS / "train_sudoku9_unique_sft.py"
 BUILD = SCRIPTS / "build_sudoku9_unique_manifests.py"
 SUMMARY = SCRIPTS / "summarize_sudoku9_unique.py"
 DEFAULT_ASSETS = REPO / "assets" / "sudoku9_unique"
+DEFAULT_TRAIN_CLUES = "40,36,32,28"
+DEFAULT_FOCUS_CLUES = "32,28"
+DEFAULT_EVAL_CLUES = "40,36,32,28,24"
 
 CONFIGS = {
     "baseline": ["--mode", "no_fs", "--fs_variant", "scalar", "--alpha_lr", "0", "--alpha_init", "-2", "--fs_layer_start", "6", "--fs_clip", "1.0"],
@@ -33,14 +36,48 @@ def run(cmd: list[str], *, dry_run: bool) -> None:
         subprocess.run(cmd, check=True)
 
 
-def ensure_manifests(*, assets_dir: Path, smoke: bool, dry_run: bool, workers: int) -> tuple[Path, Path]:
+def parse_int_list(text: str) -> list[int]:
+    vals = [int(x) for x in text.split(",") if x.strip()]
+    if not vals:
+        raise ValueError("expected at least one integer")
+    return vals
+
+
+def manifest_tag(*, smoke: bool, seed: int, clues: list[int]) -> str:
+    if smoke:
+        return "smoke"
+    if clues == parse_int_list(DEFAULT_EVAL_CLUES) and int(seed) == 20260312:
+        return "seed20260312"
+    return "seed" + str(int(seed)) + "_" + "-".join(str(x) for x in clues)
+
+
+def ensure_manifests(
+    *,
+    assets_dir: Path,
+    smoke: bool,
+    dry_run: bool,
+    workers: int,
+    clues: list[int],
+    seed: int,
+) -> tuple[Path, Path]:
     assets_dir.mkdir(parents=True, exist_ok=True)
-    tag = "smoke" if smoke else "seed20260312"
+    tag = manifest_tag(smoke=smoke, seed=seed, clues=clues)
     val = assets_dir / f"val_{tag}.jsonl"
     test = assets_dir / f"test_{tag}.jsonl"
     if val.exists() and test.exists():
         return val, test
-    cmd = [sys.executable, str(BUILD), "--out_dir", str(assets_dir), "--workers", str(workers)]
+    cmd = [
+        sys.executable,
+        str(BUILD),
+        "--out_dir",
+        str(assets_dir),
+        "--workers",
+        str(workers),
+        "--clues",
+        ",".join(str(x) for x in clues),
+        "--seed",
+        str(seed),
+    ]
     if smoke:
         cmd.append("--smoke")
     run(cmd, dry_run=dry_run)
@@ -142,11 +179,31 @@ def launch_phase(
     val_manifest: Path,
     test_manifest: Path,
     dry_run: bool,
+    train_clues: str,
+    focus_clues: str,
+    eval_clues: str,
+    phase_a_max_steps: int,
+    phase_a_eval_every: int,
+    phase_a_eval_examples: int,
+    phase_b_max_steps: int,
+    phase_b_eval_every: int,
+    phase_b_eval_examples: int,
+    phase_b_final_eval_examples: int,
 ) -> None:
     phase_budgets = {
         "smoke": {"max_steps": 2, "eval_every": 1, "eval_examples": 1, "final_eval": 0},
-        "phase_a": {"max_steps": 3000, "eval_every": 300, "eval_examples": 64, "final_eval": 0},
-        "phase_b": {"max_steps": 25000, "eval_every": 1000, "eval_examples": 256, "final_eval": 2000},
+        "phase_a": {
+            "max_steps": int(phase_a_max_steps),
+            "eval_every": int(phase_a_eval_every),
+            "eval_examples": int(phase_a_eval_examples),
+            "final_eval": 0,
+        },
+        "phase_b": {
+            "max_steps": int(phase_b_max_steps),
+            "eval_every": int(phase_b_eval_every),
+            "eval_examples": int(phase_b_eval_examples),
+            "final_eval": int(phase_b_final_eval_examples),
+        },
     }
     budget = phase_budgets[phase]
     for tag in tags:
@@ -158,11 +215,11 @@ def launch_phase(
             "--tag",
             tag,
             "--train_clues",
-            "40,36,32,28",
+            str(train_clues),
             "--focus_clues",
-            "32,28",
+            str(focus_clues),
             "--eval_clues",
-            "40,36,32,28,24",
+            str(eval_clues),
             "--val_manifest",
             str(val_manifest),
             "--test_manifest",
@@ -187,31 +244,121 @@ def main() -> None:
     ap.add_argument("--assets_dir", type=str, default=str(DEFAULT_ASSETS))
     ap.add_argument("--run_dir", type=str, default="runs")
     ap.add_argument("--workers", type=int, default=0)
+    ap.add_argument("--train_clues", type=str, default=DEFAULT_TRAIN_CLUES)
+    ap.add_argument("--focus_clues", type=str, default=DEFAULT_FOCUS_CLUES)
+    ap.add_argument("--eval_clues", type=str, default=DEFAULT_EVAL_CLUES)
+    ap.add_argument("--manifest_seed", type=int, default=20260312)
+    ap.add_argument("--phase_a_max_steps", type=int, default=3000)
+    ap.add_argument("--phase_a_eval_every", type=int, default=300)
+    ap.add_argument("--phase_a_eval_examples", type=int, default=64)
+    ap.add_argument("--phase_b_max_steps", type=int, default=25000)
+    ap.add_argument("--phase_b_eval_every", type=int, default=1000)
+    ap.add_argument("--phase_b_eval_examples", type=int, default=256)
+    ap.add_argument("--phase_b_final_eval_examples", type=int, default=2000)
     ap.add_argument("--dry_run", action="store_true")
     ap.add_argument("--self_test", action="store_true")
     args = ap.parse_args()
 
     assets_dir = Path(args.assets_dir)
     run_root = Path(args.run_dir)
+    eval_clues = parse_int_list(args.eval_clues)
 
     if args.self_test:
         run([sys.executable, str(TRAIN), "--self_test"], dry_run=args.dry_run)
-        run([sys.executable, str(BUILD), "--out_dir", str(assets_dir), "--smoke"], dry_run=args.dry_run)
+        run(
+            [
+                sys.executable,
+                str(BUILD),
+                "--out_dir",
+                str(assets_dir),
+                "--smoke",
+                "--clues",
+                args.eval_clues,
+                "--seed",
+                str(args.manifest_seed),
+            ],
+            dry_run=args.dry_run,
+        )
         if not args.dry_run:
             run([sys.executable, str(SUMMARY), "--root", str(run_root)], dry_run=False)
         return
 
     if args.phase == "smoke":
-        val_manifest, test_manifest = ensure_manifests(assets_dir=assets_dir, smoke=True, dry_run=args.dry_run, workers=int(args.workers))
-        launch_phase(phase="smoke", tags=SMOKE_CONFIGS, run_root=run_root, val_manifest=val_manifest, test_manifest=test_manifest, dry_run=args.dry_run)
+        val_manifest, test_manifest = ensure_manifests(
+            assets_dir=assets_dir,
+            smoke=True,
+            dry_run=args.dry_run,
+            workers=int(args.workers),
+            clues=eval_clues,
+            seed=int(args.manifest_seed),
+        )
+        launch_phase(
+            phase="smoke",
+            tags=SMOKE_CONFIGS,
+            run_root=run_root,
+            val_manifest=val_manifest,
+            test_manifest=test_manifest,
+            dry_run=args.dry_run,
+            train_clues=args.train_clues,
+            focus_clues=args.focus_clues,
+            eval_clues=args.eval_clues,
+            phase_a_max_steps=args.phase_a_max_steps,
+            phase_a_eval_every=args.phase_a_eval_every,
+            phase_a_eval_examples=args.phase_a_eval_examples,
+            phase_b_max_steps=args.phase_b_max_steps,
+            phase_b_eval_every=args.phase_b_eval_every,
+            phase_b_eval_examples=args.phase_b_eval_examples,
+            phase_b_final_eval_examples=args.phase_b_final_eval_examples,
+        )
         return
 
-    val_manifest, test_manifest = ensure_manifests(assets_dir=assets_dir, smoke=False, dry_run=args.dry_run, workers=int(args.workers))
+    val_manifest, test_manifest = ensure_manifests(
+        assets_dir=assets_dir,
+        smoke=False,
+        dry_run=args.dry_run,
+        workers=int(args.workers),
+        clues=eval_clues,
+        seed=int(args.manifest_seed),
+    )
     if args.phase in {"phase_a", "full"}:
-        launch_phase(phase="phase_a", tags=PHASE_A_CONFIGS, run_root=run_root, val_manifest=val_manifest, test_manifest=test_manifest, dry_run=args.dry_run)
+        launch_phase(
+            phase="phase_a",
+            tags=PHASE_A_CONFIGS,
+            run_root=run_root,
+            val_manifest=val_manifest,
+            test_manifest=test_manifest,
+            dry_run=args.dry_run,
+            train_clues=args.train_clues,
+            focus_clues=args.focus_clues,
+            eval_clues=args.eval_clues,
+            phase_a_max_steps=args.phase_a_max_steps,
+            phase_a_eval_every=args.phase_a_eval_every,
+            phase_a_eval_examples=args.phase_a_eval_examples,
+            phase_b_max_steps=args.phase_b_max_steps,
+            phase_b_eval_every=args.phase_b_eval_every,
+            phase_b_eval_examples=args.phase_b_eval_examples,
+            phase_b_final_eval_examples=args.phase_b_final_eval_examples,
+        )
     if args.phase in {"phase_b", "full"}:
         winners = DEFAULT_PHASE_B_WINNERS if args.dry_run else pick_top2_fs(run_root)
-        launch_phase(phase="phase_b", tags=["baseline"] + [tag for tag in winners if tag != "baseline"], run_root=run_root, val_manifest=val_manifest, test_manifest=test_manifest, dry_run=args.dry_run)
+        launch_phase(
+            phase="phase_b",
+            tags=["baseline"] + [tag for tag in winners if tag != "baseline"],
+            run_root=run_root,
+            val_manifest=val_manifest,
+            test_manifest=test_manifest,
+            dry_run=args.dry_run,
+            train_clues=args.train_clues,
+            focus_clues=args.focus_clues,
+            eval_clues=args.eval_clues,
+            phase_a_max_steps=args.phase_a_max_steps,
+            phase_a_eval_every=args.phase_a_eval_every,
+            phase_a_eval_examples=args.phase_a_eval_examples,
+            phase_b_max_steps=args.phase_b_max_steps,
+            phase_b_eval_every=args.phase_b_eval_every,
+            phase_b_eval_examples=args.phase_b_eval_examples,
+            phase_b_final_eval_examples=args.phase_b_final_eval_examples,
+        )
 
 
 if __name__ == "__main__":
