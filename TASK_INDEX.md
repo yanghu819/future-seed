@@ -30,8 +30,13 @@ This index maps task family to backend trainer, representative queue, and curren
 
 | Goal | Script | Location |
 |---|---|---|
+| 9x9 unique-solution Sudoku mainline | `run_sudoku9_unique_maintrack.py`, `train_sudoku9_unique_sft.py`, `build_sudoku9_unique_manifests.py` | `posttrain_rwkv7/scripts/` |
 | WikiText prefix infill | `run_wikitext_prefix.sh` | `rwkv-diff-future-seed/` |
 | MBPP prefix infill | `run_mbpp_prefix.sh` | `rwkv-diff-future-seed/` |
 | rightcopy + constr sanity | `run.sh` | repo root |
 | QA sanity | `run_qa.sh` | repo root |
 | Sudoku / KVSORT / PERMFILL | `run_sudoku.sh`, `run_kvsort_baselines.sh`, `run_permfill_anchor_sweep.sh` | `rwkv-diff-future-seed/` |
+
+Notes:
+- the canonical Sudoku benchmark is now the 9x9 unique-solution in-place task under `posttrain_rwkv7/scripts/`
+- the older `posttrain_rwkv7/scripts/train_sudoku_sft.py` is an archive teacher-forced probe and should not be treated as the main Sudoku result

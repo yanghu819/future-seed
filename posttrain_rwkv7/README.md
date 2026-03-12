@@ -87,6 +87,13 @@ Low-ROI or negative families under the current recipe:
 3. `hotpot_text_restore` has direct medium-stage positives in the released breadth window; `squad_text_restore` and `punc_restore` should be read as smaller historical positive pockets rather than current snapshot-backed lines.
 4. `mbpp_longctx_probe`, `arc_mc_probe`, and `tsp_mask` remain mixed or exploratory rather than stable headline evidence.
 
+## Sudoku Benchmark Boundary
+
+- the canonical Sudoku benchmark is `scripts/train_sudoku9_unique_sft.py` plus `scripts/run_sudoku9_unique_maintrack.py`
+- it uses 9x9 unique-solution puzzles, clue-forced in-place decode, and reports exact solve / validity / clue consistency / blank accuracy
+- the older `scripts/train_sudoku_sft.py` remains an archive teacher-forced probe and should not be used as the main Sudoku headline
+- smoke manifests for the canonical benchmark live in `assets/sudoku9_unique/`
+
 ## What The Repo Should Not Claim
 
 1. real-task gains are already stable across held-out confirmation seeds
@@ -122,6 +129,7 @@ Useful queue files:
 - `results/_rolling_round_log.md`: round-by-round operator log
 - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure ledger
 - `ARCHIVE_ROUNDS.md`: archived round chronology previously in this README
+- `assets/sudoku9_unique/`: smoke manifests and manifest format for the canonical 9x9 Sudoku benchmark
 - `scripts/`: launchers, orchestrators, and trainers
 - `LEGACY_AUTODL.md`: boundary note for preserved AutoDL-era history
 
