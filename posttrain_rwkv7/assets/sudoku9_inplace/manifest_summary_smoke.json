@@ -1,0 +1,11 @@
+{
+  "mask_counts": [
+    28,
+    32,
+    36,
+    40
+  ],
+  "val_per_mask": 2,
+  "test_per_mask": 2,
+  "seed": 20260314
+}

@@ -89,10 +89,11 @@ Low-ROI or negative families under the current recipe:
 
 ## Sudoku Benchmark Boundary
 
-- the canonical Sudoku benchmark is `scripts/train_sudoku9_unique_sft.py` plus `scripts/run_sudoku9_unique_maintrack.py`
-- it uses 9x9 unique-solution puzzles, clue-forced in-place decode, and reports exact solve / validity / clue consistency / blank accuracy
-- the older `scripts/train_sudoku_sft.py` remains an archive teacher-forced probe and should not be used as the main Sudoku headline
-- smoke manifests for the canonical benchmark live in `assets/sudoku9_unique/`
+- the canonical Sudoku benchmark is `scripts/train_sudoku9_inplace_refine.py` plus `scripts/run_sudoku9_inplace_maintrack.py`
+- it uses 9x9 solved-board random-mask repair, full-board masked loss, and reports board exact / validity / clue consistency / masked accuracy
+- `scripts/train_sudoku9_unique_sft.py` remains a transfer / archive line for direct unique-solution puzzle solving and should not be used as the main Sudoku headline
+- the older `scripts/train_sudoku_sft.py` remains an archive teacher-forced probe
+- smoke manifests for the canonical benchmark live in `assets/sudoku9_inplace/`
 
 ## What The Repo Should Not Claim
 
@@ -129,7 +130,7 @@ Useful queue files:
 - `results/_rolling_round_log.md`: round-by-round operator log
 - `paper/DETAILED_EXPERIMENT_LOG.md`: full success/failure ledger
 - `ARCHIVE_ROUNDS.md`: archived round chronology previously in this README
-- `assets/sudoku9_unique/`: smoke manifests and manifest format for the canonical 9x9 Sudoku benchmark
+- `assets/sudoku9_inplace/`: smoke manifests and manifest format for the canonical 9x9 in-place Sudoku benchmark
 - `scripts/`: launchers, orchestrators, and trainers
 - `LEGACY_AUTODL.md`: boundary note for preserved AutoDL-era history
 

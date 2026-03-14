@@ -6,8 +6,8 @@ The `scripts/` folder contains both active and legacy runners.
 
 - `run_round77_82_fastdiscover.py`
   - main orchestrator for queue-based quick->med search
-- `run_sudoku9_unique_maintrack.py`
-  - fixed orchestrator for the canonical 9x9 unique-solution Sudoku benchmark
+- `run_sudoku9_inplace_maintrack.py`
+  - fixed orchestrator for the canonical 9x9 in-place repair Sudoku benchmark
 - `rebuild_fastloop_queues_broad.py`
   - queue generator for profile-based search cycles
 - `plan_bestofn_fastloop.py`
@@ -23,20 +23,21 @@ The `scripts/` folder contains both active and legacy runners.
 
 ## 2) Canonical Sudoku benchmark
 
-The active Sudoku benchmark is the 9x9 unique-solution in-place task:
+The active Sudoku benchmark is the 9x9 solved-board in-place repair task:
 
-- `sudoku9_unique.py`
-  - puzzle generator, uniqueness checker, and metric helpers
-- `build_sudoku9_unique_manifests.py`
-  - deterministic `val/test` manifest builder
-- `train_sudoku9_unique_sft.py`
-  - canonical trainer with clue-forced decode and exact/valid/clue metrics
-- `summarize_sudoku9_unique.py`
+- `sudoku9_inplace.py`
+  - solved-board masker, manifest helpers, and repair metrics
+- `build_sudoku9_inplace_manifests.py`
+  - deterministic `val/test` manifest builder for `mask28/32/36/40`
+- `train_sudoku9_inplace_refine.py`
+  - canonical trainer with full-board masked repair loss and iterative refine eval
+- `summarize_sudoku9_inplace.py`
   - aggregate runner summaries across `runs/`
-- `run_sudoku9_unique_maintrack.py`
+- `run_sudoku9_inplace_maintrack.py`
   - fixed two-phase main-track launcher
 
-The older `train_sudoku_sft.py` remains in the tree as an archive probe. It is not the canonical 9x9 benchmark.
+The older `train_sudoku9_unique_sft.py` remains in the tree as a transfer / archive line.
+`train_sudoku_sft.py` remains the older teacher-forced probe.
 
 ## 3) Sudoku-RWKV Baseline + Future-Seed Bridge
 
@@ -47,7 +48,7 @@ For the CoT-style `Sudoku-RWKV` baseline from the external repo, use:
 - `sudoku_rwkv_future_seed.py`
   - dynamic wrapper around the upstream `RWKV-v6` inference model with optional Future-Seed attention-state injection
 - `run_sudoku_rwkv_eval.py`
-  - evaluates either the untouched official baseline or the Future-Seed-augmented variant on our `sudoku9_unique` manifests
+  - evaluates either the untouched official baseline or the Future-Seed-augmented variant on our Sudoku manifests
 
 Smoke:
 
@@ -103,9 +104,9 @@ Sudoku smoke / dry-run:
 
 ```bash
 cd posttrain_rwkv7
-python3 scripts/build_sudoku9_unique_manifests.py --out_dir assets/sudoku9_unique --smoke
-python3 scripts/train_sudoku9_unique_sft.py --self_test
-python3 scripts/run_sudoku9_unique_maintrack.py --self_test --dry_run
+python3 scripts/build_sudoku9_inplace_manifests.py --out_dir assets/sudoku9_inplace --smoke
+python3 scripts/train_sudoku9_inplace_refine.py --self_test
+python3 scripts/run_sudoku9_inplace_maintrack.py --self_test --dry_run
 ```
 
 ## 5) Orchestrator quick reference
@@ -143,7 +144,7 @@ They are useful for forensics, but not required for new reproduction.
 
 1. Read root `README.md` and `results/README_RESULTS.md` first.
 2. Use finite packets before editing strategy files.
-3. For Sudoku, prefer `sudoku9_unique` over the older `train_sudoku_sft.py` probe.
+3. For Sudoku, prefer `sudoku9_inplace` over `sudoku9_unique` and the older `train_sudoku_sft.py` probe.
 4. For CoT Sudoku baselines, prefer `run_sudoku_rwkv_eval.py` over ad-hoc copies of the external repo.
 5. Sync `runs/` to `results/` before updating README or logs.
 6. Only then modify queue strategy or policy files.
