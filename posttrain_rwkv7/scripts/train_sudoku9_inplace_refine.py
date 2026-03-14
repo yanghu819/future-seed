@@ -9,6 +9,7 @@ import random
 import statistics
 import sys
 import time
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
@@ -165,6 +166,8 @@ def main() -> None:
     ap.add_argument("--final_eval_examples_per_mask", type=int, default=0)
     ap.add_argument("--refine_steps_train", type=int, default=1)
     ap.add_argument("--refine_steps_eval", type=int, default=1)
+    ap.add_argument("--progressive_train", action="store_true")
+    ap.add_argument("--progressive_eval", action="store_true")
     ap.add_argument("--model_lr", type=float, default=3e-5)
     ap.add_argument("--alpha_lr", type=float, default=0.0)
     ap.add_argument("--alpha_init", type=float, default=-2.0)
@@ -266,8 +269,9 @@ def main() -> None:
         fs_detach=bool(args.fs_detach),
     )
     train_pool = TrainPool(masks=train_masks, cache_per_mask=int(args.train_cache_per_mask), seed=int(args.seed))
+    curriculum_rng = random.Random((int(args.seed) * 17) + 9137)
 
-    def encode_examples(examples: Sequence[SudokuInplaceExample]):
+    def encode_examples(examples: Sequence[SudokuInplaceExample], *, current_boards: Sequence[str] | None = None):
         full_rows = []
         solution_rows = []
         masked_rows = []
@@ -275,8 +279,13 @@ def main() -> None:
         masked_boards = []
         solutions = []
         mask_counts = []
-        for ex in examples:
+        for idx, ex in enumerate(examples):
             prompt, solution, clue_mask, masked_positions = board_prompt(ex)
+            if current_boards is not None:
+                board = str(current_boards[idx])
+                prompt = f"{PROMPT_PREFIX}{board}"
+                clue_mask = [ch != MASK_CHAR for ch in board]
+                masked_positions = [not x for x in clue_mask]
             ids = codec.encode_text(prompt)
             ids = ids + [pad_id] * (seq_len_pad - len(ids))
             full_rows.append(ids)
@@ -291,6 +300,26 @@ def main() -> None:
         masked_mask = torch.tensor(masked_rows, dtype=torch.bool, device=device)
         clue_mask_t = torch.tensor(clue_masks, dtype=torch.bool, device=device)
         return input_ids, solution_ids, masked_mask, clue_mask_t, masked_boards, solutions, mask_counts
+
+    def sample_progressive_boards(examples: Sequence[SudokuInplaceExample]) -> list[str]:
+        boards: list[str] = []
+        steps = max(1, int(args.refine_steps_train))
+        for ex in examples:
+            original = ex.masked_board
+            masked_positions = [idx for idx, ch in enumerate(original) if ch == MASK_CHAR]
+            if not masked_positions:
+                boards.append(original)
+                continue
+            stage = curriculum_rng.randint(1, steps)
+            remaining = max(1, int(math.ceil(len(masked_positions) * (steps - stage + 1) / steps)))
+            reveal = max(0, len(masked_positions) - remaining)
+            keep_hidden = set(curriculum_rng.sample(masked_positions, k=remaining))
+            chars = list(ex.solution)
+            for pos in masked_positions:
+                if pos in keep_hidden:
+                    chars[pos] = MASK_CHAR
+            boards.append("".join(chars))
+        return boards
 
     def forward_hidden(input_ids: torch.Tensor):
         hidden, _ = model(
@@ -313,6 +342,28 @@ def main() -> None:
     def argmax_digit_ids(logits: torch.Tensor) -> torch.Tensor:
         digit_logits = logits.index_select(dim=-1, index=digit_ids)
         return digit_ids[digit_logits.argmax(dim=-1)]
+
+    def progressive_commit(board_tokens: torch.Tensor, logits: torch.Tensor, *, steps_left: int, progressive: bool) -> torch.Tensor:
+        digit_logits = logits.index_select(dim=-1, index=digit_ids)
+        probs = torch.softmax(digit_logits, dim=-1)
+        conf, best_idx = probs.max(dim=-1)
+        pred_digit_ids = digit_ids[best_idx]
+        updated = board_tokens.clone()
+        mask_id = codec.char_to_id[MASK_CHAR]
+        masked_now = board_tokens.eq(mask_id)
+        for row in range(board_tokens.size(0)):
+            idxs = torch.nonzero(masked_now[row], as_tuple=False).flatten()
+            if idxs.numel() == 0:
+                continue
+            if (not progressive) or steps_left <= 1:
+                fill_idx = idxs
+            else:
+                fill_n = max(1, int(math.ceil(idxs.numel() / steps_left)))
+                row_conf = conf[row, idxs]
+                top = torch.topk(row_conf, k=min(fill_n, idxs.numel()), largest=True).indices
+                fill_idx = idxs[top]
+            updated[row, fill_idx] = pred_digit_ids[row, fill_idx]
+        return updated
 
     def consistency_penalty(logits: torch.Tensor, masked_mask: torch.Tensor, solution_ids: torch.Tensor) -> torch.Tensor:
         if float(args.consistency_lambda) <= 0.0:
@@ -351,12 +402,17 @@ def main() -> None:
                 batch = examples[start : start + int(args.bsz)]
                 input_ids, solution_ids, masked_mask, clue_mask_t, masked_boards, solutions, _ = encode_examples(batch)
                 current = input_ids.clone()
-                for _ in range(int(refine_steps)):
+                total_steps = max(1, int(refine_steps))
+                for refine_idx in range(total_steps):
                     board_hidden = forward_hidden(current)
                     logits = model.project(board_hidden)
-                    pred_digit_ids = argmax_digit_ids(logits)
                     board_tokens = current[:, board_start : board_start + BOARD_LEN].clone()
-                    board_tokens = torch.where(clue_mask_t, board_tokens, pred_digit_ids)
+                    board_tokens = progressive_commit(
+                        board_tokens,
+                        logits,
+                        steps_left=max(1, total_steps - refine_idx),
+                        progressive=bool(args.progressive_eval),
+                    )
                     current[:, board_start : board_start + BOARD_LEN] = board_tokens
                 final_board_ids = current[:, board_start : board_start + BOARD_LEN]
                 for row_idx in range(final_board_ids.size(0)):
@@ -412,7 +468,11 @@ def main() -> None:
             break
 
         batch = train_pool.sample(int(args.bsz))
-        input_ids, solution_ids, masked_mask, _clue_mask_t, _masked_boards, _solutions, mask_counts = encode_examples(batch)
+        current_boards = sample_progressive_boards(batch) if args.progressive_train else None
+        input_ids, solution_ids, masked_mask, _clue_mask_t, _masked_boards, _solutions, mask_counts = encode_examples(
+            batch,
+            current_boards=current_boards,
+        )
         opt.zero_grad(set_to_none=True)
 
         current = input_ids.clone()
@@ -429,9 +489,17 @@ def main() -> None:
             step_losses.append(F.cross_entropy(logits.view(-1, vocab_size), targets.view(-1), ignore_index=-100))
             step_cons.append(consistency_penalty(logits, masked_mask, solution_ids))
             if refine_idx + 1 < int(args.refine_steps_train):
-                pred_digit_ids = argmax_digit_ids(logits).detach()
                 board_tokens = current[:, board_start : board_start + BOARD_LEN].clone()
-                board_tokens = torch.where(masked_mask, pred_digit_ids, board_tokens)
+                if args.progressive_train:
+                    board_tokens = progressive_commit(
+                        board_tokens,
+                        logits.detach(),
+                        steps_left=max(1, int(args.refine_steps_train) - refine_idx),
+                        progressive=True,
+                    )
+                else:
+                    pred_digit_ids = argmax_digit_ids(logits).detach()
+                    board_tokens = torch.where(masked_mask, pred_digit_ids, board_tokens)
                 current[:, board_start : board_start + BOARD_LEN] = board_tokens
         loss = torch.stack(step_losses).mean()
         cons = torch.stack(step_cons).mean()
@@ -449,6 +517,8 @@ def main() -> None:
                 "consistency_lambda": float(args.consistency_lambda),
                 "refine_steps_train": int(args.refine_steps_train),
                 "refine_steps": int(args.refine_steps_eval),
+                "progressive_train": bool(args.progressive_train),
+                "progressive_eval": bool(args.progressive_eval),
                 "alpha_mean": float(torch.sigmoid(alpha[1:]).mean()) if alpha.numel() > 1 else float(torch.sigmoid(alpha).mean()),
                 "alpha_head_mean": float(torch.sigmoid(alpha_head[1:]).mean()) if alpha_head is not None and alpha_head.size(0) > 1 else (float(torch.sigmoid(alpha_head).mean()) if alpha_head is not None else None),
             }
@@ -473,6 +543,8 @@ def main() -> None:
         "best_record": best_record,
         "refine_steps_train": int(args.refine_steps_train),
         "refine_steps_eval": int(args.refine_steps_eval),
+        "progressive_train": bool(args.progressive_train),
+        "progressive_eval": bool(args.progressive_eval),
         "consistency_lambda": float(args.consistency_lambda),
     }
 

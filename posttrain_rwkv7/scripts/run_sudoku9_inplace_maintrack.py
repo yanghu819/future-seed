@@ -135,7 +135,7 @@ def pick_winner_fs(root: Path) -> str:
     return ranked[0][1]
 
 
-def launch_phase(*, phase: str, tags: list[str], run_root: Path, val_manifest: Path, test_manifest: Path, dry_run: bool, train_masks: str, focus_masks: str, eval_masks: str, phase_a_max_steps: int, phase_a_eval_every: int, phase_a_eval_examples: int, phase_b_max_steps: int, phase_b_eval_every: int, phase_b_eval_examples: int, phase_b_final_eval_examples: int, refine_steps_train: int, refine_steps_eval: int, consistency_lambda: float) -> None:
+def launch_phase(*, phase: str, tags: list[str], run_root: Path, val_manifest: Path, test_manifest: Path, dry_run: bool, train_masks: str, focus_masks: str, eval_masks: str, phase_a_max_steps: int, phase_a_eval_every: int, phase_a_eval_examples: int, phase_b_max_steps: int, phase_b_eval_every: int, phase_b_eval_examples: int, phase_b_final_eval_examples: int, refine_steps_train: int, refine_steps_eval: int, consistency_lambda: float, progressive_train: bool, progressive_eval: bool) -> None:
     budgets = {
         "smoke": {"max_steps": 2, "eval_every": 1, "eval_examples": 1, "final_eval": 0},
         "phase_a": {"max_steps": int(phase_a_max_steps), "eval_every": int(phase_a_eval_every), "eval_examples": int(phase_a_eval_examples), "final_eval": 0},
@@ -162,6 +162,10 @@ def launch_phase(*, phase: str, tags: list[str], run_root: Path, val_manifest: P
             "--refine_steps_eval", str(refine_steps_eval),
             "--consistency_lambda", str(consistency_lambda),
         ] + CONFIGS[tag]
+        if progressive_train:
+            cmd.append("--progressive_train")
+        if progressive_eval:
+            cmd.append("--progressive_eval")
         run(cmd, dry_run=dry_run)
 
 
@@ -185,6 +189,8 @@ def main() -> None:
     ap.add_argument("--refine_steps_train", type=int, default=1)
     ap.add_argument("--refine_steps_eval", type=int, default=1)
     ap.add_argument("--consistency_lambda", type=float, default=0.0)
+    ap.add_argument("--progressive_train", action="store_true")
+    ap.add_argument("--progressive_eval", action="store_true")
     ap.add_argument("--dry_run", action="store_true")
     ap.add_argument("--self_test", action="store_true")
     args = ap.parse_args()
@@ -222,6 +228,8 @@ def main() -> None:
             refine_steps_train=args.refine_steps_train,
             refine_steps_eval=args.refine_steps_eval,
             consistency_lambda=args.consistency_lambda,
+            progressive_train=args.progressive_train,
+            progressive_eval=args.progressive_eval,
         )
         return
 
@@ -247,6 +255,8 @@ def main() -> None:
             refine_steps_train=args.refine_steps_train,
             refine_steps_eval=args.refine_steps_eval,
             consistency_lambda=args.consistency_lambda,
+            progressive_train=args.progressive_train,
+            progressive_eval=args.progressive_eval,
         )
     if args.phase in {"phase_b", "full"}:
         winner = DEFAULT_PHASE_B_WINNER if args.dry_run else pick_winner_fs(run_root)
@@ -270,6 +280,8 @@ def main() -> None:
             refine_steps_train=args.refine_steps_train,
             refine_steps_eval=args.refine_steps_eval,
             consistency_lambda=args.consistency_lambda,
+            progressive_train=args.progressive_train,
+            progressive_eval=args.progressive_eval,
         )
 
 
