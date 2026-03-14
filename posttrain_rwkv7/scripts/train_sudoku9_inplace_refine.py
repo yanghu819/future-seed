@@ -500,7 +500,9 @@ def main() -> None:
                 else:
                     pred_digit_ids = argmax_digit_ids(logits).detach()
                     board_tokens = torch.where(masked_mask, pred_digit_ids, board_tokens)
-                current[:, board_start : board_start + BOARD_LEN] = board_tokens
+                next_current = current.clone()
+                next_current[:, board_start : board_start + BOARD_LEN] = board_tokens
+                current = next_current
         loss = torch.stack(step_losses).mean()
         cons = torch.stack(step_cons).mean()
         total_loss = loss + float(args.consistency_lambda) * cons
