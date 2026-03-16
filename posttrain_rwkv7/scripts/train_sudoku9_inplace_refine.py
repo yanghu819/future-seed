@@ -168,6 +168,10 @@ def main() -> None:
     ap.add_argument("--refine_steps_eval", type=int, default=1)
     ap.add_argument("--progressive_train", action="store_true")
     ap.add_argument("--progressive_eval", action="store_true")
+    ap.add_argument("--wrong_digit_corruption_prob", type=float, default=0.0)
+    ap.add_argument("--decode_legalize", action="store_true")
+    ap.add_argument("--remask_conflicts", action="store_true")
+    ap.add_argument("--remask_low_confidence", type=float, default=0.0)
     ap.add_argument("--model_lr", type=float, default=3e-5)
     ap.add_argument("--alpha_lr", type=float, default=0.0)
     ap.add_argument("--alpha_init", type=float, default=-2.0)
@@ -284,7 +288,9 @@ def main() -> None:
             if current_boards is not None:
                 board = str(current_boards[idx])
                 prompt = f"{PROMPT_PREFIX}{board}"
-                clue_mask = [ch != MASK_CHAR for ch in board]
+                # Editable positions stay defined by the original mask, even if an
+                # intermediate board currently contains guessed digits.
+                clue_mask = [ch != MASK_CHAR for ch in ex.masked_board]
                 masked_positions = [not x for x in clue_mask]
             ids = codec.encode_text(prompt)
             ids = ids + [pad_id] * (seq_len_pad - len(ids))
@@ -305,19 +311,21 @@ def main() -> None:
         boards: list[str] = []
         steps = max(1, int(args.refine_steps_train))
         for ex in examples:
-            original = ex.masked_board
-            masked_positions = [idx for idx, ch in enumerate(original) if ch == MASK_CHAR]
+            masked_positions = [idx for idx, ch in enumerate(ex.masked_board) if ch == MASK_CHAR]
             if not masked_positions:
-                boards.append(original)
+                boards.append(ex.masked_board)
                 continue
             stage = curriculum_rng.randint(1, steps)
             remaining = max(1, int(math.ceil(len(masked_positions) * (steps - stage + 1) / steps)))
-            reveal = max(0, len(masked_positions) - remaining)
             keep_hidden = set(curriculum_rng.sample(masked_positions, k=remaining))
             chars = list(ex.solution)
             for pos in masked_positions:
                 if pos in keep_hidden:
                     chars[pos] = MASK_CHAR
+                elif float(args.wrong_digit_corruption_prob) > 0.0 and curriculum_rng.random() < float(args.wrong_digit_corruption_prob):
+                    tgt = ex.solution[pos]
+                    choices = [d for d in "123456789" if d != tgt]
+                    chars[pos] = curriculum_rng.choice(choices)
             boards.append("".join(chars))
         return boards
 
@@ -343,27 +351,114 @@ def main() -> None:
         digit_logits = logits.index_select(dim=-1, index=digit_ids)
         return digit_ids[digit_logits.argmax(dim=-1)]
 
-    def progressive_commit(board_tokens: torch.Tensor, logits: torch.Tensor, *, steps_left: int, progressive: bool) -> torch.Tensor:
-        digit_logits = logits.index_select(dim=-1, index=digit_ids)
+    digit_id_to_value = {int(codec.char_to_id[str(i)]): int(i) for i in range(1, 10)}
+    value_to_digit_id = {int(i): int(codec.char_to_id[str(i)]) for i in range(1, 10)}
+    mask_id = int(codec.char_to_id[MASK_CHAR])
+
+    def allowed_digits(board_vals: list[int], idx: int) -> list[int]:
+        row, col = divmod(idx, 9)
+        used: set[int] = set()
+        for c in range(9):
+            v = board_vals[row * 9 + c]
+            if c != col and v != 0:
+                used.add(v)
+        for r in range(9):
+            v = board_vals[r * 9 + col]
+            if r != row and v != 0:
+                used.add(v)
+        br = (row // 3) * 3
+        bc = (col // 3) * 3
+        for rr in range(br, br + 3):
+            for cc in range(bc, bc + 3):
+                if rr == row and cc == col:
+                    continue
+                v = board_vals[rr * 9 + cc]
+                if v != 0:
+                    used.add(v)
+        return [d for d in range(1, 10) if d not in used]
+
+    def progressive_commit(
+        board_tokens: torch.Tensor,
+        logits: torch.Tensor,
+        *,
+        editable_mask: torch.Tensor,
+        steps_left: int,
+        progressive: bool,
+    ) -> torch.Tensor:
+        digit_logits = logits.index_select(dim=-1, index=digit_ids).detach().float().cpu()
         probs = torch.softmax(digit_logits, dim=-1)
-        conf, best_idx = probs.max(dim=-1)
-        pred_digit_ids = digit_ids[best_idx]
-        updated = board_tokens.clone()
-        mask_id = codec.char_to_id[MASK_CHAR]
-        masked_now = board_tokens.eq(mask_id)
-        for row in range(board_tokens.size(0)):
-            idxs = torch.nonzero(masked_now[row], as_tuple=False).flatten()
-            if idxs.numel() == 0:
+        board_cpu = board_tokens.detach().cpu()
+        editable_cpu = editable_mask.detach().cpu()
+        updated_rows: list[list[int]] = []
+
+        for row in range(board_cpu.size(0)):
+            row_ids = [int(x) for x in board_cpu[row].tolist()]
+            board_vals = [digit_id_to_value.get(tok, 0) for tok in row_ids]
+            editable_positions = [idx for idx, can_edit in enumerate(editable_cpu[row].tolist()) if bool(can_edit)]
+            if not editable_positions:
+                updated_rows.append(row_ids)
                 continue
-            if (not progressive) or steps_left <= 1:
-                fill_idx = idxs
-            else:
-                fill_n = max(1, int(math.ceil(idxs.numel() / steps_left)))
-                row_conf = conf[row, idxs]
-                top = torch.topk(row_conf, k=min(fill_n, idxs.numel()), largest=True).indices
-                fill_idx = idxs[top]
-            updated[row, fill_idx] = pred_digit_ids[row, fill_idx]
-        return updated
+
+            fill_budget = len(editable_positions)
+            if progressive and steps_left > 1:
+                fill_budget = max(1, int(math.ceil(len(editable_positions) / steps_left)))
+
+            candidates: list[tuple[float, int]] = []
+            for idx in editable_positions:
+                if args.decode_legalize:
+                    allowed = allowed_digits(board_vals, idx)
+                    if allowed:
+                        allowed_idx = torch.tensor([d - 1 for d in allowed], dtype=torch.long)
+                        sub_probs = probs[row, idx].index_select(0, allowed_idx)
+                        best_local = int(sub_probs.argmax().item())
+                        chosen_digit = allowed[best_local]
+                        score = float(sub_probs[best_local].item())
+                        if len(allowed) == 1:
+                            score += 1.0
+                    else:
+                        if args.remask_conflicts and steps_left > 1:
+                            continue
+                        chosen_digit = int(probs[row, idx].argmax().item()) + 1
+                        score = float(probs[row, idx, chosen_digit - 1].item())
+                else:
+                    chosen_digit = int(probs[row, idx].argmax().item()) + 1
+                    score = float(probs[row, idx, chosen_digit - 1].item())
+                candidates.append((score, idx))
+
+            candidates.sort(reverse=True)
+            selected = candidates[:fill_budget] if progressive and steps_left > 1 else candidates
+            for _score, idx in selected:
+                allowed = allowed_digits(board_vals, idx) if args.decode_legalize else list(range(1, 10))
+                if allowed:
+                    allowed_idx = torch.tensor([d - 1 for d in allowed], dtype=torch.long)
+                    sub_probs = probs[row, idx].index_select(0, allowed_idx)
+                    best_local = int(sub_probs.argmax().item())
+                    chosen_digit = allowed[best_local]
+                    score = float(sub_probs[best_local].item())
+                else:
+                    if args.remask_conflicts and steps_left > 1:
+                        row_ids[idx] = mask_id
+                        board_vals[idx] = 0
+                        continue
+                    chosen_digit = int(probs[row, idx].argmax().item()) + 1
+                    score = float(probs[row, idx, chosen_digit - 1].item())
+                if progressive and steps_left > 1 and float(args.remask_low_confidence) > 0.0 and score < float(args.remask_low_confidence):
+                    row_ids[idx] = mask_id
+                    board_vals[idx] = 0
+                    continue
+                row_ids[idx] = value_to_digit_id[chosen_digit]
+                board_vals[idx] = chosen_digit
+
+            if progressive and steps_left > 1 and float(args.remask_low_confidence) > 0.0:
+                for idx in editable_positions:
+                    allowed = allowed_digits(board_vals, idx) if args.decode_legalize else list(range(1, 10))
+                    if not allowed:
+                        row_ids[idx] = mask_id
+                        board_vals[idx] = 0
+
+            updated_rows.append(row_ids)
+
+        return torch.tensor(updated_rows, dtype=board_tokens.dtype, device=board_tokens.device)
 
     def consistency_penalty(logits: torch.Tensor, masked_mask: torch.Tensor, solution_ids: torch.Tensor) -> torch.Tensor:
         if float(args.consistency_lambda) <= 0.0:
@@ -410,6 +505,7 @@ def main() -> None:
                     board_tokens = progressive_commit(
                         board_tokens,
                         logits,
+                        editable_mask=masked_mask,
                         steps_left=max(1, total_steps - refine_idx),
                         progressive=bool(args.progressive_eval),
                     )
@@ -494,6 +590,7 @@ def main() -> None:
                     board_tokens = progressive_commit(
                         board_tokens,
                         logits.detach(),
+                        editable_mask=masked_mask,
                         steps_left=max(1, int(args.refine_steps_train) - refine_idx),
                         progressive=True,
                     )
@@ -521,6 +618,10 @@ def main() -> None:
                 "refine_steps": int(args.refine_steps_eval),
                 "progressive_train": bool(args.progressive_train),
                 "progressive_eval": bool(args.progressive_eval),
+                "wrong_digit_corruption_prob": float(args.wrong_digit_corruption_prob),
+                "decode_legalize": bool(args.decode_legalize),
+                "remask_conflicts": bool(args.remask_conflicts),
+                "remask_low_confidence": float(args.remask_low_confidence),
                 "alpha_mean": float(torch.sigmoid(alpha[1:]).mean()) if alpha.numel() > 1 else float(torch.sigmoid(alpha).mean()),
                 "alpha_head_mean": float(torch.sigmoid(alpha_head[1:]).mean()) if alpha_head is not None and alpha_head.size(0) > 1 else (float(torch.sigmoid(alpha_head).mean()) if alpha_head is not None else None),
             }
@@ -547,6 +648,10 @@ def main() -> None:
         "refine_steps_eval": int(args.refine_steps_eval),
         "progressive_train": bool(args.progressive_train),
         "progressive_eval": bool(args.progressive_eval),
+        "wrong_digit_corruption_prob": float(args.wrong_digit_corruption_prob),
+        "decode_legalize": bool(args.decode_legalize),
+        "remask_conflicts": bool(args.remask_conflicts),
+        "remask_low_confidence": float(args.remask_low_confidence),
         "consistency_lambda": float(args.consistency_lambda),
     }
 
